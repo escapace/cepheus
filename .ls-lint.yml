@@ -1,0 +1,17 @@
+ls:
+  .ts: kebab-case
+  .d.ts: kebab-case
+  .spec.ts: kebab-case
+
+ignore:
+  - .circleci
+  - .eslintrc.json
+  - .git
+  - .github
+  - .manage_modules
+  - .vscode
+  - coverage
+  - lib
+  - node_modules
+  - unocss.config.ts
+  - vite.config.ts
