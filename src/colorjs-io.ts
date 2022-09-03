@@ -29,7 +29,9 @@ export {
   deltaEJz,
   deltaEITP,
   deltaEOK,
-  clone
+  clone,
+  contrast,
+  inGamut
 } from 'colorjs.io/fn'
 
 export type { Color, ColorFormat, ColorSpaceId } from 'colorjs.io/fn'
@@ -41,6 +43,5 @@ export const parse = (color: string | Color): Color => clone(getColor(color))
 export const convert: typeof to = (color, space, options) =>
   to(clone(color), space, options)
 
-export const serialize: typeof _serialize = (color) => _serialize(clone(color))
-
-// export { clone }
+export const serialize: typeof _serialize = (color, options) =>
+  _serialize(clone(color), options)

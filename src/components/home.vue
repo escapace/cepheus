@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import Rand, { PRNG } from 'rand-seed'
 import { optimize } from './wip'
 import {
   ColorSpace,
   LCH,
   OKLab,
+  HSL,
   OKLCH,
   convert,
   parse,
@@ -12,41 +14,50 @@ import {
   P3
 } from '../colorjs-io'
 
+ColorSpace.register(HSL)
 ColorSpace.register(P3)
 ColorSpace.register(OKLab)
 ColorSpace.register(OKLCH)
 ColorSpace.register(sRGB)
 ColorSpace.register(LCH)
 
-// const parse = (color) => {
-//   const value = _parse(color)
-//
-//   return {
-//     space: ColorSpace.get(value.space ?? value.spaceId),
-//     coords: value.coords,
-//     alpha: value.alpha ?? 1
-//   }
-// }
+const prng = new Rand(
+  'jkaqweqwehq1qwehqwkje2312wqweqweeqweh1kqwqweqw',
+  PRNG.xoshiro128ss
+)
 
 const initial = [
-  parse('#9966FF'),
-  // parse('#0055BC'),
-  // new Color('#00A1C2'),
-  parse('#ED6804'),
-  // new Color('#B3063D'),
-  parse('#45cb85'),
-  parse('#E08DAC')
+  parse('#1473e6'),
+  parse('#d7373f'),
+  parse('#da7b11'),
+  parse('#268e6c')
 ]
 
-const colors = optimize(initial)
+const colors = optimize({
+  colors: initial,
+  background: parse('#ffffff'),
+  random: () => prng.next(),
+  colorSpace: ColorSpace.get('p3'),
+  contrast: {
+    range: [35, 55]
+  },
+  chroma: {
+    range: [0.0, 0.1]
+  }
+})
 
-// console.log(initial)
+// console.log(colors)
 //
 // console.log(
-//   initial.map(
-//     (color) => convert(clone(color), 'oklab', { inGamut: true })
+//   initial.map((color) =>
+//     serialize(convert(color, ColorSpace.get('hsl'), { inGamut: true }), {
+//       format: 'hsla'
+//     })
 //   )
 // )
+//
+// console.log('here')
+
 //
 // console.log(
 //   initial.map((color) =>
@@ -109,9 +120,12 @@ const colors = optimize(initial)
           <div
             class="w-10 h-10 m-1"
             :style="{
-              background: serialize(convert(color, 'srgb', { inGamut: true }), {
-                format: 'rgba'
-              })
+              'background-color': serialize(
+                convert(color, ColorSpace.get('hsl'), { inGamut: true }),
+                {
+                  format: 'hsla'
+                }
+              )
               // serialize(convert(color, 'p3', { inGamut: true }), {
               //   format: 'color'
               // })
@@ -129,9 +143,9 @@ const colors = optimize(initial)
             class="w-10 h-10 m-1"
             :style="{
               'background-color': serialize(
-                convert(color, 'srgb', { inGamut: true }),
+                convert(color, 'hsl', { inGamut: true }),
                 {
-                  format: 'rgba'
+                  format: 'hsla'
                 }
               )
             }"
