@@ -81,7 +81,7 @@ declare module 'colorjs.io/fn' {
   export const contrast: (
     background: Color,
     foreground: Color,
-    options?: {}
+    options?: { algorithm: ColorContrast }
   ) => number
 
   export const clone: (color: Color) => Color
@@ -124,4 +124,6 @@ declare module 'colorjs.io/fn' {
       inGamut?: boolean
     }
   ) => string
+
+  export const inGamut: (color: Color, space?: ColorSpace) => boolean
 }
