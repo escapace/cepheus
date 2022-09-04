@@ -1,5 +1,5 @@
 import { Deficiency, simulate as simulateDeficiency } from '@bjornlu/colorblind'
-import { mean, medianAbsoluteDeviation, sample } from 'simple-statistics'
+import { mean, sample, sum, variance } from 'simple-statistics'
 import {
   ColorSpace,
   convert,
@@ -10,8 +10,11 @@ import {
   inGamut
 } from '../colorjs-io'
 import { clamp } from '../utilities/clamp'
-import { range, defaultsDeep } from 'lodash-es'
+import { map, range, mapValues, flatMap, defaultsDeep } from 'lodash-es'
 import type { DeepRequired } from 'utility-types'
+import { relativeDifference } from '../utilities/relative-difference'
+
+// TODO: assert
 
 function getRandomArbitrary(
   min: number,
@@ -24,8 +27,6 @@ function getRandomArbitrary(
 function between(x: number, min: number, max: number) {
   return x >= min && x <= max
 }
-
-// TODO: gamut
 
 const randomNearbyColor = (color: Color, options: RequiredOptions): Color => {
   const next = (): Color => {
@@ -127,7 +128,7 @@ const distance = (a: Color, b: Color) => deltaEOK(a, b)
 const distances = (colors: Color[], deficiency?: Deficiency) => {
   const distances: number[] = []
 
-  const convertedColors = colors.map((color) => {
+  const convertedColors = map(colors, (color) => {
     if (deficiency === undefined) {
       return color
     }
@@ -152,7 +153,7 @@ const distances = (colors: Color[], deficiency?: Deficiency) => {
     return convert(
       {
         space: ColorSpace.get('srgb'),
-        coords: [r, g, b].map((value) => value / 255.0),
+        coords: map([r, g, b], (value) => value / 255.0),
         alpha: 1
       },
       'oklch',
@@ -166,20 +167,40 @@ const distances = (colors: Color[], deficiency?: Deficiency) => {
     }
   }
 
-  return distances.sort((a, b) => a - b)
+  return distances
 }
 
 // Cost function including weights
 const cost = (state: Color[], options: RequiredOptions) => {
-  const div = 100
+  // average of the distance from target colors
+  const differenceScore = mean(
+    map(state, (c, index) => distance(c, options.colors[index]))
+  )
 
-  const targetWeight = 50 / div
+  const lightnessScore = relativeDifference(
+    mean(map(state, (value) => value.coords[0])),
+    options.lightness.target,
+    options.lightness.range[0],
+    options.lightness.range[1]
+  )
 
-  const medianAbsoluteDeviationWeight = 30 / div
-  const normalWeight = 5 / div
-  const protanopiaWeight = 5 / div
-  const deuteranopiaWeight = 5 / div
-  const tritanopiaWeight = 5 / div
+  const chromaScore = relativeDifference(
+    mean(map(state, (value) => value.coords[1])),
+    options.chroma.target,
+    options.chroma.range[0],
+    options.chroma.range[1]
+  )
+
+  const contrastScore = relativeDifference(
+    mean(
+      map(state, (value) =>
+        Math.abs(contrast(options.background, value, { algorithm: 'APCA' }))
+      )
+    ),
+    options.contrast.target,
+    options.contrast.range[0],
+    options.contrast.range[1]
+  )
 
   const normalDistances = distances(state)
   const protanopiaDistances = distances(state, 'protanopia')
@@ -192,62 +213,59 @@ const cost = (state: Color[], options: RequiredOptions) => {
   const deuteranopiaScore = 1 - mean(deuteranopiaDistances)
   const tritanopiaScore = 1 - mean(tritanopiaDistances)
 
-  // average of the distance from target colors
-  const targetScore = mean(
-    state
-      .map((c, index) => distance(c, options.colors[index]))
-      .sort((a, b) => a - b)
-  )
-
-  // TODO: contrast score
-
   const colorWeights =
-    normalWeight + protanopiaWeight + deuteranopiaWeight + tritanopiaWeight
+    options.weights.normal +
+    options.weights.protanopia +
+    options.weights.deuteranopia +
+    options.weights.deuteranopia
 
-  // const medianAbsoluteDeviationScore = 100 - medianAbsoluteDeviation(normalDistances)
-
-  // medianAbsoluteDeviation() increases with the variability of colors
-  // 1 - medianAbsoluteDeviation() decreases with the variability of colors
-  const medianAbsoluteDeviationScore =
+  const dispersionScore =
     1 -
     mean(
-      [
-        [normalDistances, normalWeight / colorWeights] as const,
-        [protanopiaDistances, protanopiaWeight / colorWeights] as const,
-        [deuteranopiaDistances, deuteranopiaWeight / colorWeights] as const,
-        [tritanopiaDistances, tritanopiaWeight / colorWeights] as const
-      ].flatMap(([value, weight]) => medianAbsoluteDeviation(value) * weight)
+      flatMap(
+        [
+          [normalDistances, options.weights.normal / colorWeights] as const,
+          [
+            protanopiaDistances,
+            options.weights.protanopia / colorWeights
+          ] as const,
+          [
+            deuteranopiaDistances,
+            options.weights.deuteranopia / colorWeights
+          ] as const,
+          [
+            tritanopiaDistances,
+            options.weights.tritanopia / colorWeights
+          ] as const
+        ],
+        ([value, weight]) => variance(value) * weight
+      )
     )
 
   if (
     [
+      contrastScore,
+      deuteranopiaScore,
+      differenceScore,
+      dispersionScore,
       normalScore,
       protanopiaScore,
-      deuteranopiaScore,
-      tritanopiaScore,
-      medianAbsoluteDeviationScore,
-      targetScore
+      tritanopiaScore
     ].some((value) => value > 1 || value < 0 || isNaN(value))
   ) {
-    console.log({
-      normalScore,
-      protanopiaScore,
-      deuteranopiaScore,
-      tritanopiaScore,
-      medianAbsoluteDeviationScore,
-      targetScore
-    })
-
     throw new Error('Out of bounds.')
   }
 
   return (
-    targetWeight * targetScore +
-    medianAbsoluteDeviationWeight * medianAbsoluteDeviationScore +
-    normalWeight * normalScore +
-    protanopiaWeight * protanopiaScore +
-    deuteranopiaWeight * deuteranopiaScore +
-    tritanopiaWeight * tritanopiaScore
+    options.weights.chroma * chromaScore +
+    options.weights.lightness * lightnessScore +
+    options.weights.contrast * contrastScore +
+    options.weights.deuteranopia * deuteranopiaScore +
+    options.weights.difference * differenceScore +
+    options.weights.dispersion * dispersionScore +
+    options.weights.normal * normalScore +
+    options.weights.protanopia * protanopiaScore +
+    options.weights.tritanopia * tritanopiaScore
   )
 }
 
@@ -272,43 +290,96 @@ interface Options {
   colors: Color[]
   background: Color
   colorSpace?: ColorSpace
+  weights?: {
+    chroma: number
+    contrast: number
+    deuteranopia: number
+    difference: number
+    dispersion: number
+    lightness: number
+    normal: number
+    protanopia: number
+    tritanopia: number
+  }
   lightness?: {
     // Lightness [0, 1]
+    target?: number
     range?: [number, number]
   }
   chroma?: {
     // Chroma [0, 0.4]
+    target?: number
     range?: [number, number]
   }
   contrast?: {
-    // APCA [0, 106]
+    // APCA [0, 106] or [0, 108]
+    target?: number
+    /* APCA reports lightness contrast as an Lc value from Lc 0 to Lc 106 for dark
+     * text on a light background, and Lc 0 to Lc -108 for light text on a dark
+     * background (dark mode). The minus sign merely indicates negative contrast,
+     * which means light text on a dark background. */
     range?: [number, number]
   }
 }
 
 type RequiredOptions = DeepRequired<Options>
 
+const normalizeWeights = (
+  weights: Required<Exclude<Options['weights'], undefined>>
+): Required<Exclude<Options['weights'], undefined>> => {
+  const total = sum(Object.values(weights))
+
+  return mapValues(weights, (value) => value / total)
+}
+
 export const optimize = (options: Options) => {
-  const opts = defaultsDeep({}, options, {
-    colorSpace: ColorSpace.get('p3'),
-    lightness: {
-      range: [0, 1],
-      ...options.lightness
+  const opts = defaultsDeep(
+    {
+      ...options,
+      colors: options.colors.map((value) =>
+        convert(value, 'oklch', { inGamut: true })
+      ),
+      background: convert(options.background, 'oklch', { inGamut: true })
     },
-    chroma: {
-      range: [0, 0.4],
-      ...options.chroma
-    },
-    contrast: {
-      range: [70, 100],
-      ...options.contrast
-    },
-    ...options,
-    colors: options.colors.map((value) =>
-      convert(value, 'oklch', { inGamut: true })
-    ),
-    background: convert(options.background, 'oklch', { inGamut: true })
-  }) as RequiredOptions
+    {
+      weights: normalizeWeights({
+        difference: 100,
+        dispersion: 40,
+        // coords
+        lightness: 10,
+        chroma: 10,
+        contrast: 10,
+        // color-vision
+        normal: 15,
+        protanopia: 5,
+        tritanopia: 5,
+        deuteranopia: 5,
+        ...options.weights
+      }),
+      colorSpace: ColorSpace.get('p3'),
+      lightness: {
+        range: [0, 1],
+        target: mean(options.lightness?.range ?? [0, 1]),
+        ...options.lightness
+      },
+      chroma: {
+        range: [0, 0.4],
+        target: mean(options.chroma?.range ?? [0, 0.4]),
+        ...options.chroma
+      },
+      contrast: {
+        range: [30, 108],
+        target: mean(options.contrast?.range ?? [30, 108]),
+        ...options.contrast
+      }
+    }
+  ) as RequiredOptions
+
+  ;(['lightness', 'chroma', 'contrast'] as const).forEach((key) => {
+    if (!between(opts[key].target, opts[key].range[0], opts[key].range[1])) {
+      throw new Error(`${key} out of range`)
+    }
+  })
 
   const n = opts.colors.length
 

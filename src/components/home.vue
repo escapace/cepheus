@@ -22,7 +22,7 @@ ColorSpace.register(sRGB)
 ColorSpace.register(LCH)
 
 const prng = new Rand(
-  'jkaqweqwehq1qwehqwkje2312wqweqweeqweh1kqwqweqw',
+  'qhwkjqweh12jajajajqhjk1aqwehkjqwe3123kjehjkhqwjkeqwhekqwehjqwehki123123jkqjqwkjehkqjwew',
   PRNG.xoshiro128ss
 )
 
@@ -33,18 +33,50 @@ const initial = [
   parse('#268e6c')
 ]
 
-const colors = optimize({
-  colors: initial,
-  background: parse('#ffffff'),
-  random: () => prng.next(),
-  colorSpace: ColorSpace.get('p3'),
-  contrast: {
-    range: [35, 55]
-  },
-  chroma: {
-    range: [0.0, 0.1]
-  }
-})
+const clusters = [
+  optimize({
+    colors: initial,
+    background: parse('#ffffff'),
+    random: () => prng.next(),
+    colorSpace: ColorSpace.get('p3'),
+    contrast: {
+      range: [30, 45]
+    },
+    chroma: {
+      range: [0.1, 0.2]
+    },
+    lightness: {
+      range: [0.8, 1]
+    }
+  }),
+  optimize({
+    colors: initial,
+    background: parse('#ffffff'),
+    random: () => prng.next(),
+    colorSpace: ColorSpace.get('p3'),
+    contrast: {
+      range: [75, 100]
+    },
+    chroma: {
+      range: [0, 0.1]
+    },
+    lightness: {
+      range: [0.5, 0.8]
+    }
+  })
+  /* optimize({ */
+  /*   colors: initial, */
+  /*   background: parse('#ffffff'), */
+  /*   random: () => prng.next(), */
+  /*   colorSpace: ColorSpace.get('p3'), */
+  /*   contrast: { */
+  /*     range: [60, 75] */
+  /*   }, */
+  /*   chroma: { */
+  /*     range: [0.3, 0.4] */
+  /*   } */
+  /* }) */
+]
 
 // console.log(colors)
 //
@@ -137,19 +169,21 @@ const colors = optimize({
 
     <div class="p5">
       <p class="text-lg font-sans mb6">Optmizied Colors</p>
-      <div class="flex flex-wrap items-center w-full">
-        <div v-for="(color, index) in colors" :key="index">
-          <div
-            class="w-10 h-10 m-1"
-            :style="{
-              'background-color': serialize(
-                convert(color, 'hsl', { inGamut: true }),
-                {
-                  format: 'hsla'
-                }
-              )
-            }"
-          ></div>
+      <div v-for="(colors, index1) in clusters" :key="index1">
+        <div class="flex flex-wrap items-center w-full">
+          <div v-for="(color, index2) in colors" :key="index2">
+            <div
+              class="w-10 h-10 m-1"
+              :style="{
+                'background-color': serialize(
+                  convert(color, 'hsl', { inGamut: true }),
+                  {
+                    format: 'hsla'
+                  }
+                )
+              }"
+            ></div>
+          </div>
         </div>
       </div>
     </div>
