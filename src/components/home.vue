@@ -47,22 +47,22 @@ const clusters = [
     lightness: {
       range: [0, 1]
     }
+  }),
+  optimize({
+    colors: initial,
+    background: parse('#ffffff'),
+    random: () => prng.next(),
+    colorSpace: ColorSpace.get('p3'),
+    contrast: {
+      range: [60, 75]
+    },
+    chroma: {
+      range: [0.1, 0.3]
+    },
+    lightness: {
+      range: [0, 1]
+    }
   })
-  /* optimize({ */
-  /*   colors: initial, */
-  /*   background: parse('#ffffff'), */
-  /*   random: () => prng.next(), */
-  /*   colorSpace: ColorSpace.get('p3'), */
-  /*   contrast: { */
-  /*     range: [60, 75] */
-  /*   }, */
-  /*   chroma: { */
-  /*     range: [0.1, 0.3] */
-  /*   }, */
-  /*   lightness: { */
-  /*     range: [0, 1] */
-  /*   } */
-  /* }) */
   /* optimize({ */
   /*   colors: initial, */
   /*   background: parse('#ffffff'), */
