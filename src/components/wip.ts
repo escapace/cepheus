@@ -1,6 +1,6 @@
 import { Deficiency, simulate as simulateDeficiency } from '@bjornlu/colorblind'
 import { defaultsDeep, flatMap, map, mapValues, range } from 'lodash-es'
-import { mean, sample, sum, variance } from 'simple-statistics'
+import { errorFunction, mean, sample, sum, variance } from 'simple-statistics'
 import type { DeepRequired } from 'utility-types'
 import {
   clone,
@@ -17,6 +17,7 @@ import { randomWithin } from '../utilities/random-within'
 import { relativeDifference } from '../utilities/relative-difference'
 
 // TODO: assert
+// 11.53
 
 export class IterationError extends Error {
   constructor(message: string) {
@@ -27,7 +28,17 @@ export class IterationError extends Error {
   }
 }
 
-const randomColor = (options: RequiredOptions, color?: Color): Color => {
+function randomColor(options: RequiredOptions): Color
+function randomColor(
+  options: RequiredOptions,
+  color: Color,
+  temperature: number
+): Color
+function randomColor(
+  options: RequiredOptions,
+  color?: Color,
+  temperature?: number
+): Color {
   const next = (): Color => {
     if (color === undefined) {
       return {
@@ -52,11 +63,18 @@ const randomColor = (options: RequiredOptions, color?: Color): Color => {
 
       const value = clone(color)
 
+      const percentage =
+        0.05 +
+        0.5 *
+          errorFunction(
+            (temperature as number) / options.hyperparameters.temperature
+          )
+
       switch (index) {
         case 0:
           value.coords[index] = percentile(
             value.coords[index],
-            5,
+            percentage,
             options.lightness.range[0],
             options.lightness.range[1],
             options.random
@@ -66,7 +84,7 @@ const randomColor = (options: RequiredOptions, color?: Color): Color => {
         case 1:
           value.coords[index] = percentile(
             value.coords[index],
-            5,
+            percentage,
             options.chroma.range[0],
             options.chroma.range[1],
             options.random
@@ -76,7 +94,7 @@ const randomColor = (options: RequiredOptions, color?: Color): Color => {
         case 2:
           value.coords[index] = percentile(
             value.coords[index],
-            5,
+            percentage,
             0,
             360,
             options.random
@@ -270,7 +288,7 @@ const percentile = (
   max: number,
   randomSource: () => number
 ) => {
-  const value = (percent / 100.0) * (max - min)
+  const value = percent * (max - min)
 
   return clamp(
     current + randomWithin(-1.0 * value, value, randomSource),
@@ -284,6 +302,11 @@ interface Options {
   colors: Color[]
   background: Color
   colorSpace?: ColorSpace
+  hyperparameters?: {
+    temperature: number
+    coolingRate: number
+    cutoff: number
+  }
   weights?: {
     chroma: number
     contrast: number
@@ -336,18 +359,23 @@ const normalizeOptions = (options: Options): RequiredOptions => {
       background: convert(options.background, 'oklch', { inGamut: true })
     },
     {
+      hyperparameters: {
+        temperature: 2000,
+        coolingRate: 0.99,
+        cutoff: 0.0001
+      },
       weights: normalizeWeights({
-        difference: 100,
-        dispersion: 40,
-        // coords
-        lightness: 10,
-        chroma: 10,
-        contrast: 10,
+        difference: 200,
+        dispersion: 80,
         // color-vision
-        normal: 15,
-        protanopia: 5,
-        tritanopia: 5,
-        deuteranopia: 5,
+        normal: 20,
+        protanopia: 10,
+        tritanopia: 10,
+        deuteranopia: 10,
+        // coords
+        lightness: 5,
+        chroma: 5,
+        contrast: 5,
         ...options.weights
       }),
       colorSpace: ColorSpace.get('p3'),
@@ -390,21 +418,19 @@ export const optimize = (options: Options): Color[] => {
   const startCost = cost(normalizedOptions, startColors)
 
   // intialize hyperparameters
-  let temperature = 1000
-  const coolingRate = 0.99
-  const cutoff = 0.0001
+  let temperature = normalizedOptions.hyperparameters.temperature
 
   let bestCost: number = startCost
   let bestColors: Color[] = startColors
 
   // iteration loop
-  while (temperature > cutoff) {
+  while (temperature > normalizedOptions.hyperparameters.cutoff) {
     // for each color
     for (let i = 0; i < colors.length; i++) {
       // copy old colors
       const newColors = [...colors]
       // move the current color randomly
-      newColors[i] = randomColor(normalizedOptions, newColors[i])
+      newColors[i] = randomColor(normalizedOptions, newColors[i], temperature)
       // choose between the current state and the new state
       // based on the difference between the two, the temperature
       // of the algorithm, and some random chance
@@ -426,7 +452,7 @@ export const optimize = (options: Options): Color[] => {
     }
 
     // decrease temperature
-    temperature *= coolingRate
+    temperature *= normalizedOptions.hyperparameters.coolingRate
   }
 
   console.log(`${((1 - bestCost / startCost) * 100).toFixed(2)}% Optimized`)
