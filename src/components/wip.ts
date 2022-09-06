@@ -1,74 +1,101 @@
 import { Deficiency, simulate as simulateDeficiency } from '@bjornlu/colorblind'
+import { defaultsDeep, flatMap, map, mapValues, range } from 'lodash-es'
 import { mean, sample, sum, variance } from 'simple-statistics'
+import type { DeepRequired } from 'utility-types'
 import {
-  ColorSpace,
-  convert,
-  deltaEOK,
-  contrast,
   clone,
   Color,
+  ColorSpace,
+  contrast,
+  convert,
+  deltaEOK,
   inGamut
 } from '../colorjs-io'
 import { clamp } from '../utilities/clamp'
-import { map, range, mapValues, flatMap, defaultsDeep } from 'lodash-es'
-import type { DeepRequired } from 'utility-types'
+import { isWithin } from '../utilities/is-within'
+import { randomWithin } from '../utilities/random-within'
 import { relativeDifference } from '../utilities/relative-difference'
 
 // TODO: assert
 
-function getRandomArbitrary(
-  min: number,
-  max: number,
-  randomSource: () => number
-) {
-  return randomSource() * (max - min) + min
+export class IterationError extends Error {
+  constructor(message: string) {
+    super(message)
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, IterationError.prototype)
+  }
 }
 
-function between(x: number, min: number, max: number) {
-  return x >= min && x <= max
-}
-
-const randomNearbyColor = (color: Color, options: RequiredOptions): Color => {
+const randomColor = (options: RequiredOptions, color?: Color): Color => {
   const next = (): Color => {
-    const index = sample([0, 1, 2], 1, options.random)[0]
+    if (color === undefined) {
+      return {
+        space: ColorSpace.get('oklch'),
+        coords: [
+          randomWithin(
+            options.lightness.range[0],
+            options.lightness.range[1],
+            options.random
+          ),
+          randomWithin(
+            options.chroma.range[0],
+            options.chroma.range[1],
+            options.random
+          ),
+          randomWithin(0, 360, options.random)
+        ],
+        alpha: 1
+      }
+    } else {
+      const index = sample([0, 1, 2], 1, options.random)[0]
 
-    const value = clone(color)
+      const value = clone(color)
 
-    switch (index) {
-      case 0:
-        value.coords[index] = percentile(
-          value.coords[index],
-          5,
-          options.lightness.range[0],
-          options.lightness.range[1],
-          options.random
-        )
+      switch (index) {
+        case 0:
+          value.coords[index] = percentile(
+            value.coords[index],
+            5,
+            options.lightness.range[0],
+            options.lightness.range[1],
+            options.random
+          )
 
-        break
-      case 1:
-        value.coords[index] = percentile(
-          value.coords[index],
-          5,
-          options.chroma.range[0],
-          options.chroma.range[1],
-          options.random
-        )
+          break
+        case 1:
+          value.coords[index] = percentile(
+            value.coords[index],
+            5,
+            options.chroma.range[0],
+            options.chroma.range[1],
+            options.random
+          )
 
-        break
-      case 2:
-        value.coords[index] = percentile(
-          value.coords[index],
-          5,
-          0,
-          360,
-          options.random
-        )
+          break
+        case 2:
+          value.coords[index] = percentile(
+            value.coords[index],
+            5,
+            0,
+            360,
+            options.random
+          )
 
-        break
+          break
+      }
+
+      return value
     }
+  }
+
+  let iterations = 100000
+
+  while (iterations !== 0) {
+    const value = next()
 
     if (
-      between(
+      isWithin(
         Math.abs(contrast(options.background, value, { algorithm: 'APCA' })),
         options.contrast.range[0],
         options.contrast.range[1]
@@ -76,45 +103,12 @@ const randomNearbyColor = (color: Color, options: RequiredOptions): Color => {
       inGamut(value, options.colorSpace)
     ) {
       return value
-    } else {
-      return next()
     }
+
+    iterations--
   }
 
-  return next()
-}
-
-const randomColor = (options: RequiredOptions): Color => {
-  const value = {
-    space: ColorSpace.get('oklch'),
-    coords: [
-      getRandomArbitrary(
-        options.lightness.range[0],
-        options.lightness.range[1],
-        options.random
-      ),
-      getRandomArbitrary(
-        options.chroma.range[0],
-        options.chroma.range[1],
-        options.random
-      ),
-      getRandomArbitrary(-0.4, 0.4, options.random)
-    ],
-    alpha: 1
-  }
-
-  if (
-    between(
-      Math.abs(contrast(options.background, value, { algorithm: 'APCA' })),
-      options.contrast.range[0],
-      options.contrast.range[1]
-    ) &&
-    inGamut(value, options.colorSpace)
-  ) {
-    return value
-  } else {
-    return randomColor(options)
-  }
+  throw new IterationError('Iteration limit exceeded.')
 }
 
 const distance = (a: Color, b: Color) => deltaEOK(a, b)
@@ -171,7 +165,7 @@ const distances = (colors: Color[], deficiency?: Deficiency) => {
 }
 
 // Cost function including weights
-const cost = (state: Color[], options: RequiredOptions) => {
+const cost = (options: RequiredOptions, state: Color[]) => {
   // average of the distance from target colors
   const differenceScore = mean(
     map(state, (c, index) => distance(c, options.colors[index]))
@@ -279,7 +273,7 @@ const percentile = (
   const value = (percent / 100.0) * (max - min)
 
   return clamp(
-    current + getRandomArbitrary(-1.0 * value, value, randomSource),
+    current + randomWithin(-1.0 * value, value, randomSource),
     min,
     max
   )
@@ -332,8 +326,8 @@ const normalizeWeights = (
   return mapValues(weights, (value) => value / total)
 }
 
-export const optimize = (options: Options) => {
-  const opts = defaultsDeep(
+const normalizeOptions = (options: Options): RequiredOptions => {
+  const value = defaultsDeep(
     {
       ...options,
       colors: options.colors.map((value) =>
@@ -376,17 +370,24 @@ export const optimize = (options: Options) => {
   ) as RequiredOptions
 
   ;(['lightness', 'chroma', 'contrast'] as const).forEach((key) => {
-    if (!between(opts[key].target, opts[key].range[0], opts[key].range[1])) {
+    if (
+      !isWithin(value[key].target, value[key].range[0], value[key].range[1])
+    ) {
       throw new Error(`${key} out of range`)
     }
   })
 
-  const n = opts.colors.length
+  return value
+}
 
-  const colors: Color[] = range(n).map(() => randomColor(opts))
+export const optimize = (options: Options): Color[] => {
+  const normalizedOptions = normalizeOptions(options)
+
+  const n = normalizedOptions.colors.length
+  const colors: Color[] = range(n).map(() => randomColor(normalizedOptions))
 
   const startColors = Array.from(colors)
-  const startCost = cost(startColors, opts)
+  const startCost = cost(normalizedOptions, startColors)
 
   // intialize hyperparameters
   let temperature = 1000
@@ -403,18 +404,19 @@ export const optimize = (options: Options) => {
       // copy old colors
       const newColors = [...colors]
       // move the current color randomly
-      newColors[i] = randomNearbyColor(newColors[i], opts)
+      newColors[i] = randomColor(normalizedOptions, newColors[i])
       // choose between the current state and the new state
       // based on the difference between the two, the temperature
       // of the algorithm, and some random chance
-      const delta = cost(newColors, opts) - cost(colors, opts)
+      const delta =
+        cost(normalizedOptions, newColors) - cost(normalizedOptions, colors)
       const probability = Math.exp(-delta / temperature)
-      if (opts.random() < probability) {
+      if (normalizedOptions.random() < probability) {
         colors[i] = newColors[i]
       }
     }
 
-    const current = cost(colors, opts)
+    const current = cost(normalizedOptions, colors)
 
     console.log(`Current cost: ${current}`)
 

@@ -21,7 +21,10 @@ ColorSpace.register(OKLCH)
 ColorSpace.register(sRGB)
 ColorSpace.register(LCH)
 
-const prng = new Rand('qhwkjqweh12jajajajqhjk1aqwehkjqw', PRNG.xoshiro128ss)
+const prng = new Rand(
+  'qhwkjqwewerhkweh12jajaqwejkjajqweqhjk1aqwehkjqw',
+  PRNG.xoshiro128ss
+)
 
 const initial = [
   parse('#1473e6'),
@@ -31,34 +34,34 @@ const initial = [
 ]
 
 const clusters = [
+  /* optimize({ */
+  /*   colors: initial, */
+  /*   background: parse('#ffffff'), */
+  /*   random: () => prng.next(), */
+  /*   colorSpace: ColorSpace.get('p3'), */
+  /*   contrast: { */
+  /*     range: [30, 45] */
+  /*   }, */
+  /*   chroma: { */
+  /*     range: [0.1, 0.2] */
+  /*   }, */
+  /*   lightness: { */
+  /*     range: [0.8, 1] */
+  /*   } */
+  /* }), */
   optimize({
     colors: initial,
     background: parse('#ffffff'),
     random: () => prng.next(),
     colorSpace: ColorSpace.get('p3'),
     contrast: {
-      range: [30, 45]
+      range: [0, 108]
     },
     chroma: {
       range: [0.1, 0.2]
     },
     lightness: {
       range: [0.8, 1]
-    }
-  }),
-  optimize({
-    colors: initial,
-    background: parse('#ffffff'),
-    random: () => prng.next(),
-    colorSpace: ColorSpace.get('p3'),
-    contrast: {
-      range: [75, 100]
-    },
-    chroma: {
-      range: [0, 0.1]
-    },
-    lightness: {
-      range: [0.5, 0.8]
     }
   })
   /* optimize({ */
