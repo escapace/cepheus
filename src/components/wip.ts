@@ -162,7 +162,7 @@ const distances = (colors: Color[], deficiency?: Deficiency) => {
       { r, g, b }
     )
 
-    return convert(
+    const result = convert(
       {
         space: ColorSpace.get('srgb'),
         coords: map([r, g, b], (value) => value / 255.0),
@@ -171,6 +171,18 @@ const distances = (colors: Color[], deficiency?: Deficiency) => {
       'oklch',
       { inGamut: true }
     )
+
+    result.coords = map(result.coords, (value) => {
+      if (isNaN(value)) {
+        /* console.warn(`NaN for [${r}, ${g}, ${b}]`) */
+
+        return 0
+      }
+
+      return value
+    })
+
+    return result
   })
 
   for (let i = 0; i < colors.length; i++) {
