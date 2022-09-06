@@ -393,6 +393,9 @@ export const optimize = (options: Options) => {
   const coolingRate = 0.99
   const cutoff = 0.0001
 
+  let bestCost: number = startCost
+  let bestColors: Color[] = startColors
+
   // iteration loop
   while (temperature > cutoff) {
     // for each color
@@ -411,17 +414,22 @@ export const optimize = (options: Options) => {
       }
     }
 
-    console.log(`Current cost: ${cost(colors, opts)}`)
+    const current = cost(colors, opts)
+
+    console.log(`Current cost: ${current}`)
+
+    if (current < bestCost) {
+      bestCost = current
+      bestColors = colors
+    }
 
     // decrease temperature
     temperature *= coolingRate
   }
 
-  console.log(
-    `${((1 - cost(colors, opts) / startCost) * 100).toFixed(2)}% Optimized`
-  )
+  console.log(`${((1 - bestCost / startCost) * 100).toFixed(2)}% Optimized`)
 
-  return colors
+  return bestColors
 }
 
 // const run = () => {

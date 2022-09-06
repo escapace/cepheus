@@ -21,10 +21,7 @@ ColorSpace.register(OKLCH)
 ColorSpace.register(sRGB)
 ColorSpace.register(LCH)
 
-const prng = new Rand(
-  'qhwkjqweh12jajajajqhjk1aqwehkjqwe3123kjehjkhqwjkeqwhekqwehjqwehki123123jkqjqwkjehkqjwew',
-  PRNG.xoshiro128ss
-)
+const prng = new Rand('qhwkjqweh12jajajajqhjk1aqwehkjqw', PRNG.xoshiro128ss)
 
 const initial = [
   parse('#1473e6'),
