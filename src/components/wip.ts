@@ -1,5 +1,5 @@
 import { Deficiency, simulate as simulateDeficiency } from '@bjornlu/colorblind'
-import { defaultsDeep, flatMap, map, mapValues, range } from 'lodash-es'
+import { flatMap, map, mapValues, range } from 'lodash-es'
 import { errorFunction, mean, sample, sum, variance } from 'simple-statistics'
 import type { DeepRequired } from 'utility-types'
 import {
@@ -361,53 +361,80 @@ const normalizeWeights = (
   return mapValues(weights, (value) => value / total)
 }
 
+const normalizeChroma = (
+  value: Required<Exclude<Options['chroma'], undefined>>
+): Required<Exclude<Options['chroma'], undefined>> => ({
+  range: map(value.range, (v) => v * 0.4) as [number, number],
+  target: value.target * 0.4
+})
+
+const normalizeContrast = (
+  value: Required<Exclude<Options['contrast'], undefined>>,
+  isDarkMode: boolean
+): Required<Exclude<Options['contrast'], undefined>> => ({
+  range: map(value.range, (v) => v * (isDarkMode ? 108 : 106)) as [
+    number,
+    number
+  ],
+  target: value.target * (isDarkMode ? 108 : 106)
+})
+
 const normalizeOptions = (options: Options): RequiredOptions => {
-  const value = defaultsDeep(
-    {
-      ...options,
-      colors: options.colors.map((value) =>
-        convert(value, 'oklch', { inGamut: true })
-      ),
-      background: convert(options.background, 'oklch', { inGamut: true })
+  const colors = map(options.colors, (value) =>
+    convert(value, 'oklch', { inGamut: true })
+  )
+  const background = convert(options.background, 'oklch', { inGamut: true })
+
+  const isDarkMode =
+    mean(
+      map(colors, (value) => contrast(background, value, { algorithm: 'APCA' }))
+    ) < 0
+
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  const value = {
+    colors,
+    background,
+    random: options.random,
+    hyperparameters: {
+      temperature: 2000,
+      coolingRate: 0.99,
+      cutoff: 0.0001,
+      ...options.hyperparameters
     },
-    {
-      hyperparameters: {
-        temperature: 2000,
-        coolingRate: 0.99,
-        cutoff: 0.0001
-      },
-      weights: normalizeWeights({
-        difference: 200,
-        dispersion: 80,
-        // color-vision
-        normal: 20,
-        protanopia: 10,
-        tritanopia: 10,
-        deuteranopia: 10,
-        // coords
-        lightness: 5,
-        chroma: 5,
-        contrast: 5,
-        ...options.weights
-      }),
-      colorSpace: ColorSpace.get('p3'),
-      lightness: {
+    weights: normalizeWeights({
+      difference: 200,
+      dispersion: 80,
+      // color-vision
+      normal: 20,
+      protanopia: 10,
+      tritanopia: 10,
+      deuteranopia: 10,
+      // coords
+      lightness: 5,
+      chroma: 5,
+      contrast: 5,
+      ...options.weights
+    }),
+    colorSpace: options.colorSpace ?? ColorSpace.get('p3'),
+    lightness: {
+      range: [0, 1],
+      target: mean(options.lightness?.range ?? [0, 1]),
+      ...options.lightness
+    },
+    chroma: normalizeChroma({
+      range: [0, 1],
+      target: mean(options.chroma?.range ?? [0, 1]),
+      ...options.chroma
+    }),
+    contrast: normalizeContrast(
+      {
         range: [0, 1],
-        target: mean(options.lightness?.range ?? [0, 1]),
-        ...options.lightness
-      },
-      chroma: {
-        range: [0, 0.4],
-        target: mean(options.chroma?.range ?? [0, 0.4]),
-        ...options.chroma
-      },
-      contrast: {
-        range: [30, 108],
-        target: mean(options.contrast?.range ?? [30, 108]),
+        target: mean(options.contrast?.range ?? [0, 1]),
         ...options.contrast
-      }
-    }
-  ) as RequiredOptions
+      },
+      isDarkMode
+    )
+  } as RequiredOptions
 
   ;(['lightness', 'chroma', 'contrast'] as const).forEach((key) => {
     if (
@@ -424,7 +451,7 @@ export const optimize = (options: Options): Color[] => {
   const normalizedOptions = normalizeOptions(options)
 
   const n = normalizedOptions.colors.length
-  const colors: Color[] = range(n).map(() => randomColor(normalizedOptions))
+  const colors: Color[] = map(range(n), () => randomColor(normalizedOptions))
 
   const startColors = Array.from(colors)
   const startCost = cost(normalizedOptions, startColors)
