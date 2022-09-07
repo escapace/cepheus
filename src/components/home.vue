@@ -37,12 +37,11 @@ const clusters = [
     colors: initial,
     background: parse('#ffffff'),
     random: () => prng.next(),
-    colorSpace: ColorSpace.get('p3'),
     contrast: {
-      range: [30, 45]
+      range: [0.3, 0.45]
     },
     chroma: {
-      range: [0, 0.05]
+      range: [0, 0.1]
     },
     lightness: {
       range: [0, 1]
@@ -52,12 +51,11 @@ const clusters = [
     colors: initial,
     background: parse('#ffffff'),
     random: () => prng.next(),
-    colorSpace: ColorSpace.get('p3'),
     contrast: {
-      range: [60, 75]
+      range: [0.6, 0.75]
     },
     chroma: {
-      range: [0.1, 0.3]
+      range: [0.2, 0.6]
     },
     lightness: {
       range: [0, 1]
