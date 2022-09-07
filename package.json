@@ -1,96 +1,53 @@
 {
-  "name": "@escapace/typescript-library-starter",
+  "name": "@escapace/bruni-monorepo",
   "description": "",
   "version": "0.0.0",
   "author": "escapace <opensource@escapace.com>",
-  "bugs": "https://github.com/escapace/typescript-library-starter/issues",
-  "dependencies": {
-    "@types/lodash-es": "^4.17.6",
-    "colorjs.io": "^0.4.0",
-    "k-medoids": "^1.0.6",
-    "lodash-es": "^4.17.21",
-    "nanoid": "^4.0.0"
-  },
+  "bugs": "https://github.com/escapace/bruni/issues",
   "devDependencies": {
-    "@bjornlu/colorblind": "1.0.3",
     "@commitlint/cli": "17.1.2",
     "@commitlint/config-conventional": "17.1.0",
     "@ls-lint/ls-lint": "1.11.2",
-    "@shoelace-style/shoelace": "2.0.0-beta.82",
-    "@types/chai": "4.3.3",
-    "@types/mocha": "9.1.1",
-    "@types/node": "18.7.14",
-    "@typescript-eslint/eslint-plugin": "5.36.1",
-    "@typescript-eslint/parser": "5.36.1",
-    "@unocss/reset": "0.45.14",
-    "@vitejs/plugin-vue": "3.0.3",
-    "@vueuse/core": "9.1.1",
+    "@types/node": "18.7.16",
+    "@typescript-eslint/eslint-plugin": "5.36.2",
+    "@typescript-eslint/parser": "5.36.2",
     "arg": "5.0.2",
     "c8": "7.12.0",
     "chai": "4.3.6",
     "changelogithub": "0.12.4",
-    "esbuild": "0.15.6",
+    "esbuild": "0.15.7",
     "eslint": "8.23.0",
     "eslint-config-escapace": "3.14.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-editorconfig": "4.0.2",
     "eslint-plugin-no-null": "1.0.2",
-    "eslint-plugin-vue": "9.4.0",
     "execa": "6.1.0",
     "fast-glob": "3.2.11",
     "fs-extra": "10.1.0",
     "husky": "8.0.1",
     "is-ci": "3.0.1",
     "lint-staged": "13.0.3",
-    "mocha": "10.0.0",
-    "pinia": "2.0.21",
     "prettier": "2.7.1",
     "prettier-config-escapace": "1.0.4",
-    "rand-seed": "1.0.1",
     "semver": "7.3.7",
-    "simple-statistics": "7.7.6",
     "syncpack": "8.2.4",
-    "typescript": "4.8.2",
-    "unocss": "0.45.14",
-    "utility-types": "3.10.0",
-    "vite": "3.0.9",
-    "vue": "3.2.38",
-    "vue-router": "4",
-    "vue-tsc": "0.40.5"
+    "typescript": "4.8.2"
   },
   "engines": {
     "node": ">= 18.2.0",
     "pnpm": ">= 7.9.5"
   },
-  "exports": {
-    ".": {
-      "import": "./lib/esm/index.mjs",
-      "require": "./lib/cjs/index.cjs"
-    }
-  },
-  "files": [
-    "lib/cjs",
-    "lib/esm",
-    "lib/types"
-  ],
-  "homepage": "https://github.com/escapace/typescript-library-starter",
+  "homepage": "https://github.com/escapace/bruni",
   "license": "MPL-2.0",
-  "main": "lib/cjs/index.cjs",
-  "module": "lib/esm/index.mjs",
-  "private": false,
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": "https://github.com/escapace/typescript-library-starter.git",
+  "private": true,
+  "repository": "https://github.com/escapace/bruni.git",
   "scripts": {
-    "build": "node ./scripts/build.mjs",
-    "lint": "ls-lint && eslint --fix '{src,scripts}/**/*.{ts,js,vue}'",
+    "build": "pnpm run -r --filter './packages/*' build",
+    "lint": "ls-lint && pnpm run -r --filter './packages/*' lint",
     "prepare": "is-ci || husky install",
-    "release": "node ./scripts/release.mjs",
-    "test": "node ./scripts/test.mjs && c8 mocha --enable-source-maps 'lib/tests/**/*.spec.js'",
-    "typecheck": "vue-tsc --noEmit"
+    "release": "pnpm run -r --filter './packages/*' release",
+    "test": "pnpm run -r --filter './packages/*' test",
+    "typecheck": "pnpm run -r --filter './packages/*' typecheck"
   },
-  "sideEffects": false,
-  "type": "module",
-  "types": "lib/types/index.d.ts"
+  "type": "module"
 }

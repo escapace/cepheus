@@ -1,14 +1,15 @@
 {
   "compilerOptions": {
+    "allowJs": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
-    "declaration": true,
-    "declarationMap": true,
     "esModuleInterop": true,
+    "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "importHelpers": false,
     "isolatedModules": true,
-    "lib": ["esnext"],
+    "jsx": "preserve",
+    "lib": ["esnext", "dom"],
     "module": "esnext",
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
@@ -18,10 +19,12 @@
     "pretty": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
+    "sourceMap": true,
     "strict": true,
     "target": "esnext",
     "typeRoots": ["node_modules/@types"],
+    "types": ["vite/client"],
     "useDefineForClassFields": true
   },
-  "include": ["scripts"]
+  "exclude": ["lib", "node_modules"]
 }

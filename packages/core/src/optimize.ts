@@ -10,11 +10,11 @@ import {
   convert,
   deltaEOK,
   inGamut
-} from '../colorjs-io'
-import { clamp } from '../utilities/clamp'
-import { isWithin } from '../utilities/is-within'
-import { randomWithin } from '../utilities/random-within'
-import { relativeDifference } from '../utilities/relative-difference'
+} from '@escapace/bruni-color'
+import { clamp } from './utilities/clamp'
+import { isWithin } from './utilities/is-within'
+import { randomWithin } from './utilities/random-within'
+import { relativeDifference } from './utilities/relative-difference'
 
 // TODO: assert
 // 11.53
@@ -447,43 +447,59 @@ const normalizeOptions = (options: Options): RequiredOptions => {
   return value
 }
 
-export const optimize = (options: Options): Color[] => {
-  const normalizedOptions = normalizeOptions(options)
+enum TypeOptimizationResult {
+  Error,
+  Colors
+}
 
-  const n = normalizedOptions.colors.length
-  const colors: Color[] = map(range(n), () => randomColor(normalizedOptions))
+interface OptimizationResult {
+  type: TypeOptimizationResult
+}
+
+interface OptimizationResultColors extends OptimizationResult {
+  type: TypeOptimizationResult.Colors
+  colors: Color[]
+  cost: number
+}
+
+interface OptimizationResultError extends OptimizationResult {
+  type: TypeOptimizationResult.Error
+}
+
+type OptimizationResults = OptimizationResultColors | OptimizationResultError
+
+const iterate = (options: RequiredOptions) => {
+  const n = options.colors.length
+  const colors: Color[] = map(range(n), () => randomColor(options))
 
   const startColors = Array.from(colors)
-  const startCost = cost(normalizedOptions, startColors)
+  const startCost = cost(options, startColors)
 
   // intialize hyperparameters
-  let temperature = normalizedOptions.hyperparameters.temperature
+  let temperature = options.hyperparameters.temperature
 
   let bestCost: number = startCost
   let bestColors: Color[] = startColors
 
   // iteration loop
-  while (temperature > normalizedOptions.hyperparameters.cutoff) {
+  while (temperature > options.hyperparameters.cutoff) {
     // for each color
     for (let i = 0; i < colors.length; i++) {
       // copy old colors
       const newColors = [...colors]
       // move the current color randomly
-      newColors[i] = randomColor(normalizedOptions, newColors[i], temperature)
+      newColors[i] = randomColor(options, newColors[i], temperature)
       // choose between the current state and the new state
       // based on the difference between the two, the temperature
       // of the algorithm, and some random chance
-      const delta =
-        cost(normalizedOptions, newColors) - cost(normalizedOptions, colors)
+      const delta = cost(options, newColors) - cost(options, colors)
       const probability = Math.exp(-delta / temperature)
-      if (normalizedOptions.random() < probability) {
+      if (options.random() < probability) {
         colors[i] = newColors[i]
       }
     }
 
-    const current = cost(normalizedOptions, colors)
-
-    console.log(`Current cost: ${current}`)
+    const current = cost(options, colors)
 
     if (current < bestCost) {
       bestCost = current
@@ -491,12 +507,27 @@ export const optimize = (options: Options): Color[] => {
     }
 
     // decrease temperature
-    temperature *= normalizedOptions.hyperparameters.coolingRate
+    temperature *= options.hyperparameters.coolingRate
   }
 
-  console.log(`${((1 - bestCost / startCost) * 100).toFixed(2)}% Optimized`)
+  return { cost: bestCost, colors: bestColors }
+}
 
-  return bestColors
+export const optimize = (options: Options): OptimizationResults => {
+  const normalizedOptions = normalizeOptions(options)
+
+  try {
+    return {
+      type: TypeOptimizationResult.Colors,
+      ...iterate(normalizedOptions)
+    }
+  } catch (e) {
+    if (e instanceof IterationError) {
+      return { type: TypeOptimizationResult.Error }
+    }
+
+    throw e
+  }
 }
 
 // const run = () => {
