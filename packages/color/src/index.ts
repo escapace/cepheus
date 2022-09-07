@@ -1,4 +1,4 @@
-/// <reference path="colorjs-io.d.ts"/>
+import './colorjs-io.d'
 
 export {
   XYZ_D65,

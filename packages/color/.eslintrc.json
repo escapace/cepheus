@@ -3,8 +3,5 @@
     "warnOnUnsupportedTypeScriptVersion": false,
     "project": "./tsconfig.json"
   },
-  "env": {
-    "node": true
-  },
   "extends": ["escapace"]
 }

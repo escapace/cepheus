@@ -21,7 +21,10 @@
     "strict": true,
     "target": "esnext",
     "typeRoots": ["node_modules/@types"],
-    "useDefineForClassFields": true
+    "useDefineForClassFields": true,
+    "declarationDir": "lib/types",
+    "outDir": "lib/tsc",
+    "rootDir": "src"
   },
-  "include": ["scripts"]
+  "include": ["src"]
 }

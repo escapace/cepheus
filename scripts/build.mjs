@@ -3,19 +3,42 @@ import { execa } from 'execa'
 import fse from 'fs-extra'
 import { mkdir } from 'fs/promises'
 import path from 'path'
-import { cwd, target, external } from './constants.mjs'
+import process from 'process'
+import { cwd, external, version } from './constants.mjs'
+
+const tsconfig = fse.existsSync(path.join(cwd, 'tsconfig-build.json'))
+  ? path.join(cwd, 'tsconfig-build.json')
+  : path.join(cwd, 'tsconfig.json')
 
 const options = {
-  cjs: {
-    outdir: path.join(cwd, 'lib/cjs')
-  },
   esm: {
-    outdir: path.join(cwd, 'lib/esm')
+    outdir: path.join(cwd, 'lib/esm'),
+    tsconfig,
+    entryPoints: ['src/index.ts'],
+    splitting: false
+    /* splitting: name === 'yeux', */
+    /* name === 'yeux' */
+    /*   ? ['lib/tsc/index.js', 'lib/tsc/cli.js'] */
+    /*   : ['src/index.ts'] */
   }
 }
 
 process.umask(0o022)
 process.chdir(cwd)
+
+await fse.remove(path.join(cwd, 'lib'))
+
+await execa(
+  path.join(cwd, 'node_modules', '.bin', 'tsc'),
+  ['-p', path.relative(cwd, tsconfig)],
+  {
+    all: true,
+    cwd
+  }
+).catch((reason) => {
+  console.error(reason.all)
+  process.exit(reason.exitCode)
+})
 
 await Promise.all(
   Object.keys(options).map(async (format) => {
@@ -26,34 +49,17 @@ await Promise.all(
 
     await build({
       bundle: true,
-      entryPoints: ['src/index.ts'],
-      external: ['esbuild', ...external],
+      external,
       format,
+      define: {
+        VERSION: JSON.stringify(version)
+      },
       logLevel: 'info',
       outExtension: { '.js': `.${format === 'esm' ? 'mjs' : 'cjs'}` },
-      outbase: path.join(cwd, 'src'),
-      outdir,
+      splitting: options.splitting,
       platform: 'node',
       sourcemap: true,
-      target,
-      tsconfig: path.join(cwd, 'tsconfig-build.json')
+      ...options[format]
     })
   })
 )
-
-await fse.remove(path.join(cwd, 'lib/types'))
-
-await execa(
-  path.join(cwd, 'node_modules', '.bin', 'tsc'),
-  [
-    '-p',
-    './tsconfig-build.json',
-    '--emitDeclarationOnly',
-    '--declarationDir',
-    'lib/types'
-  ],
-  { all: true, cwd }
-).catch((reason) => {
-  console.error(reason.all)
-  process.exit(reason.exitCode)
-})
