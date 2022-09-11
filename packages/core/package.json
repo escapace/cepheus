@@ -4,9 +4,17 @@
   "version": "0.0.0",
   "author": "escapace <opensource@escapace.com>",
   "bugs": "https://github.com/escapace/bruni/issues",
-  "devDependencies": {
+  "dependencies": {
     "@bjornlu/colorblind": "1.0.3",
     "@escapace/bruni-color": "workspace:*",
+    "@sindresorhus/fnv1a": "3.0.0",
+    "@thi.ng/random": "3.3.7",
+    "lodash-es": "4.17.21",
+    "piscina": "3.2.0",
+    "simple-statistics": "7.7.6",
+    "utility-types": "3.10.0"
+  },
+  "devDependencies": {
     "@types/chai": "4.3.3",
     "@types/lodash-es": "4.17.6",
     "@types/mocha": "9.1.1",
@@ -20,29 +28,23 @@
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-editorconfig": "4.0.2",
     "eslint-plugin-no-null": "1.0.2",
-    "lodash-es": "4.17.21",
     "mocha": "10.0.0",
     "prettier": "2.7.1",
     "prettier-config-escapace": "1.0.4",
-    "rand-seed": "1.0.1",
-    "simple-statistics": "7.7.6",
-    "typescript": "4.8.2",
-    "utility-types": "3.10.0"
+    "tsx": "3.9.0",
+    "typescript": "4.8.2"
   },
   "exports": {
     ".": {
-      "import": "./lib/esm/index.mjs",
-      "require": "./lib/cjs/index.cjs"
+      "import": "./lib/esm/index.mjs"
     }
   },
   "files": [
-    "lib/cjs",
     "lib/esm",
     "lib/types"
   ],
   "homepage": "https://github.com/escapace/bruni",
   "license": "MPL-2.0",
-  "main": "lib/cjs/index.cjs",
   "module": "lib/esm/index.mjs",
   "private": false,
   "publishConfig": {
