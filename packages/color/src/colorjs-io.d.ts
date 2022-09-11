@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-extraneous-class */
+/* eslint-disable @typescript-eslint/naming-convention */
+
 declare module 'colorjs.io/fn' {
   export type ColorSpaceId =
     | 'a98rgb-linear'
@@ -30,36 +31,37 @@ declare module 'colorjs.io/fn' {
     | 'xyz-d50'
     | 'xyz-d65'
 
-  export class ColorSpace {
+  export abstract class ColorSpace {
+    id: ColorSpaceId
     static register(space: ColorSpace): void
     static get(id: ColorSpaceId): ColorSpace
   }
 
-  export class XYZ_D65 extends ColorSpace {}
-  export class XYZ_D50 extends ColorSpace {}
-  export class XYZ_ABS_D65 extends ColorSpace {}
-  export class Lab_D65 extends ColorSpace {}
-  export class Lab extends ColorSpace {}
-  export class LCH extends ColorSpace {}
-  export class sRGB_Linear extends ColorSpace {}
-  export class sRGB extends ColorSpace {}
-  export class HSL extends ColorSpace {}
-  export class HWB extends ColorSpace {}
-  export class HSV extends ColorSpace {}
-  export class P3_Linear extends ColorSpace {}
-  export class P3 extends ColorSpace {}
-  export class A98RGB_Linear extends ColorSpace {}
-  export class A98RGB extends ColorSpace {}
-  export class ProPhoto_Linear extends ColorSpace {}
-  export class ProPhoto extends ColorSpace {}
-  export class REC_2020_Linear extends ColorSpace {}
-  export class REC_2020 extends ColorSpace {}
-  export class OKLab extends ColorSpace {}
-  export class OKLCH extends ColorSpace {}
+  export const XYZ_D65: InstanceType<typeof ColorSpace>
+  export const XYZ_D50: InstanceType<typeof ColorSpace>
+  export const XYZ_ABS_D65: InstanceType<typeof ColorSpace>
+  export const Lab_D65: InstanceType<typeof ColorSpace>
+  export const Lab: InstanceType<typeof ColorSpace>
+  export const LCH: InstanceType<typeof ColorSpace>
+  export const sRGB_Linear: InstanceType<typeof ColorSpace>
+  export const sRGB: InstanceType<typeof ColorSpace>
+  export const HSL: InstanceType<typeof ColorSpace>
+  export const HWB: InstanceType<typeof ColorSpace>
+  export const HSV: InstanceType<typeof ColorSpace>
+  export const P3_Linear: InstanceType<typeof ColorSpace>
+  export const P3: InstanceType<typeof ColorSpace>
+  export const A98RGB_Linear: InstanceType<typeof ColorSpace>
+  export const A98RGB: InstanceType<typeof ColorSpace>
+  export const ProPhoto_Linear: InstanceType<typeof ColorSpace>
+  export const ProPhoto: InstanceType<typeof ColorSpace>
+  export const REC_2020_Linear: InstanceType<typeof ColorSpace>
+  export const REC_2020: InstanceType<typeof ColorSpace>
+  export const OKLab: InstanceType<typeof ColorSpace>
+  export const OKLCH: InstanceType<typeof ColorSpace>
 
   export interface Color {
     space: ColorSpace
-    coords: number[]
+    coords: [number, number, number]
     alpha: number
   }
 

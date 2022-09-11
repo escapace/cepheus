@@ -1,7 +1,4 @@
 import { Deficiency, simulate as simulateDeficiency } from '@bjornlu/colorblind'
-import { flatMap, map, mapValues, range } from 'lodash-es'
-import { errorFunction, mean, sample, sum, variance } from 'simple-statistics'
-import type { DeepRequired } from 'utility-types'
 import {
   clone,
   Color,
@@ -9,10 +6,19 @@ import {
   contrast,
   convert,
   deltaEOK,
-  inGamut
+  inGamut,
+  P3,
+  OKLCH,
+  sRGB
 } from '@escapace/bruni-color'
+import { ColorSpaceId } from 'colorjs.io/fn'
+import { flatMap, map, mapValues, range } from 'lodash-es'
+import { errorFunction, mean, sample, sum, variance } from 'simple-statistics'
+import type { DeepRequired } from 'utility-types'
 import { clamp } from './utilities/clamp'
+import { fixNaN } from './utilities/fix-nan'
 import { isWithin } from './utilities/is-within'
+import { createPRNG, PRNG, PRNGName } from './utilities/create-prng'
 import { randomWithin } from './utilities/random-within'
 import { relativeDifference } from './utilities/relative-difference'
 
@@ -28,38 +34,38 @@ export class IterationError extends Error {
   }
 }
 
-function randomColor(options: RequiredOptions): Color
+function randomColor(options: RequiredOptimizeOptions): Color
 function randomColor(
-  options: RequiredOptions,
+  options: RequiredOptimizeOptions,
   color: Color,
   temperature: number
 ): Color
 function randomColor(
-  options: RequiredOptions,
+  options: RequiredOptimizeOptions,
   color?: Color,
   temperature?: number
 ): Color {
   const next = (): Color => {
     if (color === undefined) {
       return {
-        space: ColorSpace.get('oklch'),
+        space: OKLCH,
         coords: [
           randomWithin(
             options.lightness.range[0],
             options.lightness.range[1],
-            options.random
+            options.prng
           ),
           randomWithin(
             options.chroma.range[0],
             options.chroma.range[1],
-            options.random
+            options.prng
           ),
-          randomWithin(0, 360, options.random)
+          randomWithin(0, 360, options.prng)
         ],
         alpha: 1
       }
     } else {
-      const index = sample([0, 1, 2], 1, options.random)[0]
+      const index = sample([0, 1, 2], 1, () => options.prng.float())[0]
 
       const value = clone(color)
 
@@ -77,7 +83,7 @@ function randomColor(
             percentage,
             options.lightness.range[0],
             options.lightness.range[1],
-            options.random
+            options.prng
           )
 
           break
@@ -87,7 +93,7 @@ function randomColor(
             percentage,
             options.chroma.range[0],
             options.chroma.range[1],
-            options.random
+            options.prng
           )
 
           break
@@ -97,7 +103,7 @@ function randomColor(
             percentage,
             0,
             360,
-            options.random
+            options.prng
           )
 
           break
@@ -145,7 +151,7 @@ const distances = (colors: Color[], deficiency?: Deficiency) => {
       return color
     }
 
-    const sRGBColor = convert(color, 'srgb', { inGamut: true })
+    const sRGBColor = convert(color, sRGB, { inGamut: true })
 
     const { r, g, b } = simulateDeficiency(
       {
@@ -162,27 +168,21 @@ const distances = (colors: Color[], deficiency?: Deficiency) => {
       { r, g, b }
     )
 
-    const result = convert(
-      {
-        space: ColorSpace.get('srgb'),
-        coords: map([r, g, b], (value) => value / 255.0),
-        alpha: 1
-      },
-      'oklch',
-      { inGamut: true }
+    return fixNaN(
+      convert(
+        {
+          space: sRGB,
+          coords: map([r, g, b], (value) => value / 255.0) as [
+            number,
+            number,
+            number
+          ],
+          alpha: 1
+        },
+        sRGB,
+        { inGamut: true }
+      )
     )
-
-    result.coords = map(result.coords, (value) => {
-      if (isNaN(value)) {
-        /* console.warn(`NaN for [${r}, ${g}, ${b}]`) */
-
-        return 0
-      }
-
-      return value
-    })
-
-    return result
   })
 
   for (let i = 0; i < colors.length; i++) {
@@ -195,7 +195,7 @@ const distances = (colors: Color[], deficiency?: Deficiency) => {
 }
 
 // Cost function including weights
-const cost = (options: RequiredOptions, state: Color[]) => {
+const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
   // average of the distance from target colors
   const differenceScore = mean(
     map(state, (c, index) => distance(c, options.colors[index]))
@@ -298,22 +298,19 @@ const percentile = (
   percent: number,
   min: number,
   max: number,
-  randomSource: () => number
+  prng: PRNG
 ) => {
   const value = percent * (max - min)
 
-  return clamp(
-    current + randomWithin(-1.0 * value, value, randomSource),
-    min,
-    max
-  )
+  return clamp(current + randomWithin(-1.0 * value, value, prng), min, max)
 }
 
-interface Options {
-  random: () => number
-  colors: Color[]
-  background: Color
-  colorSpace?: ColorSpace
+export interface OptimizeOptions {
+  randomSeed: string
+  randomSource?: PRNGName
+  colors: Array<[number, number, number]>
+  background: [number, number, number]
+  colorSpace?: ColorSpaceId
   hyperparameters?: {
     temperature: number
     coolingRate: number
@@ -351,50 +348,85 @@ interface Options {
   }
 }
 
-type RequiredOptions = DeepRequired<Options>
+export type RequiredOptimizeOptions = DeepRequired<
+  Omit<
+    OptimizeOptions,
+    'colorSpace' | 'colors' | 'background' | 'randomSeed' | 'randomSource'
+  >
+> & {
+  prng: PRNG
+  colorSpace: ColorSpace
+  colors: Color[]
+  background: Color
+}
 
 const normalizeWeights = (
-  weights: Required<Exclude<Options['weights'], undefined>>
-): Required<Exclude<Options['weights'], undefined>> => {
+  weights: Required<Exclude<OptimizeOptions['weights'], undefined>>
+): Required<Exclude<OptimizeOptions['weights'], undefined>> => {
   const total = sum(Object.values(weights))
 
   return mapValues(weights, (value) => value / total)
 }
 
+const normalizeLightness = (
+  value: Required<Exclude<OptimizeOptions['lightness'], undefined>>
+): Required<Exclude<OptimizeOptions['lightness'], undefined>> => ({
+  range: map(value.range, (v) => v / 100) as [number, number],
+  target: value.target / 100
+})
+
 const normalizeChroma = (
-  value: Required<Exclude<Options['chroma'], undefined>>
-): Required<Exclude<Options['chroma'], undefined>> => ({
-  range: map(value.range, (v) => v * 0.4) as [number, number],
-  target: value.target * 0.4
+  value: Required<Exclude<OptimizeOptions['chroma'], undefined>>
+): Required<Exclude<OptimizeOptions['chroma'], undefined>> => ({
+  range: map(value.range, (v) => (v / 100) * 0.4) as [number, number],
+  target: (value.target / 100) * 0.4
 })
 
 const normalizeContrast = (
-  value: Required<Exclude<Options['contrast'], undefined>>,
+  value: Required<Exclude<OptimizeOptions['contrast'], undefined>>,
   isDarkMode: boolean
-): Required<Exclude<Options['contrast'], undefined>> => ({
-  range: map(value.range, (v) => v * (isDarkMode ? 108 : 106)) as [
+): Required<Exclude<OptimizeOptions['contrast'], undefined>> => ({
+  range: map(value.range, (v) => (v / 100) * (isDarkMode ? 108 : 106)) as [
     number,
     number
   ],
-  target: value.target * (isDarkMode ? 108 : 106)
+  target: (value.target / 100) * (isDarkMode ? 108 : 106)
 })
 
-const normalizeOptions = (options: Options): RequiredOptions => {
-  const colors = map(options.colors, (value) =>
-    convert(value, 'oklch', { inGamut: true })
+const normalizeOptions = (
+  options: OptimizeOptions
+): RequiredOptimizeOptions => {
+  const colors = map(
+    options.colors,
+    (coords): Color =>
+      fixNaN({
+        space: OKLCH,
+        coords,
+        alpha: 1
+      })
   )
-  const background = convert(options.background, 'oklch', { inGamut: true })
+
+  const background: Color = fixNaN({
+    space: OKLCH,
+    coords: options.background,
+    alpha: 1
+  })
 
   const isDarkMode =
     mean(
       map(colors, (value) => contrast(background, value, { algorithm: 'APCA' }))
     ) < 0
 
+  const prng = createPRNG(options.randomSeed, options.randomSource)
+
+  const colorSpace =
+    options.colorSpace !== undefined ? ColorSpace.get(options.colorSpace) : P3
+
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const value = {
     colors,
     background,
-    random: options.random,
+    prng,
     hyperparameters: {
       temperature: 2000,
       coolingRate: 0.99,
@@ -415,26 +447,26 @@ const normalizeOptions = (options: Options): RequiredOptions => {
       contrast: 5,
       ...options.weights
     }),
-    colorSpace: options.colorSpace ?? ColorSpace.get('p3'),
-    lightness: {
-      range: [0, 1],
+    colorSpace,
+    lightness: normalizeLightness({
+      range: [0, 100],
       target: mean(options.lightness?.range ?? [0, 1]),
       ...options.lightness
-    },
+    }),
     chroma: normalizeChroma({
-      range: [0, 1],
-      target: mean(options.chroma?.range ?? [0, 1]),
+      range: [0, 100],
+      target: mean(options.chroma?.range ?? [0, 100]),
       ...options.chroma
     }),
     contrast: normalizeContrast(
       {
-        range: [0, 1],
-        target: mean(options.contrast?.range ?? [0, 1]),
+        range: [0, 100],
+        target: mean(options.contrast?.range ?? [0, 100]),
         ...options.contrast
       },
       isDarkMode
     )
-  } as RequiredOptions
+  } as RequiredOptimizeOptions
 
   ;(['lightness', 'chroma', 'contrast'] as const).forEach((key) => {
     if (
@@ -458,7 +490,7 @@ interface OptimizationResult {
 
 interface OptimizationResultColors extends OptimizationResult {
   type: TypeOptimizationResult.Colors
-  colors: Color[]
+  colors: number[][]
   cost: number
 }
 
@@ -468,7 +500,7 @@ interface OptimizationResultError extends OptimizationResult {
 
 type OptimizationResults = OptimizationResultColors | OptimizationResultError
 
-const iterate = (options: RequiredOptions) => {
+const iterate = (options: RequiredOptimizeOptions) => {
   const n = options.colors.length
   const colors: Color[] = map(range(n), () => randomColor(options))
 
@@ -494,7 +526,7 @@ const iterate = (options: RequiredOptions) => {
       // of the algorithm, and some random chance
       const delta = cost(options, newColors) - cost(options, colors)
       const probability = Math.exp(-delta / temperature)
-      if (options.random() < probability) {
+      if (options.prng.float() < probability) {
         colors[i] = newColors[i]
       }
     }
@@ -510,10 +542,13 @@ const iterate = (options: RequiredOptions) => {
     temperature *= options.hyperparameters.coolingRate
   }
 
-  return { cost: bestCost, colors: bestColors }
+  return { cost: bestCost, colors: bestColors.map((value) => value.coords) }
 }
 
-export const optimize = (options: Options): OptimizationResults => {
+export const optimize = (options: OptimizeOptions): OptimizationResults => {
+  ColorSpace.register(OKLCH)
+  ColorSpace.register(sRGB)
+
   const normalizedOptions = normalizeOptions(options)
 
   try {

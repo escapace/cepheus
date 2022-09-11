@@ -4,7 +4,7 @@ import fse from 'fs-extra'
 import { mkdir } from 'fs/promises'
 import path from 'path'
 import process from 'process'
-import { cwd, external, version } from './constants.mjs'
+import { cwd, external, version, name } from './constants.mjs'
 
 const tsconfig = fse.existsSync(path.join(cwd, 'tsconfig-build.json'))
   ? path.join(cwd, 'tsconfig-build.json')
@@ -14,9 +14,11 @@ const options = {
   esm: {
     outdir: path.join(cwd, 'lib/esm'),
     tsconfig,
-    entryPoints: ['src/index.ts'],
-    splitting: false
-    /* splitting: name === 'yeux', */
+    entryPoints:
+      name === 'core'
+        ? ['src/index.ts', 'src/worker.ts', 'src/cli.ts']
+        : ['src/index.ts'],
+    splitting: name === 'core'
     /* name === 'yeux' */
     /*   ? ['lib/tsc/index.js', 'lib/tsc/cli.js'] */
     /*   : ['src/index.ts'] */
@@ -30,7 +32,12 @@ await fse.remove(path.join(cwd, 'lib'))
 
 await execa(
   path.join(cwd, 'node_modules', '.bin', 'tsc'),
-  ['-p', path.relative(cwd, tsconfig)],
+  [
+    '-p',
+    path.relative(cwd, tsconfig),
+    '--declaration',
+    '--emitDeclarationOnly'
+  ],
   {
     all: true,
     cwd
