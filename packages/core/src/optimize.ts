@@ -7,6 +7,7 @@ import {
   convert,
   deltaEOK,
   inGamut,
+  LCH,
   P3,
   OKLCH,
   sRGB
@@ -266,27 +267,33 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
       )
     )
 
-  if (
-    [
-      contrastScore,
-      deuteranopiaScore,
-      differenceScore,
-      dispersionScore,
-      normalScore,
-      protanopiaScore,
-      tritanopiaScore
-    ].some((value) => value > 1 || value < 0 || isNaN(value))
-  ) {
-    throw new Error('Out of bounds.')
+  const issues = Object.entries({
+    chromaScore,
+    contrastScore,
+    deuteranopiaScore,
+    differenceScore,
+    dispersionScore,
+    lightnessScore,
+    normalScore,
+    protanopiaScore,
+    tritanopiaScore
+  }).filter(([_, value]) => value > 1 || value < 0 || isNaN(value))
+
+  if (issues.length !== 0) {
+    throw new Error(
+      `Out of bounds: ${issues
+        .map(([key, value]) => `${key}=${value}`)
+        .join(', ')}.`
+    )
   }
 
   return (
     options.weights.chroma * chromaScore +
-    options.weights.lightness * lightnessScore +
     options.weights.contrast * contrastScore +
     options.weights.deuteranopia * deuteranopiaScore +
     options.weights.difference * differenceScore +
     options.weights.dispersion * dispersionScore +
+    options.weights.lightness * lightnessScore +
     options.weights.normal * normalScore +
     options.weights.protanopia * protanopiaScore +
     options.weights.tritanopia * tritanopiaScore
@@ -436,15 +443,15 @@ const normalizeOptions = (
     weights: normalizeWeights({
       difference: 200,
       dispersion: 80,
+      // coords
+      lightness: 15,
+      chroma: 15,
+      contrast: 15,
       // color-vision
       normal: 20,
       protanopia: 10,
       tritanopia: 10,
       deuteranopia: 10,
-      // coords
-      lightness: 5,
-      chroma: 5,
-      contrast: 5,
       ...options.weights
     }),
     colorSpace,
@@ -479,26 +486,34 @@ const normalizeOptions = (
   return value
 }
 
-enum TypeOptimizationResult {
-  Error,
-  Colors
+export const enum TypeOptimizationState {
+  Pending,
+  Rejected,
+  Fulfilled
 }
 
-interface OptimizationResult {
-  type: TypeOptimizationResult
+interface IOptimizationState {
+  type: TypeOptimizationState
 }
 
-interface OptimizationResultColors extends OptimizationResult {
-  type: TypeOptimizationResult.Colors
+export interface OptimizationStateFulfilled extends IOptimizationState {
+  type: TypeOptimizationState.Fulfilled
   colors: number[][]
   cost: number
 }
 
-interface OptimizationResultError extends OptimizationResult {
-  type: TypeOptimizationResult.Error
+export interface OptimizationStateRejected extends IOptimizationState {
+  type: TypeOptimizationState.Rejected
 }
 
-type OptimizationResults = OptimizationResultColors | OptimizationResultError
+export interface OptimizationStatePending extends IOptimizationState {
+  type: TypeOptimizationState.Pending
+}
+
+export type OptimizationState =
+  | OptimizationStateFulfilled
+  | OptimizationStateRejected
+  | OptimizationStatePending
 
 const iterate = (options: RequiredOptimizeOptions) => {
   const n = options.colors.length
@@ -542,10 +557,12 @@ const iterate = (options: RequiredOptimizeOptions) => {
     temperature *= options.hyperparameters.coolingRate
   }
 
+  // TODO: return denormalized lightness chroma contrast
   return { cost: bestCost, colors: bestColors.map((value) => value.coords) }
 }
 
-export const optimize = (options: OptimizeOptions): OptimizationResults => {
+export const optimize = (options: OptimizeOptions): OptimizationState => {
+  ColorSpace.register(LCH)
   ColorSpace.register(OKLCH)
   ColorSpace.register(sRGB)
 
@@ -553,12 +570,12 @@ export const optimize = (options: OptimizeOptions): OptimizationResults => {
 
   try {
     return {
-      type: TypeOptimizationResult.Colors,
+      type: TypeOptimizationState.Fulfilled,
       ...iterate(normalizedOptions)
     }
   } catch (e) {
     if (e instanceof IterationError) {
-      return { type: TypeOptimizationResult.Error }
+      return { type: TypeOptimizationState.Rejected }
     }
 
     throw e

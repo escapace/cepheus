@@ -1,13 +1,16 @@
 import fnv1a from '@sindresorhus/fnv1a'
-import { SFC32, Xoshiro128 } from '@thi.ng/random'
+import { SFC32, Xoshiro128, XorShift128, XorWow } from '@thi.ng/random'
+import type { ValuesType } from 'utility-types'
 
 const RANDOM_SOURCES = {
-  xoshiro128: Xoshiro128,
+  'xoshiro128++': Xoshiro128,
+  xorshift128: XorShift128,
+  xorwow: XorWow,
   sfc32: SFC32
 }
 
 export type PRNGName = keyof typeof RANDOM_SOURCES
-export type PRNG = Xoshiro128 | SFC32
+export type PRNG = InstanceType<ValuesType<typeof RANDOM_SOURCES>>
 
 const EMPTY_FNV1A = Number(fnv1a('', { size: 32 }))
 
@@ -30,7 +33,7 @@ export const split = (string: string) => {
 
 export const createPRNG = (
   randomSeed: string,
-  randomSource: PRNGName = 'xoshiro128'
+  randomSource: PRNGName = 'xoshiro128++'
 ): PRNG => {
   return new RANDOM_SOURCES[randomSource](split(randomSeed))
 }
