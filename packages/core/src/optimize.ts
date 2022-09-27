@@ -16,15 +16,13 @@ import { ColorSpaceId } from 'colorjs.io/fn'
 import { flatMap, map, mapValues, range } from 'lodash-es'
 import { errorFunction, mean, sample, sum, variance } from 'simple-statistics'
 import type { DeepRequired } from 'utility-types'
-import { clamp } from './utilities/clamp'
 import { fixNaN } from './utilities/fix-nan'
 import { isWithin } from './utilities/is-within'
 import { createPRNG, PRNG, PRNGName } from './utilities/create-prng'
 import { randomWithin } from './utilities/random-within'
 import { relativeDifference } from './utilities/relative-difference'
-
-// TODO: assert
-// 11.53
+import { percentile } from './utilities/percentile'
+import { constrainAngle } from './utilities/constrain-angle'
 
 export class IterationError extends Error {
   constructor(message: string) {
@@ -38,16 +36,18 @@ export class IterationError extends Error {
 function randomColor(options: RequiredOptimizeOptions): Color
 function randomColor(
   options: RequiredOptimizeOptions,
-  color: Color,
+  colors: Color[],
+  colorIndex: number,
   temperature: number
 ): Color
 function randomColor(
   options: RequiredOptimizeOptions,
-  color?: Color,
+  colors?: Color[],
+  colorIndex?: number,
   temperature?: number
 ): Color {
   const next = (): Color => {
-    if (color === undefined) {
+    if (colors === undefined || colorIndex === undefined) {
       return {
         space: OKLCH,
         coords: [
@@ -68,7 +68,7 @@ function randomColor(
     } else {
       const index = sample([0, 1, 2], 1, () => options.prng.float())[0]
 
-      const value = clone(color)
+      const value = clone(colors[colorIndex])
 
       const percentage =
         0.05 +
@@ -99,12 +99,14 @@ function randomColor(
 
           break
         case 2:
-          value.coords[index] = percentile(
-            value.coords[index],
-            percentage,
-            0,
-            360,
-            options.prng
+          value.coords[index] = constrainAngle(
+            percentile(
+              value.coords[index],
+              percentage,
+              options.colors[colorIndex].coords[2] - 30,
+              options.colors[colorIndex].coords[2] + 30,
+              options.prng
+            )
           )
 
           break
@@ -163,11 +165,9 @@ const distances = (colors: Color[], deficiency?: Deficiency) => {
       deficiency
     )
 
-    console.assert(
-      !(isNaN(r) || isNaN(g) || isNaN(b)),
-      `${deficiency} outputs NaN`,
-      { r, g, b }
-    )
+    if (isNaN(r) || isNaN(g) || isNaN(b)) {
+      throw new Error(`${deficiency} outputs NaN`)
+    }
 
     return fixNaN(
       convert(
@@ -298,18 +298,6 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
     options.weights.protanopia * protanopiaScore +
     options.weights.tritanopia * tritanopiaScore
   )
-}
-
-const percentile = (
-  current: number,
-  percent: number,
-  min: number,
-  max: number,
-  prng: PRNG
-) => {
-  const value = percent * (max - min)
-
-  return clamp(current + randomWithin(-1.0 * value, value, prng), min, max)
 }
 
 export interface OptimizeOptions {
@@ -531,18 +519,18 @@ const iterate = (options: RequiredOptimizeOptions) => {
   // iteration loop
   while (temperature > options.hyperparameters.cutoff) {
     // for each color
-    for (let i = 0; i < colors.length; i++) {
+    for (let index = 0; index < colors.length; index++) {
       // copy old colors
       const newColors = [...colors]
       // move the current color randomly
-      newColors[i] = randomColor(options, newColors[i], temperature)
+      newColors[index] = randomColor(options, newColors, index, temperature)
       // choose between the current state and the new state
       // based on the difference between the two, the temperature
       // of the algorithm, and some random chance
       const delta = cost(options, newColors) - cost(options, colors)
       const probability = Math.exp(-delta / temperature)
       if (options.prng.float() < probability) {
-        colors[i] = newColors[i]
+        colors[index] = newColors[index]
       }
     }
 
