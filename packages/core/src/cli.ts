@@ -133,7 +133,7 @@ const run = async () => {
     process.exit(1)
   }
 
-  if (args._.length >= 0) {
+  if (args._.length !== 0) {
     console.log(HELP)
     process.exit(1)
   }
@@ -164,7 +164,7 @@ const run = async () => {
     const done = rejected + fulfilled
     const total = pending + done
 
-    spinner.text = `lookup table ${done}/${total}`
+    spinner.text = `Palette optimization ${done}/${total}, rejected ${rejected}`
   }
 
   updateSpinner()
