@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/promise-function-async */
 import {
   ColorSpace,
   HSL,
@@ -11,48 +12,29 @@ import {
 import { setMaxListeners } from 'events'
 import { assign, isError, map } from 'lodash-es'
 import Piscina from 'piscina'
-import { OptimizationState } from './optimize'
-import { createStore, StoreOptions, Task } from './store'
+import { createStore } from './store'
+import {
+  BruniState,
+  BruniStateOptimizationAbort,
+  BruniStateOptimizationDone,
+  BruniStateOptimizationError,
+  OptimizationState,
+  StoreOptions,
+  Task,
+  TypeBruniState
+} from './types'
 
-ColorSpace.register(HSL)
-ColorSpace.register(HSV)
-ColorSpace.register(P3)
-ColorSpace.register(OKLab)
-ColorSpace.register(OKLCH)
-ColorSpace.register(sRGB)
-ColorSpace.register(LCH)
+export {
+  TypeBruniState,
+  type BruniState,
+  type BruniStateDone,
+  type BruniStateNone,
+  type BruniStateOptimizationDone,
+  type BruniStateOptimizationAbort,
+  type BruniStateOptimizationError
+} from './types'
 
-export enum TypeBruniState {
-  None,
-  Done,
-  Error,
-  Abort
-}
-
-export interface BruniStateNone {
-  type: TypeBruniState.None
-}
-
-export interface BruniStateDone {
-  type: TypeBruniState.Done
-}
-
-export interface BruniStateError {
-  type: TypeBruniState.Error
-  error: unknown
-}
-
-export interface BruniStateAbort {
-  type: TypeBruniState.Abort
-}
-
-export type BruniState =
-  | BruniStateNone
-  | BruniStateDone
-  | BruniStateError
-  | BruniStateAbort
-
-export interface Options extends StoreOptions {
+export interface BruniOptions extends StoreOptions {
   initialState?: Record<string, Task>
 }
 
@@ -61,7 +43,15 @@ export interface BruniReturnType extends PromiseLike<BruniState> {
   store: ReturnType<typeof createStore>
 }
 
-export const bruni = (options: Options): BruniReturnType => {
+export const bruni = (options: BruniOptions): BruniReturnType => {
+  ColorSpace.register(HSL)
+  ColorSpace.register(HSV)
+  ColorSpace.register(P3)
+  ColorSpace.register(OKLab)
+  ColorSpace.register(OKLCH)
+  ColorSpace.register(sRGB)
+  ColorSpace.register(LCH)
+
   const store = createStore(options, options.initialState)
 
   const tasks = store.tasksPending()
@@ -73,34 +63,45 @@ export const bruni = (options: Options): BruniReturnType => {
   const abortController = new AbortController()
   setMaxListeners(0, abortController.signal)
 
-  const log: BruniState[] = [{ type: TypeBruniState.None }]
+  const promise = store
+    .actionUpdateStage({ type: TypeBruniState.None })
+    .then(() =>
+      Promise.all(
+        map(Object.entries(tasks), async ([key, task]) => {
+          const state = (await piscina.run(task.options, {
+            name: 'optimize',
+            signal: abortController.signal
+          })) as OptimizationState
 
-  const promise: Promise<BruniState> = Promise.all(
-    map(Object.entries(tasks), async ([key, task]) => {
-      const state = (await piscina.run(task.options, {
-        name: 'optimize',
-        signal: abortController.signal
-      })) as OptimizationState
-
-      await store.updateTask(key, state)
+          await store.actionUpdateTask(key, state)
+        })
+      )
+    )
+    .then((): BruniStateOptimizationDone => {
+      return { type: TypeBruniState.OptimizationDone }
     })
-  )
-    .then(() => {
-      log.unshift({ type: TypeBruniState.Done })
-    })
-    .catch((error) => {
-      if (isError(error) && error.name === 'AbortError') {
-        log.unshift({ type: TypeBruniState.Abort })
-      } else {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        log.unshift({ type: TypeBruniState.Error, error })
+    .catch(
+      (error): BruniStateOptimizationAbort | BruniStateOptimizationError => {
+        if (isError(error) && error.name === 'AbortError') {
+          return { type: TypeBruniState.OptimizationAbort }
+        } else {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          return { type: TypeBruniState.OptimizationError, error }
+        }
       }
-    })
-    .then(async () => {
-      await piscina.destroy()
-
-      return log[0]
-    })
+    )
+    .then(async (value) => await store.actionUpdateStage(value))
+    .then(async () => await piscina.destroy())
+    .then(
+      async () =>
+        await store.actionUpdateStage({
+          type: TypeBruniState.Done
+          // value: Array.from(store.cubes().entries()).map(([num, task]) => {
+          //   return [num, task.state.colors]
+          // })
+        })
+    )
+    .then(() => store.state())
 
   return assign(promise, {
     promise,
