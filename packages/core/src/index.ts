@@ -17,7 +17,7 @@ import {
   BruniState,
   BruniStateOptimizationAbort,
   BruniStateOptimizationDone,
-  BruniStateOptimizationError,
+  BruniStateError,
   OptimizationState,
   StoreOptions,
   Task,
@@ -31,7 +31,7 @@ export {
   type BruniStateNone,
   type BruniStateOptimizationDone,
   type BruniStateOptimizationAbort,
-  type BruniStateOptimizationError
+  type BruniStateError as BruniStateOptimizationError
 } from './types'
 
 export interface BruniOptions extends StoreOptions {
@@ -80,27 +80,29 @@ export const bruni = (options: BruniOptions): BruniReturnType => {
     .then((): BruniStateOptimizationDone => {
       return { type: TypeBruniState.OptimizationDone }
     })
-    .catch(
-      (error): BruniStateOptimizationAbort | BruniStateOptimizationError => {
-        if (isError(error) && error.name === 'AbortError') {
-          return { type: TypeBruniState.OptimizationAbort }
-        } else {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          return { type: TypeBruniState.OptimizationError, error }
-        }
+    .catch((error): BruniStateOptimizationAbort | BruniStateError => {
+      if (isError(error) && error.name === 'AbortError') {
+        return { type: TypeBruniState.OptimizationAbort }
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        return { type: TypeBruniState.Error, error }
       }
-    )
+    })
     .then(async (value) => await store.actionUpdateStage(value))
     .then(async () => await piscina.destroy())
-    .then(
-      async () =>
-        await store.actionUpdateStage({
-          type: TypeBruniState.Done
-          // value: Array.from(store.cubes().entries()).map(([num, task]) => {
-          //   return [num, task.state.colors]
-          // })
+    .then(async () => {
+      if (Array.from(store.cubes()).length > 0) {
+        return await store.actionUpdateStage({
+          type: TypeBruniState.Done,
+          model: store.model()
         })
-    )
+      }
+
+      return await store.actionUpdateStage({
+        type: TypeBruniState.Error,
+        error: 'No cubes available.'
+      })
+    })
     .then(() => store.state())
 
   return assign(promise, {

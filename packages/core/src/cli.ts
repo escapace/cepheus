@@ -1,7 +1,7 @@
 import arg from 'arg'
 import { readFileSync } from 'fs'
 import { readFile, writeFile } from 'fs/promises'
-import { isInteger, isString } from 'lodash-es'
+import { isError, isInteger, isString } from 'lodash-es'
 import ora from 'ora'
 import path, { resolve } from 'path'
 import { INTERVAL, Task, TypeBruniState } from './types'
@@ -184,7 +184,7 @@ const run = async () => {
       case TypeBruniState.OptimizationAbort:
         spinner.fail()
         break
-      case TypeBruniState.OptimizationError:
+      case TypeBruniState.Error:
         spinner.fail()
         break
     }
@@ -210,24 +210,29 @@ const run = async () => {
       case TypeBruniState.OptimizationAbort:
         updateSpinnerOptimization(type)
         break
-      case TypeBruniState.OptimizationError:
+      case TypeBruniState.Error:
         updateSpinnerOptimization(type)
         break
     }
   })
 
-  return await instance.then(() => {
+  return await instance.then(async () => {
     spinner.stop()
     instance.store.clearListeners()
 
     const state = instance.store.state()
 
     if (state.type === TypeBruniState.Done) {
-      // await writeFile(
-      //   path.resolve(process.cwd(), output),
-      //   JSON.stringify(instance.store.model()),
-      //   'utf8'
-      // )
+      spinner.start(`Writing '${path.relative(process.cwd(), output)}'`)
+
+      await writeFile(
+        path.resolve(process.cwd(), output),
+        JSON.stringify(instance.store.model()),
+        'utf8'
+      )
+
+      spinner.succeed()
+      spinner.stop()
 
       const stats = instance.store.stats()
 
@@ -244,7 +249,15 @@ const run = async () => {
           80
         )
       )
-    } else {
+    } else if (state.type === TypeBruniState.Error) {
+      const error = state.error
+
+      if (isString(error)) {
+        console.error(`${chalk.bgRed('ERROR')} ${error}`)
+      } else if (isError(error)) {
+        console.error(`${chalk.bgRed('ERROR')} ${error.message}`)
+      }
+
       process.exit(1)
     }
 

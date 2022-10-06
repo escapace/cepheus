@@ -14,6 +14,7 @@ import {
   BruniState,
   Cube,
   INTERVAL,
+  Model,
   OptimizationState,
   OptimizationStateFulfilled,
   OptimizationStatePending,
@@ -30,9 +31,15 @@ import { hash } from './utilities/hash'
 import { objectHash } from './utilities/object-hash'
 import { szudzik, unszudzik } from './utilities/szudzik'
 
-const fromXYZ = (value: [number, number, number]): number => szudzik(...value)
-const toXYZ = (value: number): [number, number, number] =>
-  unszudzik(value, 3) as [number, number, number]
+const fromXYZ = (value: [number, number, number], interval: number): number =>
+  szudzik(...value.map((v) => v / interval))
+
+const toXYZ = (cube: Cube): [number, number, number] =>
+  unszudzik(cube.position, 3).map((v) => v * cube.interval) as [
+    number,
+    number,
+    number
+  ]
 
 const tile = (interval: INTERVAL = 50): Cube[] => {
   const distribution = range(0, 100, interval)
@@ -40,13 +47,13 @@ const tile = (interval: INTERVAL = 50): Cube[] => {
   return cartesianProduct(distribution, distribution, distribution).map(
     (value): Cube => ({
       interval,
-      position: fromXYZ(value as [number, number, number])
+      position: fromXYZ(value as [number, number, number], interval)
     })
   )
 }
 
 const rangeFrom = (cube: Cube) => {
-  const positions = toXYZ(cube.position)
+  const positions = toXYZ(cube)
 
   const [lightness, chroma, contrast] = range(3).map((_, index) => {
     const range = [positions[index], positions[index] + cube.interval] as [
@@ -328,6 +335,21 @@ export const createStore = (
     }
   }
 
+  const selectorModel = (): Model => {
+    const cubes = Array.from(selectorCubes().entries()).map(
+      ([position, task]): [number, Array<[number, number, number]>] => {
+        return [position, task.state.colors]
+      }
+    )
+
+    const interval = storeOptions.interval
+
+    return {
+      cubes,
+      interval
+    }
+  }
+
   const state = () => log[0]
 
   const store = {
@@ -338,6 +360,7 @@ export const createStore = (
     tasksCount: selectorTasksCount,
     cubes: selectorCubes,
     stats: selectorStats,
+    model: selectorModel,
     state,
     actionUpdateTask,
     actionUpdateStage

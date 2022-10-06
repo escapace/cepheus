@@ -20,9 +20,9 @@ export interface Task<T extends OptimizationState = OptimizationState> {
 export enum TypeBruniState {
   None,
   OptimizationDone,
-  OptimizationError,
   OptimizationAbort,
-  Done
+  Done,
+  Error
 }
 
 export interface BruniStateNone {
@@ -33,24 +33,25 @@ export interface BruniStateOptimizationDone {
   type: TypeBruniState.OptimizationDone
 }
 
-export interface BruniStateOptimizationError {
-  type: TypeBruniState.OptimizationError
-  error: unknown
-}
-
 export interface BruniStateOptimizationAbort {
   type: TypeBruniState.OptimizationAbort
 }
 
 export interface BruniStateDone {
   type: TypeBruniState.Done
+  model: Model
+}
+
+export interface BruniStateError {
+  type: TypeBruniState.Error
+  error: unknown
 }
 
 export type BruniState =
   | BruniStateNone
   | BruniStateOptimizationDone
-  | BruniStateOptimizationError
   | BruniStateOptimizationAbort
+  | BruniStateError
   | BruniStateDone
 
 export interface StoreOptions
@@ -160,3 +161,8 @@ export type OptimizationState =
   | OptimizationStateFulfilled
   | OptimizationStateRejected
   | OptimizationStatePending
+
+export interface Model {
+  cubes: Array<[number, Array<[number, number, number]>]>
+  interval: INTERVAL
+}
