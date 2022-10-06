@@ -4,8 +4,9 @@ import { readFile, writeFile } from 'fs/promises'
 import { isInteger, isString } from 'lodash-es'
 import ora from 'ora'
 import path, { resolve } from 'path'
-import { INTERVAL, Task } from './store'
+import { INTERVAL, Task, TypeBruniState } from './types'
 import chalk from 'chalk'
+import wrap from 'wrap-ansi'
 
 const HELP = `${chalk.bold('Usage:')}
   bruni --seed <string> --background <color> (--color <color>)...
@@ -20,33 +21,36 @@ ${chalk.bold('Options:')}
   --color         Foreground color.
   --background    Background color for calculation contrast value using
                   Advanced Perception of Color Algorithm (APCA).
+  --output        Write output palette model to file.
   --color-space   Ensure that colors are inside the color space gamut. [default: p3]
   --prng          Pseudorandom number generator. [default: xoshiro128++]
-  --levels        Number of uniform sampling steps along each cube axis. [default: 2]
+  --levels        Number of uniform sampling steps along each cube axis. [default: 4]
   --tries         Optimization tries per each cube vertex. [default: 3]
-  --restore       Restore session from file.
   --save          Save session to file.
+  --restore       Restore session from file.
   -v, --version   Show version.
   -h, --help      Displays this message.
 
 ${chalk.bold('Example:')}
   bruni --seed 'f7d4a9b6-1ea8-476d-9440-fb29251d5d73' \\
     --background '#ffffff' \\
-    --color '#1473e6' --color '#d7373f' --color '#da7b11' --color '#268e6c'
+    --color '#1473e6' --color '#d7373f' --color '#da7b11' --color '#268e6c' \\
+    --output palette.json
 `
 
 const run = async () => {
   const args = arg(
     {
-      '--background': String,
-      '--color': [String],
-      '--color-space': String,
-      '--levels': Number,
-      '--prng': String,
-      '--restore': String,
-      '--save': String,
       '--seed': String,
+      '--color': [String],
+      '--background': String,
+      '--output': String,
+      '--color-space': String,
+      '--prng': String,
+      '--levels': Number,
       '--tries': Number,
+      '--save': String,
+      '--restore': String,
       '--help': Boolean,
       '--version': Boolean,
       '-v': '--version',
@@ -81,6 +85,7 @@ const run = async () => {
     | undefined
   const randomSeed = args['--seed']
   const tries = args['--tries']
+  const output = args['--output']
 
   // required
 
@@ -93,6 +98,12 @@ const run = async () => {
   if (background === undefined) {
     console.log(HELP)
     console.error(`Option '--background' must be defined.`)
+    process.exit(1)
+  }
+
+  if (output === undefined) {
+    console.log(HELP)
+    console.error(`Option '--output' must be defined.`)
     process.exit(1)
   }
 
@@ -146,7 +157,7 @@ const run = async () => {
       ) as Record<string, Task>)
     : undefined
 
-  const spinner = ora().start()
+  const spinner = ora({ text: 'Starting up' }).start()
 
   const instance = bruni({
     background,
@@ -159,17 +170,27 @@ const run = async () => {
     tries
   })
 
-  const updateSpinner = () => {
+  const updateSpinnerOptimization = (type: TypeBruniState) => {
     const { pending, rejected, fulfilled } = instance.store.tasksCount()
     const done = rejected + fulfilled
     const total = pending + done
 
-    spinner.text = `Palette optimization ${done}/${total}, rejected ${rejected}`
+    spinner.text = `${done}/${total} palette optimization`
+
+    switch (type) {
+      case TypeBruniState.OptimizationDone:
+        spinner.succeed()
+        break
+      case TypeBruniState.OptimizationAbort:
+        spinner.fail()
+        break
+      case TypeBruniState.OptimizationError:
+        spinner.fail()
+        break
+    }
   }
 
-  updateSpinner()
-
-  instance.store.on('updateTask', async () => {
+  instance.store.on('task', async () => {
     if (args['--save'] !== undefined) {
       await writeFile(
         path.resolve(process.cwd(), args['--save']),
@@ -178,14 +199,58 @@ const run = async () => {
       )
     }
 
-    updateSpinner()
+    updateSpinnerOptimization(TypeBruniState.None)
   })
 
-  return await instance.then((v) => {
-    spinner.stopAndPersist()
+  instance.store.on(['state'], ({ type }) => {
+    switch (type) {
+      case TypeBruniState.OptimizationDone:
+        updateSpinnerOptimization(type)
+        break
+      case TypeBruniState.OptimizationAbort:
+        updateSpinnerOptimization(type)
+        break
+      case TypeBruniState.OptimizationError:
+        updateSpinnerOptimization(type)
+        break
+    }
+  })
+
+  return await instance.then(() => {
+    spinner.stop()
     instance.store.clearListeners()
 
-    console.log(v)
+    const state = instance.store.state()
+
+    if (state.type === TypeBruniState.Done) {
+      // await writeFile(
+      //   path.resolve(process.cwd(), output),
+      //   JSON.stringify(instance.store.model()),
+      //   'utf8'
+      // )
+
+      const stats = instance.store.stats()
+
+      console.log()
+      console.log(
+        wrap(
+          `${stats.cubesRemaining} out of ${
+            stats.cubesTotal
+          } cubes remaining. Cost range is (${stats.costMin.toFixed(
+            6
+          )} … ${stats.costMax.toFixed(6)}) with ${stats.costMean.toFixed(
+            6
+          )} mean, and ${stats.costSd.toFixed(6)} standard deviation.`,
+          80
+        )
+      )
+    } else {
+      process.exit(1)
+    }
+
+    // Array.from(store.cubes().entries()).map(([num, task]) => {
+    //   return [num, task.state.colors]
+    // })
   })
 }
 

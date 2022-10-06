@@ -1,55 +1,40 @@
-import { Color, convert, OKLCH, parse } from '@escapace/bruni-color'
-import { isInteger, isString, omit, range } from 'lodash-es'
+import { convert, OKLCH, parse } from '@escapace/bruni-color'
+import Emittery from 'emittery'
 import {
+  compact,
+  groupBy,
+  isInteger,
+  isString,
+  map,
+  omit,
+  range
+} from 'lodash-es'
+import { mean, standardDeviation } from 'simple-statistics'
+import {
+  BruniState,
+  Cube,
+  INTERVAL,
   OptimizationState,
-  OptimizeOptions,
+  OptimizationStateFulfilled,
+  OptimizationStatePending,
+  RequiredStoreOptions,
+  StoreOptions,
+  Task,
+  TaskOptions,
+  TypeBruniState,
   TypeOptimizationState
-} from './optimize'
+} from './types'
 import { cartesianProduct } from './utilities/cartesian-product'
 import { fixNaN } from './utilities/fix-nan'
 import { hash } from './utilities/hash'
 import { objectHash } from './utilities/object-hash'
 import { szudzik, unszudzik } from './utilities/szudzik'
-import Emittery from 'emittery'
-
-export type INTERVAL = 2 | 4 | 5 | 10 | 20 | 25 | 50
-
-interface Cube {
-  interval: INTERVAL
-  position: number
-}
 
 const fromXYZ = (value: [number, number, number]): number => szudzik(...value)
 const toXYZ = (value: number): [number, number, number] =>
   unszudzik(value, 3) as [number, number, number]
 
-export const cubeVolume = (cube: Cube) => Math.pow(cube.interval, 3)
-
-export const cubeVertices = (cube: Cube) => {
-  const [x, y, z] = toXYZ(cube.position)
-
-  return cartesianProduct(
-    [x, cube.interval + x],
-    [y, cube.interval + y],
-    [z, cube.interval + z]
-  ) as [
-    [number, number, number],
-    [number, number, number],
-    [number, number, number],
-    [number, number, number],
-    [number, number, number],
-    [number, number, number],
-    [number, number, number],
-    [number, number, number]
-  ]
-  /*   .map((value) => fromXYZ(value as [number, number, number])) as [ */
-  /*   number, */
-  /*   number, */
-  /*   number */
-  /* ] */
-}
-
-export const tile = (interval: INTERVAL = 50): Cube[] => {
+const tile = (interval: INTERVAL = 50): Cube[] => {
   const distribution = range(0, 100, interval)
 
   return cartesianProduct(distribution, distribution, distribution).map(
@@ -60,50 +45,31 @@ export const tile = (interval: INTERVAL = 50): Cube[] => {
   )
 }
 
-export const rangeFrom = (cube: Cube) => {
-  return cubeVertices(cube).map((value) => {
-    const [lightness, chroma, contrast] = value.map((target) => {
-      const range = [
-        Math.max(0, target - cube.interval / 2),
-        Math.min(100, target + cube.interval / 2)
-      ] as [number, number]
+const rangeFrom = (cube: Cube) => {
+  const positions = toXYZ(cube.position)
 
-      return {
-        range,
-        target
-      }
-    })
+  const [lightness, chroma, contrast] = range(3).map((_, index) => {
+    const range = [positions[index], positions[index] + cube.interval] as [
+      number,
+      number
+    ]
+
+    const target = mean(range)
 
     return {
-      lightness,
-      chroma,
-      contrast
+      range,
+      target
     }
   })
+
+  return {
+    lightness,
+    chroma,
+    contrast
+  }
 }
 
-export interface StoreOptions
-  extends Omit<
-    OptimizeOptions,
-    'colors' | 'background' | 'lightness' | 'chroma' | 'contrast'
-  > {
-  colors: Color[] | string[]
-  background: Color | string
-  levels?: INTERVAL
-  tries?: number
-}
-
-export interface RequiredStoreOptions
-  extends Omit<StoreOptions, 'colors' | 'background' | 'levels'> {
-  colors: Array<[number, number, number]>
-  background: [number, number, number]
-  interval: INTERVAL
-  tries: number
-}
-
-export const normalizeOptions = (
-  options: StoreOptions
-): RequiredStoreOptions => {
+const normalizeOptions = (options: StoreOptions): RequiredStoreOptions => {
   const colors = options.colors.map(
     (value) =>
       fixNaN(
@@ -125,7 +91,7 @@ export const normalizeOptions = (
     )
   ).coords
 
-  const interval = (100 / (options.levels ?? 2)) as INTERVAL
+  const interval = (100 / (options.levels ?? 4)) as INTERVAL
   const tries = options.tries ?? 3
 
   if (![2, 4, 5, 10, 20, 25, 50].includes(interval)) {
@@ -145,64 +111,38 @@ export const normalizeOptions = (
   }
 }
 
-const optionsFrom = (
+const taskOptionsFrom = (
   cube: Cube,
   options: RequiredStoreOptions,
   n = 0
-): OptimizeOptions[] =>
-  rangeFrom(cube).map((value) => ({
-    randomSeed: hash(n, cube.position, cube.interval, options.randomSeed),
-    randomSource: options.randomSource,
-    colors: options.colors,
-    background: options.background,
-    colorSpace: options.colorSpace,
-    hyperparameters: options.hyperparameters,
-    weights: options.weights,
-    ...value
-  }))
-
-export interface Task {
-  state: OptimizationState
-  options: OptimizeOptions
-}
+): TaskOptions => ({
+  key: hash(cube.position, cube.interval, options.randomSeed),
+  randomSeed: hash(n, cube.position, cube.interval, options.randomSeed),
+  randomSource: options.randomSource,
+  colors: options.colors,
+  background: options.background,
+  colorSpace: options.colorSpace,
+  hyperparameters: options.hyperparameters,
+  weights: options.weights,
+  ...rangeFrom(cube)
+})
 
 export const createStore = (
   options: StoreOptions,
   initialState: Record<string, Task> = {}
 ) => {
+  const log: BruniState[] = [{ type: TypeBruniState.None }]
+
   const storeOptions = normalizeOptions(options)
   const emitter = new Emittery<{
-    updateTask: [string, Task]
+    task: [string, Task]
+    state: BruniState
   }>()
 
   const cubes = tile(storeOptions.interval)
 
-  const indexCube: Map<
-    Cube,
-    [
-      Set<string>,
-      Set<string>,
-      Set<string>,
-      Set<string>,
-      Set<string>,
-      Set<string>,
-      Set<string>,
-      Set<string>
-    ]
-  > = new Map(
-    cubes.map((value) => [
-      value,
-      [
-        new Set(),
-        new Set(),
-        new Set(),
-        new Set(),
-        new Set(),
-        new Set(),
-        new Set(),
-        new Set()
-      ]
-    ])
+  const indexCube: Map<number, Set<string>> = new Map(
+    cubes.map((value) => [value.position, new Set()])
   )
 
   const indexState: Map<string, Task> = new Map()
@@ -212,30 +152,30 @@ export const createStore = (
 
   cubes.forEach((cube) => {
     range(storeOptions.tries).forEach((n) => {
-      optionsFrom(cube, storeOptions, n).forEach((options, index) => {
-        // @ts-expect-error unable to type JSONType
-        const key = objectHash(options)
+      const options = taskOptionsFrom(cube, storeOptions, n)
 
-        if (!indexState.has(key)) {
-          if (indexInitialState.has(key)) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            indexState.set(key, indexInitialState.get(key)!)
-          } else {
-            indexState.set(key, {
-              options,
-              state: {
-                type: TypeOptimizationState.Pending
-              }
-            })
-          }
+      // @ts-expect-error unable to type JSONType
+      const key = objectHash(options)
+
+      if (!indexState.has(key)) {
+        if (indexInitialState.has(key)) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          indexState.set(key, indexInitialState.get(key)!)
+        } else {
+          indexState.set(key, {
+            options,
+            state: {
+              type: TypeOptimizationState.Pending
+            }
+          })
         }
+      }
 
-        indexCube.get(cube)?.[index].add(key)
-      })
+      indexCube.get(cube.position)?.add(key)
     })
   })
 
-  const updateTask = async (key: string, state: OptimizationState) => {
+  const actionUpdateTask = async (key: string, state: OptimizationState) => {
     const value = indexState.get(key)
 
     if (value === undefined) {
@@ -249,16 +189,25 @@ export const createStore = (
 
     indexState.set(key, task)
 
-    await emitter.emit('updateTask', [key, task])
+    await emitter.emit('task', [key, task])
   }
 
-  const selectorTasksPending = (): Record<string, Task> =>
+  const actionUpdateStage = async (value: BruniState) => {
+    log.unshift(value)
+
+    await emitter.emit('state', value)
+  }
+
+  const selectorTasksPending = (): Record<
+    string,
+    Task<OptimizationStatePending>
+  > =>
     Object.fromEntries(
       Array.from(indexState.entries()).filter(
         ([_, task]) => task.state.type === TypeOptimizationState.Pending
       )
-    )
-
+    ) as Record<string, Task<OptimizationStatePending>>
+  //
   const selectorTasksNotPending = (): Record<string, Task> =>
     Object.fromEntries(
       Array.from(indexState.entries()).filter(
@@ -266,19 +215,50 @@ export const createStore = (
       )
     )
 
-  const selectorTasksFulfilled = (): Record<string, Task> =>
+  const selectorTasksFulfilledAll = (): Record<
+    string,
+    Task<OptimizationStateFulfilled>
+  > =>
     Object.fromEntries(
       Array.from(indexState.entries()).filter(
         ([_, task]) => task.state.type === TypeOptimizationState.Fulfilled
       )
-    )
+    ) as Record<string, Task<OptimizationStateFulfilled>>
 
-  const selectorTasksRejected = (): Record<string, Task> =>
+  const selectorTasksFulfilled = (): Record<
+    string,
+    Task<OptimizationStateFulfilled>
+  > =>
     Object.fromEntries(
-      Array.from(indexState.entries()).filter(
-        ([_, task]) => task.state.type === TypeOptimizationState.Rejected
+      map(
+        groupBy(
+          Object.values(selectorTasksFulfilledAll()),
+          (value) => value.options.key
+        ),
+        (array) => {
+          const value = [...array].sort(
+            ({ state: { cost: a } }, { state: { cost: b } }) => a - b
+          )[0]
+
+          // @ts-expect-error unable to type JSONType
+          const key = objectHash(value.options)
+
+          const task = indexState.get(key) as Task<OptimizationStateFulfilled>
+
+          return [key, task] as const
+        }
       )
     )
+
+  // const selectorTasksRejected = (): Record<
+  //   string,
+  //   Task<OptimizationStateRejected>
+  // > =>
+  //   Object.fromEntries(
+  //     Array.from(indexState.entries()).filter(
+  //       ([_, task]) => task.state.type === TypeOptimizationState.Rejected
+  //     )
+  //   ) as Record<string, Task<OptimizationStateRejected>>
 
   const selectorTasksCount = () => {
     return Array.from(indexState.values()).reduce(
@@ -304,14 +284,63 @@ export const createStore = (
     )
   }
 
+  const selectorCubes = (): Map<number, Task<OptimizationStateFulfilled>> => {
+    const tasks = new Map(Object.entries(selectorTasksFulfilled()))
+
+    return new Map(
+      compact(
+        Array.from(indexCube.entries()).map(([position, set]) => {
+          const key: string | undefined = Array.from(set).filter((key) =>
+            tasks.has(key)
+          )[0]
+
+          if (key !== undefined) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const task = tasks.get(key)!
+
+            return [position, task]
+          }
+
+          return undefined
+        })
+      )
+    )
+  }
+
+  const selectorStats = () => {
+    const cubes = Array.from(selectorCubes().entries())
+    const cubesRemaining = Array.from(selectorCubes().entries()).length
+    const cubesTotal = indexCube.size
+    const costs = cubes.map(([_, task]) => task.state.cost)
+
+    const costMin = Math.min(...costs)
+    const costMax = Math.max(...costs)
+    const costMean = mean(costs)
+    const costSd = standardDeviation(costs)
+
+    return {
+      cubesRemaining,
+      cubesTotal,
+      costMin,
+      costMax,
+      costMean,
+      costSd
+    }
+  }
+
+  const state = () => log[0]
+
   const store = {
     options: storeOptions,
     tasksPending: selectorTasksPending,
     tasksNotPending: selectorTasksNotPending,
     tasksFulfilled: selectorTasksFulfilled,
-    tasksRejected: selectorTasksRejected,
     tasksCount: selectorTasksCount,
-    updateTask
+    cubes: selectorCubes,
+    stats: selectorStats,
+    state,
+    actionUpdateTask,
+    actionUpdateStage
   }
 
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

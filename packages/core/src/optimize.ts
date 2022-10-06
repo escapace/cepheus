@@ -8,23 +8,27 @@ import {
   deltaEOK,
   inGamut,
   LCH,
-  P3,
   OKLCH,
+  P3,
   sRGB
 } from '@escapace/bruni-color'
-import { ColorSpaceId } from 'colorjs.io/fn'
 import { flatMap, map, mapValues, range } from 'lodash-es'
 import { errorFunction, mean, sample, sum, variance } from 'simple-statistics'
-import type { DeepRequired } from 'utility-types'
+import {
+  OptimizationState,
+  OptimizeOptions,
+  RequiredOptimizeOptions,
+  TypeOptimizationState
+} from './types'
+import { constrainAngle } from './utilities/constrain-angle'
+import { createPRNG } from './utilities/create-prng'
 import { fixNaN } from './utilities/fix-nan'
 import { isWithin } from './utilities/is-within'
-import { createPRNG, PRNG, PRNGName } from './utilities/create-prng'
+import { percentile } from './utilities/percentile'
 import { randomWithin } from './utilities/random-within'
 import { relativeDifference } from './utilities/relative-difference'
-import { percentile } from './utilities/percentile'
-import { constrainAngle } from './utilities/constrain-angle'
 
-export class IterationError extends Error {
+class IterationError extends Error {
   constructor(message: string) {
     super(message)
 
@@ -70,6 +74,7 @@ function randomColor(
 
       const value = clone(colors[colorIndex])
 
+      // TODO: better distribution
       const percentage =
         0.05 +
         0.5 *
@@ -300,61 +305,6 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
   )
 }
 
-export interface OptimizeOptions {
-  randomSeed: string
-  randomSource?: PRNGName
-  colors: Array<[number, number, number]>
-  background: [number, number, number]
-  colorSpace?: ColorSpaceId
-  hyperparameters?: {
-    temperature: number
-    coolingRate: number
-    cutoff: number
-  }
-  weights?: {
-    chroma: number
-    contrast: number
-    deuteranopia: number
-    difference: number
-    dispersion: number
-    lightness: number
-    normal: number
-    protanopia: number
-    tritanopia: number
-  }
-  lightness?: {
-    // Lightness [0, 1]
-    target?: number
-    range?: [number, number]
-  }
-  chroma?: {
-    // Chroma [0, 0.4]
-    target?: number
-    range?: [number, number]
-  }
-  contrast?: {
-    // APCA [0, 106] or [0, 108]
-    target?: number
-    /* APCA reports lightness contrast as an Lc value from Lc 0 to Lc 106 for dark
-     * text on a light background, and Lc 0 to Lc -108 for light text on a dark
-     * background (dark mode). The minus sign merely indicates negative contrast,
-     * which means light text on a dark background. */
-    range?: [number, number]
-  }
-}
-
-export type RequiredOptimizeOptions = DeepRequired<
-  Omit<
-    OptimizeOptions,
-    'colorSpace' | 'colors' | 'background' | 'randomSeed' | 'randomSource'
-  >
-> & {
-  prng: PRNG
-  colorSpace: ColorSpace
-  colors: Color[]
-  background: Color
-}
-
 const normalizeWeights = (
   weights: Required<Exclude<OptimizeOptions['weights'], undefined>>
 ): Required<Exclude<OptimizeOptions['weights'], undefined>> => {
@@ -422,6 +372,7 @@ const normalizeOptions = (
     colors,
     background,
     prng,
+    isDarkMode,
     hyperparameters: {
       temperature: 2000,
       coolingRate: 0.99,
@@ -432,9 +383,9 @@ const normalizeOptions = (
       difference: 200,
       dispersion: 80,
       // coords
-      lightness: 15,
-      chroma: 15,
-      contrast: 15,
+      lightness: 10,
+      chroma: 10,
+      contrast: 10,
       // color-vision
       normal: 20,
       protanopia: 10,
@@ -473,35 +424,6 @@ const normalizeOptions = (
 
   return value
 }
-
-export const enum TypeOptimizationState {
-  Pending,
-  Rejected,
-  Fulfilled
-}
-
-interface IOptimizationState {
-  type: TypeOptimizationState
-}
-
-export interface OptimizationStateFulfilled extends IOptimizationState {
-  type: TypeOptimizationState.Fulfilled
-  colors: number[][]
-  cost: number
-}
-
-export interface OptimizationStateRejected extends IOptimizationState {
-  type: TypeOptimizationState.Rejected
-}
-
-export interface OptimizationStatePending extends IOptimizationState {
-  type: TypeOptimizationState.Pending
-}
-
-export type OptimizationState =
-  | OptimizationStateFulfilled
-  | OptimizationStateRejected
-  | OptimizationStatePending
 
 const iterate = (options: RequiredOptimizeOptions) => {
   const n = options.colors.length
@@ -545,14 +467,17 @@ const iterate = (options: RequiredOptimizeOptions) => {
     temperature *= options.hyperparameters.coolingRate
   }
 
-  // TODO: return denormalized lightness chroma contrast
-  return { cost: bestCost, colors: bestColors.map((value) => value.coords) }
+  return {
+    cost: bestCost,
+    colors: bestColors.map((value): [number, number, number] => value.coords)
+  }
 }
 
 export const optimize = (options: OptimizeOptions): OptimizationState => {
   ColorSpace.register(LCH)
   ColorSpace.register(OKLCH)
   ColorSpace.register(sRGB)
+  ColorSpace.register(P3)
 
   const normalizedOptions = normalizeOptions(options)
 
@@ -569,35 +494,3 @@ export const optimize = (options: OptimizeOptions): OptimizationState => {
     throw e
   }
 }
-
-// const run = () => {
-//   // function getRandomArbitrary(min, max) {
-//   //   return Math.random() * (max - min) + min;
-//   // }
-//
-//   const nanoid = customRandom('abcdefghijklmnopqrstuvwxyz', 10, (size) => {
-//     return new Uint8Array(size).map(() => 256 * prng.next())
-//   })
-//
-//   // 100 random colors
-//
-//   const colors = map(_range(24), () => {
-//     return {
-//       id: nanoid(),
-//       color: new Color({
-//         space: 'p3',
-//         coords: [prng.next(), prng.next(), prng.next()]
-//       })
-//     }
-//   })
-//
-//   // const clusters = Clusterer.getInstance(colors, 8, (a, b) => {
-//   //   return Math.abs(a.color.deltaEJz(b.color))
-//   // })
-//   //   .getClusteredData()
-//   //   .map((value) => {
-//   //     return [...value].sort(
-//   //       (a, b) => b.color.clone().to('oklab').l - a.color.clone().to('oklab').l
-//   //     )
-//   //   })
-// }
