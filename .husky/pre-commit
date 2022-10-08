@@ -6,7 +6,7 @@ pnpm exec syncpack set-semver-ranges \
   --dev \
   --source 'package.json' \
   --source 'packages/*/package.json' \
-  --filter '^(?!@escapace/bruni).*$'  || exit 1
+  --filter '^(?!@cepheus).*$'  || exit 1
 
 pnpm exec syncpack fix-mismatches \
   --dev \
@@ -14,7 +14,7 @@ pnpm exec syncpack fix-mismatches \
   --peer \
   --source 'package.json' \
   --source 'packages/*/package.json' \
-  --filter '^(?!@escapace/bruni).*$'  || exit 1
+  --filter '^(?!@cepheus).*$'  || exit 1
 
 pnpm exec syncpack format \
   --source 'package.json' \

@@ -8,42 +8,42 @@ import {
   OKLCH,
   P3,
   sRGB
-} from '@escapace/bruni-color'
+} from '@cepheus/color'
 import { setMaxListeners } from 'events'
 import { assign, isError, map } from 'lodash-es'
 import Piscina from 'piscina'
 import { createStore } from './store'
 import {
-  BruniState,
-  BruniStateOptimizationAbort,
-  BruniStateOptimizationDone,
-  BruniStateError,
+  CepheusState,
+  CepheusStateError,
+  CepheusStateOptimizationAbort,
+  CepheusStateOptimizationDone,
   OptimizationState,
   StoreOptions,
   Task,
-  TypeBruniState
+  TypeCepheusState
 } from './types'
 
 export {
-  TypeBruniState,
-  type BruniState,
-  type BruniStateDone,
-  type BruniStateNone,
-  type BruniStateOptimizationDone,
-  type BruniStateOptimizationAbort,
-  type BruniStateError as BruniStateOptimizationError
+  TypeCepheusState,
+  type CepheusState,
+  type CepheusStateDone,
+  type CepheusStateError,
+  type CepheusStateNone,
+  type CepheusStateOptimizationAbort,
+  type CepheusStateOptimizationDone
 } from './types'
 
-export interface BruniOptions extends StoreOptions {
+export interface CepheusOptions extends StoreOptions {
   initialState?: Record<string, Task>
 }
 
-export interface BruniReturnType extends PromiseLike<BruniState> {
+export interface CepheusReturnType extends PromiseLike<CepheusState> {
   abort: () => void
   store: ReturnType<typeof createStore>
 }
 
-export const bruni = (options: BruniOptions): BruniReturnType => {
+export const cepheus = (options: CepheusOptions): CepheusReturnType => {
   ColorSpace.register(HSL)
   ColorSpace.register(HSV)
   ColorSpace.register(P3)
@@ -64,7 +64,7 @@ export const bruni = (options: BruniOptions): BruniReturnType => {
   setMaxListeners(0, abortController.signal)
 
   const promise = store
-    .actionUpdateStage({ type: TypeBruniState.None })
+    .actionUpdateStage({ type: TypeCepheusState.None })
     .then(() =>
       Promise.all(
         map(Object.entries(tasks), async ([key, task]) => {
@@ -77,15 +77,15 @@ export const bruni = (options: BruniOptions): BruniReturnType => {
         })
       )
     )
-    .then((): BruniStateOptimizationDone => {
-      return { type: TypeBruniState.OptimizationDone }
+    .then((): CepheusStateOptimizationDone => {
+      return { type: TypeCepheusState.OptimizationDone }
     })
-    .catch((error): BruniStateOptimizationAbort | BruniStateError => {
+    .catch((error): CepheusStateOptimizationAbort | CepheusStateError => {
       if (isError(error) && error.name === 'AbortError') {
-        return { type: TypeBruniState.OptimizationAbort }
+        return { type: TypeCepheusState.OptimizationAbort }
       } else {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        return { type: TypeBruniState.Error, error }
+        return { type: TypeCepheusState.Error, error }
       }
     })
     .then(async (value) => await store.actionUpdateStage(value))
@@ -93,13 +93,13 @@ export const bruni = (options: BruniOptions): BruniReturnType => {
     .then(async () => {
       if (Array.from(store.cubes()).length > 0) {
         return await store.actionUpdateStage({
-          type: TypeBruniState.Done,
+          type: TypeCepheusState.Done,
           model: store.model()
         })
       }
 
       return await store.actionUpdateStage({
-        type: TypeBruniState.Error,
+        type: TypeCepheusState.Error,
         error: 'No cubes available.'
       })
     })

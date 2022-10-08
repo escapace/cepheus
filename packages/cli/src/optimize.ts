@@ -6,12 +6,13 @@ import {
   contrast,
   convert,
   deltaEOK,
+  fixNaN,
   inGamut,
   LCH,
   OKLCH,
   P3,
   sRGB
-} from '@escapace/bruni-color'
+} from '@cepheus/color'
 import { flatMap, map, mapValues, range } from 'lodash-es'
 import { errorFunction, mean, sample, sum, variance } from 'simple-statistics'
 import {
@@ -22,7 +23,6 @@ import {
 } from './types'
 import { constrainAngle } from './utilities/constrain-angle'
 import { createPRNG } from './utilities/create-prng'
-import { fixNaN } from './utilities/fix-nan'
 import { isWithin } from './utilities/is-within'
 import { percentile } from './utilities/percentile'
 import { randomWithin } from './utilities/random-within'

@@ -1,4 +1,4 @@
-import type { Color, ColorSpace } from '@escapace/bruni-color'
+import type { Color, ColorSpace } from '@cepheus/color'
 import type { ColorSpaceId } from 'colorjs.io/fn'
 import type { DeepRequired } from 'utility-types'
 import type { PRNG, PRNGName } from './utilities/create-prng'
@@ -17,7 +17,7 @@ export interface Task<T extends OptimizationState = OptimizationState> {
   options: TaskOptions
 }
 
-export enum TypeBruniState {
+export enum TypeCepheusState {
   None,
   OptimizationDone,
   OptimizationAbort,
@@ -25,34 +25,34 @@ export enum TypeBruniState {
   Error
 }
 
-export interface BruniStateNone {
-  type: TypeBruniState.None
+export interface CepheusStateNone {
+  type: TypeCepheusState.None
 }
 
-export interface BruniStateOptimizationDone {
-  type: TypeBruniState.OptimizationDone
+export interface CepheusStateOptimizationDone {
+  type: TypeCepheusState.OptimizationDone
 }
 
-export interface BruniStateOptimizationAbort {
-  type: TypeBruniState.OptimizationAbort
+export interface CepheusStateOptimizationAbort {
+  type: TypeCepheusState.OptimizationAbort
 }
 
-export interface BruniStateDone {
-  type: TypeBruniState.Done
+export interface CepheusStateDone {
+  type: TypeCepheusState.Done
   model: Model
 }
 
-export interface BruniStateError {
-  type: TypeBruniState.Error
+export interface CepheusStateError {
+  type: TypeCepheusState.Error
   error: unknown
 }
 
-export type BruniState =
-  | BruniStateNone
-  | BruniStateOptimizationDone
-  | BruniStateOptimizationAbort
-  | BruniStateError
-  | BruniStateDone
+export type CepheusState =
+  | CepheusStateNone
+  | CepheusStateOptimizationDone
+  | CepheusStateOptimizationAbort
+  | CepheusStateError
+  | CepheusStateDone
 
 export interface StoreOptions
   extends Omit<
