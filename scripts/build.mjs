@@ -10,20 +10,21 @@ const tsconfig = fse.existsSync(path.join(cwd, 'tsconfig-build.json'))
   ? path.join(cwd, 'tsconfig-build.json')
   : path.join(cwd, 'tsconfig.json')
 
-const options = {
-  esm: {
-    outdir: path.join(cwd, 'lib/esm'),
-    tsconfig,
-    entryPoints:
-      name === 'core'
-        ? ['src/index.ts', 'src/worker.ts', 'src/cli.ts']
-        : ['src/index.ts'],
-    splitting: name === 'core'
-    /* name === 'yeux' */
-    /*   ? ['lib/tsc/index.js', 'lib/tsc/cli.js'] */
-    /*   : ['src/index.ts'] */
-  }
-}
+const getOptions = (format) => ({
+  format,
+  outdir: path.join(cwd, `lib/${format}`),
+  tsconfig,
+  entryPoints:
+    name === 'cli'
+      ? ['src/index.ts', 'src/worker.ts', 'src/cli.ts']
+      : ['src/index.ts'],
+  splitting: name === 'cli'
+  /* name === 'yeux' */
+  /*   ? ['lib/tsc/index.js', 'lib/tsc/cli.js'] */
+  /*   : ['src/index.ts'] */
+})
+
+const formats = name === 'utilities' ? ['cjs', 'esm'] : ['esm']
 
 process.umask(0o022)
 process.chdir(cwd)
@@ -48,25 +49,22 @@ await execa(
 })
 
 await Promise.all(
-  Object.keys(options).map(async (format) => {
-    const { outdir } = options[format]
-
-    await fse.remove(outdir)
-    await mkdir(outdir, { recursive: true })
+  formats.map(async (format) => {
+    const options = getOptions(format)
+    await fse.remove(options.outdir)
+    await mkdir(options.outdir, { recursive: true })
 
     await build({
       bundle: true,
       external,
-      format,
       define: {
         VERSION: JSON.stringify(version)
       },
       logLevel: 'info',
-      outExtension: { '.js': `.${format === 'esm' ? 'mjs' : 'cjs'}` },
-      splitting: options.splitting,
+      outExtension: { '.js': `.${options.format === 'esm' ? 'mjs' : 'cjs'}` },
       platform: 'node',
       sourcemap: true,
-      ...options[format]
+      ...options
     })
   })
 )

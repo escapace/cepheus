@@ -1,4 +1,4 @@
-import { convert, OKLCH, parse } from '@escapace/bruni-color'
+import { convert, fixNaN, OKLCH, parse } from '@cepheus/color'
 import Emittery from 'emittery'
 import {
   compact,
@@ -11,7 +11,7 @@ import {
 } from 'lodash-es'
 import { mean, standardDeviation } from 'simple-statistics'
 import {
-  BruniState,
+  CepheusState,
   Cube,
   INTERVAL,
   Model,
@@ -22,14 +22,12 @@ import {
   StoreOptions,
   Task,
   TaskOptions,
-  TypeBruniState,
+  TypeCepheusState,
   TypeOptimizationState
 } from './types'
-import { cartesianProduct } from './utilities/cartesian-product'
-import { fixNaN } from './utilities/fix-nan'
+import { cartesianProduct, szudzik, unszudzik } from '@cepheus/utilities'
 import { hash } from './utilities/hash'
 import { objectHash } from './utilities/object-hash'
-import { szudzik, unszudzik } from './utilities/szudzik'
 
 const fromXYZ = (value: [number, number, number], interval: number): number =>
   szudzik(...value.map((v) => v / interval))
@@ -138,12 +136,12 @@ export const createStore = (
   options: StoreOptions,
   initialState: Record<string, Task> = {}
 ) => {
-  const log: BruniState[] = [{ type: TypeBruniState.None }]
+  const log: CepheusState[] = [{ type: TypeCepheusState.None }]
 
   const storeOptions = normalizeOptions(options)
   const emitter = new Emittery<{
     task: [string, Task]
-    state: BruniState
+    state: CepheusState
   }>()
 
   const cubes = tile(storeOptions.interval)
@@ -199,7 +197,7 @@ export const createStore = (
     await emitter.emit('task', [key, task])
   }
 
-  const actionUpdateStage = async (value: BruniState) => {
+  const actionUpdateStage = async (value: CepheusState) => {
     log.unshift(value)
 
     await emitter.emit('state', value)

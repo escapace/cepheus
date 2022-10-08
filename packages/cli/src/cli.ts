@@ -4,17 +4,17 @@ import { readFile, writeFile } from 'fs/promises'
 import { isError, isInteger, isString } from 'lodash-es'
 import ora from 'ora'
 import path, { resolve } from 'path'
-import { INTERVAL, Task, TypeBruniState } from './types'
+import { INTERVAL, Task, TypeCepheusState } from './types'
 import chalk from 'chalk'
 import wrap from 'wrap-ansi'
 
 const HELP = `${chalk.bold('Usage:')}
-  bruni --seed <string> --background <color> (--color <color>)...
+  cepheus --seed <string> --background <color> (--color <color>)...
         [--color-space p3|srgb] [--prng xoshiro128++|xorwow|xorshift128|sfc32]
         [--tries <number>] [--levels 50|25|20|10|5|4|2]
         [--restore <file>] [--save <file>]
-  bruni -h | --help
-  bruni --version
+  cepheus -h | --help
+  cepheus --version
 
 ${chalk.bold('Options:')}
   --seed          Pseudorandom number generator seed.
@@ -32,7 +32,7 @@ ${chalk.bold('Options:')}
   -h, --help      Displays this message.
 
 ${chalk.bold('Example:')}
-  bruni --seed 'f7d4a9b6-1ea8-476d-9440-fb29251d5d73' \\
+  cepheus --seed 'f7d4a9b6-1ea8-476d-9440-fb29251d5d73' \\
     --background '#ffffff' \\
     --color '#1473e6' --color '#d7373f' --color '#da7b11' --color '#268e6c' \\
     --output palette.json
@@ -64,7 +64,7 @@ const run = async () => {
       readFileSync(resolve('../../package.json'), 'utf8')
     ) as Record<'version', string>
 
-    console.log(`${chalk.bold('bruni')} v${version}`)
+    console.log(`${chalk.bold('cepheus')} v${version}`)
     process.exit(0)
   }
 
@@ -149,7 +149,7 @@ const run = async () => {
     process.exit(1)
   }
 
-  const { bruni } = await import('./index')
+  const { cepheus } = await import('./index')
 
   const initialState = isString(args['--restore'])
     ? (JSON.parse(
@@ -159,7 +159,7 @@ const run = async () => {
 
   const spinner = ora({ text: 'Starting up' }).start()
 
-  const instance = bruni({
+  const instance = cepheus({
     background,
     colorSpace,
     colors,
@@ -170,7 +170,7 @@ const run = async () => {
     tries
   })
 
-  const updateSpinnerOptimization = (type: TypeBruniState) => {
+  const updateSpinnerOptimization = (type: TypeCepheusState) => {
     const { pending, rejected, fulfilled } = instance.store.tasksCount()
     const done = rejected + fulfilled
     const total = pending + done
@@ -178,13 +178,13 @@ const run = async () => {
     spinner.text = `${done}/${total} palette optimization`
 
     switch (type) {
-      case TypeBruniState.OptimizationDone:
+      case TypeCepheusState.OptimizationDone:
         spinner.succeed()
         break
-      case TypeBruniState.OptimizationAbort:
+      case TypeCepheusState.OptimizationAbort:
         spinner.fail()
         break
-      case TypeBruniState.Error:
+      case TypeCepheusState.Error:
         spinner.fail()
         break
     }
@@ -199,18 +199,18 @@ const run = async () => {
       )
     }
 
-    updateSpinnerOptimization(TypeBruniState.None)
+    updateSpinnerOptimization(TypeCepheusState.None)
   })
 
   instance.store.on(['state'], ({ type }) => {
     switch (type) {
-      case TypeBruniState.OptimizationDone:
+      case TypeCepheusState.OptimizationDone:
         updateSpinnerOptimization(type)
         break
-      case TypeBruniState.OptimizationAbort:
+      case TypeCepheusState.OptimizationAbort:
         updateSpinnerOptimization(type)
         break
-      case TypeBruniState.Error:
+      case TypeCepheusState.Error:
         updateSpinnerOptimization(type)
         break
     }
@@ -222,7 +222,7 @@ const run = async () => {
 
     const state = instance.store.state()
 
-    if (state.type === TypeBruniState.Done) {
+    if (state.type === TypeCepheusState.Done) {
       spinner.start(`Writing '${path.relative(process.cwd(), output)}'`)
 
       await writeFile(
@@ -249,7 +249,7 @@ const run = async () => {
           80
         )
       )
-    } else if (state.type === TypeBruniState.Error) {
+    } else if (state.type === TypeCepheusState.Error) {
       const error = state.error
 
       if (isString(error)) {
