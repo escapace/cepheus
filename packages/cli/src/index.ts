@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/promise-function-async */
 import {
   ColorSpace,
   HSL,
@@ -10,7 +9,7 @@ import {
   sRGB
 } from '@cepheus/color'
 import { setMaxListeners } from 'events'
-import { assign, isError, map } from 'lodash-es'
+import { assign, isError, map, omit, range } from 'lodash-es'
 import Piscina from 'piscina'
 import { createStore } from './store'
 import {
@@ -19,6 +18,7 @@ import {
   CepheusStateOptimizationAbort,
   CepheusStateOptimizationDone,
   OptimizationState,
+  OptimizeOptions,
   StoreOptions,
   Task,
   TypeCepheusState
@@ -54,8 +54,6 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
 
   const store = createStore(options, options.initialState)
 
-  const tasks = store.tasksPending()
-
   const piscina = new Piscina({
     filename: new URL('./worker.mjs', import.meta.url).href
   })
@@ -65,18 +63,28 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
 
   const promise = store
     .actionUpdateStage({ type: TypeCepheusState.None })
-    .then(() =>
-      Promise.all(
-        map(Object.entries(tasks), async ([key, task]) => {
-          const state = (await piscina.run(task.options, {
-            name: 'optimize',
-            signal: abortController.signal
-          })) as OptimizationState
+    .then(async () => {
+      const iterations = range(store.options.iterations)
 
-          await store.actionUpdateTask(key, state)
-        })
-      )
-    )
+      for (const iteration of iterations) {
+        store.iterate(iteration)
+
+        const tasks = store.tasksPending()
+
+        await Promise.all(
+          map(Object.entries(tasks), async ([key, task]) => {
+            const options: OptimizeOptions = omit(task.options, ['key'])
+
+            const state = (await piscina.run(options, {
+              name: 'optimize',
+              signal: abortController.signal
+            })) as OptimizationState
+
+            await store.actionUpdateTask(key, state)
+          })
+        )
+      }
+    })
     .then((): CepheusStateOptimizationDone => {
       return { type: TypeCepheusState.OptimizationDone }
     })
@@ -91,17 +99,19 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
     .then(async (value) => await store.actionUpdateStage(value))
     .then(async () => await piscina.destroy())
     .then(async () => {
-      if (Array.from(store.cubes()).length > 0) {
+      if (store.state().type === TypeCepheusState.OptimizationDone) {
+        if (Array.from(store.squares()).length > 0) {
+          return await store.actionUpdateStage({
+            type: TypeCepheusState.Done,
+            model: store.model()
+          })
+        }
+
         return await store.actionUpdateStage({
-          type: TypeCepheusState.Done,
-          model: store.model()
+          type: TypeCepheusState.Error,
+          error: 'No squares available.'
         })
       }
-
-      return await store.actionUpdateStage({
-        type: TypeCepheusState.Error,
-        error: 'No cubes available.'
-      })
     })
     .then(() => store.state())
 

@@ -2,18 +2,19 @@ import { convert, fixNaN, OKLCH, parse } from '@cepheus/color'
 import Emittery from 'emittery'
 import {
   compact,
+  difference,
   groupBy,
   isInteger,
   isString,
   map,
   omit,
-  range
+  range,
+  uniq
 } from 'lodash-es'
 import { mean, standardDeviation } from 'simple-statistics'
 import {
   CepheusState,
-  Cube,
-  INTERVAL,
+  Square,
   Model,
   OptimizationState,
   OptimizationStateFulfilled,
@@ -28,33 +29,38 @@ import {
 import { cartesianProduct, szudzik, unszudzik } from '@cepheus/utilities'
 import { hash } from './utilities/hash'
 import { objectHash } from './utilities/object-hash'
+import {
+  DEFAULT_OPTIMIZE_RANGE_DIVISOR,
+  DEFAULT_ITERATIONS,
+  OPTIMIZE_RANGE_DIVISORS,
+  OPTIMIZE_RANGE_MAX
+} from './constants'
 
-const fromXYZ = (value: [number, number, number], interval: number): number =>
+const fromXYZ = (value: number[], interval: number): number =>
   szudzik(...value.map((v) => v / interval))
 
-const toXYZ = (cube: Cube): [number, number, number] =>
-  unszudzik(cube.position, 3).map((v) => v * cube.interval) as [
-    number,
+const toXYZ = (square: Square): [number, number] =>
+  unszudzik(square.position, 2).map((v) => v * square.interval) as [
     number,
     number
   ]
 
-const tile = (interval: INTERVAL = 50): Cube[] => {
-  const distribution = range(0, 100, interval)
+const tile = (interval: number): Square[] => {
+  const distribution = range(0, OPTIMIZE_RANGE_MAX, interval)
 
-  return cartesianProduct(distribution, distribution, distribution).map(
-    (value): Cube => ({
+  return cartesianProduct(distribution, distribution).map(
+    (value): Square => ({
       interval,
-      position: fromXYZ(value as [number, number, number], interval)
+      position: fromXYZ(value as [number, number], interval)
     })
   )
 }
 
-const rangeFrom = (cube: Cube) => {
-  const positions = toXYZ(cube)
+const rangeFrom = (square: Square) => {
+  const positions = toXYZ(square)
 
-  const [lightness, chroma, contrast] = range(3).map((_, index) => {
-    const range = [positions[index], positions[index] + cube.interval] as [
+  const [lightness, chroma] = range(2).map((_, index) => {
+    const range = [positions[index], positions[index] + square.interval] as [
       number,
       number
     ]
@@ -69,9 +75,37 @@ const rangeFrom = (cube: Cube) => {
 
   return {
     lightness,
-    chroma,
-    contrast
+    chroma
   }
+}
+
+const surroundingSquares = (square: Square): Square[] => {
+  const [xs, ys] = toXYZ(square)
+  const i = square.interval
+
+  // y
+  // |
+  // |  nw  n  ne
+  // |  w   !   e
+  // |  sw  s  se
+  // |
+  // +------------x
+
+  const n = [xs, ys + i]
+  const ne = [xs + i, ys + i]
+  const e = [xs + i, ys]
+  const se = [xs + i, ys - i]
+  const s = [xs, ys - i]
+  const sw = [xs - i, ys - i]
+  const w = [xs - i, ys]
+  const nw = [xs - i, ys + i]
+
+  return [n, ne, e, se, s, sw, w, nw]
+    .filter(([x, y]) => x >= 0 && y >= 0)
+    .map((position) => ({
+      position: fromXYZ(position, i),
+      interval: i
+    }))
 }
 
 const normalizeOptions = (options: StoreOptions): RequiredStoreOptions => {
@@ -96,15 +130,20 @@ const normalizeOptions = (options: StoreOptions): RequiredStoreOptions => {
     )
   ).coords
 
-  const interval = (100 / (options.levels ?? 4)) as INTERVAL
-  const tries = options.tries ?? 3
+  const interval =
+    OPTIMIZE_RANGE_MAX / (options.levels ?? DEFAULT_OPTIMIZE_RANGE_DIVISOR)
+  const iterations = options.iterations ?? DEFAULT_ITERATIONS
 
-  if (![2, 4, 5, 10, 20, 25, 50].includes(interval)) {
-    throw new Error(`'levels' must be one of 2, 4, 5, 10, 20, 25 or 50`)
+  if (!OPTIMIZE_RANGE_DIVISORS.includes(interval)) {
+    throw new Error(
+      `'levels' must be one of ${OPTIMIZE_RANGE_DIVISORS.join(', ')}`
+    )
   }
 
-  if (!(isInteger(tries) && tries >= 1)) {
-    throw new Error(`'tries' must be an integer greater or equal to 1`)
+  if (!(isInteger(iterations) && iterations >= 2 && iterations % 2 === 0)) {
+    throw new Error(
+      `'iterations' must be an even integer greater or equal to 2`
+    )
   }
 
   return {
@@ -112,24 +151,33 @@ const normalizeOptions = (options: StoreOptions): RequiredStoreOptions => {
     background,
     colors,
     interval,
-    tries
+    iterations
   }
 }
 
 const taskOptionsFrom = (
-  cube: Cube,
+  square: Square,
+  iteration: number,
   options: RequiredStoreOptions,
-  n = 0
+  colorsPrevious?: Array<[number, number, number]>,
+  colorsSurrounding?: Array<Array<[number, number, number]>>
 ): TaskOptions => ({
-  key: hash(cube.position, cube.interval, options.randomSeed),
-  randomSeed: hash(n, cube.position, cube.interval, options.randomSeed),
+  key: hash(square.position, square.interval, options.randomSeed),
+  randomSeed: hash(
+    iteration,
+    square.position,
+    square.interval,
+    options.randomSeed
+  ),
   randomSource: options.randomSource,
   colors: options.colors,
   background: options.background,
   colorSpace: options.colorSpace,
   hyperparameters: options.hyperparameters,
   weights: options.weights,
-  ...rangeFrom(cube)
+  colorsSurrounding,
+  colorsPrevious,
+  ...rangeFrom(square)
 })
 
 export const createStore = (
@@ -144,20 +192,53 @@ export const createStore = (
     state: CepheusState
   }>()
 
-  const cubes = tile(storeOptions.interval)
+  const squares = tile(storeOptions.interval)
 
-  const indexCube: Map<number, Set<string>> = new Map(
-    cubes.map((value) => [value.position, new Set()])
+  const indexSquare: Map<number, Map<number, string>> = new Map(
+    squares.map((value) => [value.position, new Map<number, string>()])
   )
 
   const indexState: Map<string, Task> = new Map()
+
   const indexInitialState: Map<string, Task> = new Map(
     Object.entries(initialState)
   )
 
-  cubes.forEach((cube) => {
-    range(storeOptions.tries).forEach((n) => {
-      const options = taskOptionsFrom(cube, storeOptions, n)
+  const iterations = range(storeOptions.iterations)
+  const iterationsFirst = iterations.slice(0, iterations.length / 2)
+  const iterationsLast = difference(iterations, iterationsFirst)
+
+  let iteratedSquares: Map<number, Task<OptimizationStateFulfilled>>
+
+  const iterate = (iteration: number) => {
+    if (iteration === iterationsLast[0]) {
+      iteratedSquares = selectorSquares(iterationsFirst)
+    }
+
+    squares.forEach((square) => {
+      let options: TaskOptions
+
+      if (iterationsLast.includes(iteration)) {
+        const colorsPrevious =
+          iteratedSquares.get(square.position)?.state.colors ?? []
+        const colorsSurrounding = compact(
+          surroundingSquares(square).map(
+            (square) => iteratedSquares.get(square.position)?.options.colors
+          )
+        )
+
+        options = taskOptionsFrom(
+          square,
+          iteration,
+          storeOptions,
+          colorsPrevious,
+          colorsSurrounding
+        )
+      } else {
+        options = taskOptionsFrom(square, iteration, storeOptions)
+      }
+
+      // const options = taskOptionsFrom(square, iteration, storeOptions)
 
       // @ts-expect-error unable to type JSONType
       const key = objectHash(options)
@@ -176,9 +257,21 @@ export const createStore = (
         }
       }
 
-      indexCube.get(cube.position)?.add(key)
+      indexSquare.get(square.position)?.set(iteration, key)
     })
-  })
+  }
+
+  // select the best iteration in preflight
+
+  // const selectorTasksBySquare = (square: Square) => {
+  //   const keys = indexSquare.get(square.position)
+  //
+  //   if (keys === undefined) {
+  //     return []
+  //   }
+  //
+  //   const qwe = Array.from(keys).map(key => indexState.get(key))
+  // }
 
   const actionUpdateTask = async (key: string, state: OptimizationState) => {
     const value = indexState.get(key)
@@ -220,24 +313,33 @@ export const createStore = (
       )
     )
 
-  const selectorTasksFulfilledAll = (): Record<
-    string,
-    Task<OptimizationStateFulfilled>
-  > =>
-    Object.fromEntries(
+  const selectorTasksFulfilledAll = (
+    iterations: number[]
+  ): Record<string, Task<OptimizationStateFulfilled>> => {
+    const keys = uniq(
+      Array.from(indexSquare.values()).flatMap((iterationsMap) => {
+        return compact(
+          iterations.map((iteration) => iterationsMap.get(iteration))
+        )
+      })
+    )
+
+    return Object.fromEntries(
       Array.from(indexState.entries()).filter(
-        ([_, task]) => task.state.type === TypeOptimizationState.Fulfilled
+        ([key, task]) =>
+          keys.includes(key) &&
+          task.state.type === TypeOptimizationState.Fulfilled
       )
     ) as Record<string, Task<OptimizationStateFulfilled>>
+  }
 
-  const selectorTasksFulfilled = (): Record<
-    string,
-    Task<OptimizationStateFulfilled>
-  > =>
+  const selectorTasksFulfilled = (
+    iterations: number[]
+  ): Record<string, Task<OptimizationStateFulfilled>> =>
     Object.fromEntries(
       map(
         groupBy(
-          Object.values(selectorTasksFulfilledAll()),
+          Object.values(selectorTasksFulfilledAll(iterations)),
           (value) => value.options.key
         ),
         (array) => {
@@ -254,16 +356,6 @@ export const createStore = (
         }
       )
     )
-
-  // const selectorTasksRejected = (): Record<
-  //   string,
-  //   Task<OptimizationStateRejected>
-  // > =>
-  //   Object.fromEntries(
-  //     Array.from(indexState.entries()).filter(
-  //       ([_, task]) => task.state.type === TypeOptimizationState.Rejected
-  //     )
-  //   ) as Record<string, Task<OptimizationStateRejected>>
 
   const selectorTasksCount = () => {
     return Array.from(indexState.values()).reduce(
@@ -289,19 +381,27 @@ export const createStore = (
     )
   }
 
-  const selectorCubes = (): Map<number, Task<OptimizationStateFulfilled>> => {
-    const tasks = new Map(Object.entries(selectorTasksFulfilled()))
+  const selectorSquares = (
+    iterations: number[] = iterationsLast
+  ): Map<number, Task<OptimizationStateFulfilled>> => {
+    const bestTasks = new Map(
+      Object.entries(selectorTasksFulfilled(iterations))
+    )
 
     return new Map(
       compact(
-        Array.from(indexCube.entries()).map(([position, set]) => {
-          const key: string | undefined = Array.from(set).filter((key) =>
-            tasks.has(key)
+        Array.from(indexSquare.entries()).map(([position, iterationsMap]) => {
+          const keys = compact(
+            iterations.map((iteration) => iterationsMap.get(iteration))
+          )
+
+          const key: string | undefined = keys.filter((key) =>
+            bestTasks.has(key)
           )[0]
 
           if (key !== undefined) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const task = tasks.get(key)!
+            const task = bestTasks.get(key)!
 
             return [position, task]
           }
@@ -313,10 +413,10 @@ export const createStore = (
   }
 
   const selectorStats = () => {
-    const cubes = Array.from(selectorCubes().entries())
-    const cubesRemaining = Array.from(selectorCubes().entries()).length
-    const cubesTotal = indexCube.size
-    const costs = cubes.map(([_, task]) => task.state.cost)
+    const squares = Array.from(selectorSquares(iterationsLast).entries())
+    const squaresRemaining = squares.length
+    const squaresTotal = indexSquare.size
+    const costs = squares.map(([_, task]) => task.state.cost)
 
     const costMin = Math.min(...costs)
     const costMax = Math.max(...costs)
@@ -324,8 +424,8 @@ export const createStore = (
     const costSd = standardDeviation(costs)
 
     return {
-      cubesRemaining,
-      cubesTotal,
+      squaresRemaining,
+      squaresTotal,
       costMin,
       costMax,
       costMean,
@@ -334,7 +434,7 @@ export const createStore = (
   }
 
   const selectorModel = (): Model => {
-    const cubes = Array.from(selectorCubes().entries()).map(
+    const squares = Array.from(selectorSquares(iterationsLast).entries()).map(
       ([position, task]): [number, Array<[number, number, number]>] => {
         return [position, task.state.colors]
       }
@@ -343,7 +443,7 @@ export const createStore = (
     const interval = storeOptions.interval
 
     return {
-      cubes,
+      squares,
       interval
     }
   }
@@ -351,17 +451,18 @@ export const createStore = (
   const state = () => log[0]
 
   const store = {
-    options: storeOptions,
-    tasksPending: selectorTasksPending,
-    tasksNotPending: selectorTasksNotPending,
-    tasksFulfilled: selectorTasksFulfilled,
-    tasksCount: selectorTasksCount,
-    cubes: selectorCubes,
-    stats: selectorStats,
-    model: selectorModel,
-    state,
+    actionUpdateStage,
     actionUpdateTask,
-    actionUpdateStage
+    iterate,
+    model: selectorModel,
+    options: storeOptions,
+    squares: selectorSquares,
+    state,
+    stats: selectorStats,
+    tasksCount: selectorTasksCount,
+    tasksFulfilled: selectorTasksFulfilled,
+    tasksNotPending: selectorTasksNotPending,
+    tasksPending: selectorTasksPending
   }
 
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
