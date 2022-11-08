@@ -5,10 +5,8 @@ import type { PRNG, PRNGName } from './utilities/create-prng'
 
 export { PRNG, PRNGName }
 
-export type INTERVAL = 2 | 4 | 5 | 10 | 20 | 25 | 50
-
-export interface Cube {
-  interval: INTERVAL
+export interface Square {
+  interval: number
   position: number
 }
 
@@ -57,20 +55,20 @@ export type CepheusState =
 export interface StoreOptions
   extends Omit<
     OptimizeOptions,
-    'colors' | 'background' | 'lightness' | 'chroma' | 'contrast'
+    'colors' | 'background' | 'lightness' | 'chroma'
   > {
   colors: Color[] | string[]
   background: Color | string
-  levels?: INTERVAL
-  tries?: number
+  levels?: number
+  iterations?: number
 }
 
 export interface RequiredStoreOptions
   extends Omit<StoreOptions, 'colors' | 'background' | 'levels'> {
   colors: Array<[number, number, number]>
   background: [number, number, number]
-  interval: INTERVAL
-  tries: number
+  interval: number
+  iterations: number
 }
 
 export interface TaskOptions extends OptimizeOptions {
@@ -81,6 +79,8 @@ export interface OptimizeOptions {
   randomSeed: string
   randomSource?: PRNGName
   colors: Array<[number, number, number]>
+  colorsSurrounding?: Array<Array<[number, number, number]>>
+  colorsPrevious?: Array<[number, number, number]>
   background: [number, number, number]
   colorSpace?: ColorSpaceId
   hyperparameters?: {
@@ -89,6 +89,7 @@ export interface OptimizeOptions {
     cutoff: number
   }
   weights?: {
+    surround: number
     chroma: number
     contrast: number
     deuteranopia: number
@@ -109,26 +110,34 @@ export interface OptimizeOptions {
     target?: number
     range?: [number, number]
   }
-  contrast?: {
-    // APCA [0, 106] or [0, 108]
-    target?: number
-    /* APCA reports lightness contrast as an Lc value from Lc 0 to Lc 106 for dark
-     * text on a light background, and Lc 0 to Lc -108 for light text on a dark
-     * background (dark mode). The minus sign merely indicates negative contrast,
-     * which means light text on a dark background. */
-    range?: [number, number]
-  }
+  // contrast?: {
+  //   // APCA [0, 106] or [0, 108]
+  //   target?: number
+  //   /* APCA reports lightness contrast as an Lc value from Lc 0 to Lc 106 for dark
+  //    * text on a light background, and Lc 0 to Lc -108 for light text on a dark
+  //    * background (dark mode). The minus sign merely indicates negative contrast,
+  //    * which means light text on a dark background. */
+  //   range?: [number, number]
+  // }
 }
 
 export type RequiredOptimizeOptions = DeepRequired<
   Omit<
     OptimizeOptions,
-    'colorSpace' | 'colors' | 'background' | 'randomSeed' | 'randomSource'
+    | 'colorSpace'
+    | 'colors'
+    | 'background'
+    | 'randomSeed'
+    | 'randomSource'
+    | 'colorsPrevious'
+    | 'colorsSurrounding'
   >
 > & {
   prng: PRNG
   colorSpace: ColorSpace
   colors: Color[]
+  colorsSurrounding: Color[][]
+  colorsPrevious: Color[]
   background: Color
   isDarkMode: boolean
 }
@@ -163,6 +172,6 @@ export type OptimizationState =
   | OptimizationStatePending
 
 export interface Model {
-  cubes: Array<[number, Array<[number, number, number]>]>
-  interval: INTERVAL
+  squares: Array<[number, Array<[number, number, number]>]>
+  interval: number
 }

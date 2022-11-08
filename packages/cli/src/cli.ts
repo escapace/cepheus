@@ -4,14 +4,20 @@ import { readFile, writeFile } from 'fs/promises'
 import { isError, isInteger, isString } from 'lodash-es'
 import ora from 'ora'
 import path, { resolve } from 'path'
-import { INTERVAL, Task, TypeCepheusState } from './types'
+import { Task, TypeCepheusState } from './types'
 import chalk from 'chalk'
 import wrap from 'wrap-ansi'
+import {
+  OPTIMIZE_RANGE_DIVISORS,
+  DEFAULT_OPTIMIZE_RANGE_DIVISOR,
+  DEFAULT_ITERATIONS,
+  OPTIMIZE_RANGE_MAX
+} from './constants'
 
 const HELP = `${chalk.bold('Usage:')}
   cepheus --seed <string> --background <color> (--color <color>)...
         [--color-space p3|srgb] [--prng xoshiro128++|xorwow|xorshift128|sfc32]
-        [--tries <number>] [--levels 50|25|20|10|5|4|2]
+        [--iterations <number>] [--levels ${OPTIMIZE_RANGE_DIVISORS.join('|')}]
         [--restore <file>] [--save <file>]
   cepheus -h | --help
   cepheus --version
@@ -24,8 +30,8 @@ ${chalk.bold('Options:')}
   --output        Write output palette model to file.
   --color-space   Ensure that colors are inside the color space gamut. [default: p3]
   --prng          Pseudorandom number generator. [default: xoshiro128++]
-  --levels        Number of uniform sampling steps along each cube axis. [default: 4]
-  --tries         Optimization tries per each cube vertex. [default: 3]
+  --levels        Number of uniform sampling steps along each square axis. [default: ${DEFAULT_OPTIMIZE_RANGE_DIVISOR}]
+  --terations     Even number of iterations. [default: ${DEFAULT_ITERATIONS}]
   --save          Save session to file.
   --restore       Restore session from file.
   -v, --version   Show version.
@@ -48,7 +54,7 @@ const run = async () => {
       '--color-space': String,
       '--prng': String,
       '--levels': Number,
-      '--tries': Number,
+      '--iterations': Number,
       '--save': String,
       '--restore': String,
       '--help': Boolean,
@@ -76,7 +82,7 @@ const run = async () => {
   const background = args['--background']
   const colorSpace = args['--color-space'] as 'p3' | 'srgb' | undefined
   const colors = args['--color']
-  const levels = args['--levels'] as INTERVAL | undefined
+  const levels = args['--levels']
   const randomSource = args['--prng'] as
     | 'xoshiro128++'
     | 'xorwow'
@@ -84,7 +90,7 @@ const run = async () => {
     | 'sfc32'
     | undefined
   const randomSeed = args['--seed']
-  const tries = args['--tries']
+  const iterations = args['--iterations']
   const output = args['--output']
 
   // required
@@ -132,15 +138,22 @@ const run = async () => {
     process.exit(1)
   }
 
-  if (levels !== undefined && ![2, 4, 5, 10, 20, 25, 50].includes(levels)) {
+  if (levels !== undefined && !OPTIMIZE_RANGE_DIVISORS.includes(levels)) {
     console.log(HELP)
-    console.error(`Option '--levels' must be one of 2, 4, 5, 10, 20, 25, 50.`)
+    console.error(
+      `Option '--levels' must be one of ${OPTIMIZE_RANGE_DIVISORS.join(', ')}.`
+    )
     process.exit(1)
   }
 
-  if (tries !== undefined && !(isInteger(tries) && tries >= 1)) {
+  if (
+    iterations !== undefined &&
+    !(isInteger(iterations) && iterations >= 2 && iterations % 2 === 0)
+  ) {
     console.log(HELP)
-    console.error(`Option '--tries' must be an integer greater or equal to 1.`)
+    console.error(
+      `Option '--iterations' must be an even integer greater or equal to 2.`
+    )
     process.exit(1)
   }
 
@@ -167,13 +180,16 @@ const run = async () => {
     levels,
     randomSeed,
     randomSource,
-    tries
+    iterations
   })
 
+  const total =
+    instance.store.options.iterations *
+    Math.pow(OPTIMIZE_RANGE_MAX / instance.store.options.interval, 2)
+
   const updateSpinnerOptimization = (type: TypeCepheusState) => {
-    const { pending, rejected, fulfilled } = instance.store.tasksCount()
+    const { rejected, fulfilled } = instance.store.tasksCount()
     const done = rejected + fulfilled
-    const total = pending + done
 
     spinner.text = `${done}/${total} palette optimization`
 
@@ -239,9 +255,9 @@ const run = async () => {
       console.log()
       console.log(
         wrap(
-          `${stats.cubesRemaining} out of ${
-            stats.cubesTotal
-          } cubes remaining. Cost range is (${stats.costMin.toFixed(
+          `${stats.squaresRemaining} out of ${
+            stats.squaresTotal
+          } squares remaining. Cost range is (${stats.costMin.toFixed(
             6
           )} … ${stats.costMax.toFixed(6)}) with ${stats.costMean.toFixed(
             6

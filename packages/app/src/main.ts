@@ -7,7 +7,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import App from './components/app.vue'
 import Home from './components/home.vue'
 
-import '@unocss/reset/tailwind.css'
+import '@unocss/reset/antfu.css'
 import 'uno.css'
 
 type State = Record<string, StateTree>
@@ -23,7 +23,7 @@ watch(pinia.state, () => {
 
 const router = createRouter({
   history: createWebHistory(),
-  routes: [{ path: '/home', component: Home }]
+  routes: [{ path: '/', component: Home }]
 })
 
 createApp(App).use(router).use(pinia).mount('#app')
