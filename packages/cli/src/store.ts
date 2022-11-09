@@ -118,17 +118,14 @@ const normalizeOptions = (options: StoreOptions): RequiredStoreOptions => {
       ).coords
   )
 
-  const background = fixNaN(
-    convert(
-      isString(options.background)
-        ? parse(options.background)
-        : options.background,
-      OKLCH,
-      {
-        inGamut: true
-      }
-    )
-  ).coords
+  const background = options.background.map(
+    (value) =>
+      fixNaN(
+        convert(isString(value) ? parse(value) : value, OKLCH, {
+          inGamut: true
+        })
+      ).coords
+  )
 
   const interval =
     OPTIMIZE_RANGE_MAX / (options.levels ?? DEFAULT_OPTIMIZE_RANGE_DIVISOR)

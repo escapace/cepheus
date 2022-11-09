@@ -255,12 +255,14 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
   const contrastScore =
     1 -
     mean(
-      map(
-        state,
-        (value) =>
-          Math.abs(contrast(options.background, value, { algorithm: 'APCA' })) /
-          (options.isDarkMode ? 108 : 108)
-        // (options.isDarkMode ? 108 : 106)
+      map(options.background, (background) =>
+        mean(
+          map(
+            state,
+            (value) =>
+              Math.abs(contrast(background, value, { algorithm: 'APCA' })) / 108
+          )
+        )
       )
     )
 
@@ -302,7 +304,7 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
         mean(
           map(state, (c, index) =>
             mean(
-              options.colorsSurrounding.map((colors) =>
+              map(options.colorsSurrounding, (colors) =>
                 distance(c, colors[index])
               )
             )
@@ -324,9 +326,9 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
 
   if (issues.length !== 0) {
     throw new Error(
-      `Out of bounds: ${issues
-        .map(([key, value]) => `${key}=${value}`)
-        .join(', ')}.`
+      `Out of bounds: ${map(issues, ([key, value]) => `${key}=${value}`).join(
+        ', '
+      )}.`
     )
   }
 
@@ -406,7 +408,8 @@ const normalizeOptions = (
   )
 
   const colorsSurrounding = map(options.colorsSurrounding, (value) =>
-    value.map(
+    map(
+      value,
       (coords): Color =>
         fixNaN({
           space: OKLCH,
@@ -416,16 +419,20 @@ const normalizeOptions = (
     )
   )
 
-  const background: Color = fixNaN({
-    space: OKLCH,
-    coords: options.background,
-    alpha: 1
-  })
+  const background = map(
+    options.background,
+    (coords): Color =>
+      fixNaN({
+        space: OKLCH,
+        coords,
+        alpha: 1
+      })
+  )
 
-  const isDarkMode =
-    mean(
-      map(colors, (value) => contrast(background, value, { algorithm: 'APCA' }))
-    ) < 0
+  // const isDarkMode =
+  //   mean(
+  //     map(colors, (value) => contrast(background, value, { algorithm: 'APCA' }))
+  //   ) < 0
 
   const prng = createPRNG(options.randomSeed, options.randomSource)
 
@@ -439,7 +446,6 @@ const normalizeOptions = (
     colorsSurrounding,
     background,
     prng,
-    isDarkMode,
     hyperparameters: {
       temperature: 6000,
       coolingRate: 0.99,
@@ -457,13 +463,13 @@ const normalizeOptions = (
       // pushes color to the chroma center
       chroma: 5,
       // pushes color away from background
-      contrast: 5,
+      contrast: 8.75,
       // pushes color away from pallete colors
       dispersion: 5,
       normal: 5,
-      protanopia: 5,
-      tritanopia: 5,
-      deuteranopia: 5,
+      protanopia: 3.75,
+      tritanopia: 3.75,
+      deuteranopia: 3.75,
       ...options.weights
     }),
     colorSpace,
@@ -496,7 +502,7 @@ const iterate = (options: RequiredOptimizeOptions) => {
       ? options.colors
       : options.colorsPrevious
 
-  const colors: Color[] = initialColors.map((color) =>
+  const colors: Color[] = map(initialColors, (color) =>
     randomColor(options, color)
   )
 
@@ -545,7 +551,7 @@ const iterate = (options: RequiredOptimizeOptions) => {
 
   return {
     cost: bestCost,
-    colors: bestColors.map((value): [number, number, number] => value.coords)
+    colors: map(bestColors, (value): [number, number, number] => value.coords)
   }
 }
 

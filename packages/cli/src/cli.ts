@@ -15,7 +15,7 @@ import {
 } from './constants'
 
 const HELP = `${chalk.bold('Usage:')}
-  cepheus --seed <string> --background <color> (--color <color>)...
+  cepheus --seed <string> (--background <color>)... (--color <color>)...
         [--color-space p3|srgb] [--prng xoshiro128++|xorwow|xorshift128|sfc32]
         [--iterations <number>] [--levels ${OPTIMIZE_RANGE_DIVISORS.join('|')}]
         [--restore <file>] [--save <file>]
@@ -25,7 +25,7 @@ const HELP = `${chalk.bold('Usage:')}
 ${chalk.bold('Options:')}
   --seed          Pseudorandom number generator seed.
   --color         Foreground color.
-  --background    Background color for calculation contrast value using
+  --background    Background color for contrast calculation value using
                   Advanced Perception of Color Algorithm (APCA).
   --output        Write output palette model to file.
   --color-space   Ensure that colors are inside the color space gamut. [default: p3]
@@ -39,7 +39,7 @@ ${chalk.bold('Options:')}
 
 ${chalk.bold('Example:')}
   cepheus --seed 'f7d4a9b6-1ea8-476d-9440-fb29251d5d73' \\
-    --background '#ffffff' \\
+    --background '#ffffff' --background '#000000' \\
     --color '#1473e6' --color '#d7373f' --color '#da7b11' --color '#268e6c' \\
     --output palette.json
 `
@@ -49,7 +49,7 @@ const run = async () => {
     {
       '--seed': String,
       '--color': [String],
-      '--background': String,
+      '--background': [String],
       '--output': String,
       '--color-space': String,
       '--prng': String,
@@ -101,9 +101,9 @@ const run = async () => {
     process.exit(1)
   }
 
-  if (background === undefined) {
+  if (background === undefined || background.length < 1) {
     console.log(HELP)
-    console.error(`Option '--background' must be defined.`)
+    console.error(`At least one '--background' option must be defined.`)
     process.exit(1)
   }
 

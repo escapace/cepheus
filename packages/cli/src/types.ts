@@ -58,7 +58,7 @@ export interface StoreOptions
     'colors' | 'background' | 'lightness' | 'chroma'
   > {
   colors: Color[] | string[]
-  background: Color | string
+  background: Color[] | string[]
   levels?: number
   iterations?: number
 }
@@ -66,7 +66,7 @@ export interface StoreOptions
 export interface RequiredStoreOptions
   extends Omit<StoreOptions, 'colors' | 'background' | 'levels'> {
   colors: Array<[number, number, number]>
-  background: [number, number, number]
+  background: Array<[number, number, number]>
   interval: number
   iterations: number
 }
@@ -81,7 +81,7 @@ export interface OptimizeOptions {
   colors: Array<[number, number, number]>
   colorsSurrounding?: Array<Array<[number, number, number]>>
   colorsPrevious?: Array<[number, number, number]>
-  background: [number, number, number]
+  background: Array<[number, number, number]>
   colorSpace?: ColorSpaceId
   hyperparameters?: {
     temperature: number
@@ -138,8 +138,7 @@ export type RequiredOptimizeOptions = DeepRequired<
   colors: Color[]
   colorsSurrounding: Color[][]
   colorsPrevious: Color[]
-  background: Color
-  isDarkMode: boolean
+  background: Color[]
 }
 
 export const enum TypeOptimizationState {
