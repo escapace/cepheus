@@ -127,7 +127,7 @@ function randomColor(
     }
   }
 
-  let iterations = 100000
+  let iterations = 10000
 
   while (iterations !== 0) {
     const value = next()

@@ -10,7 +10,9 @@ import {
 } from '@cepheus/color'
 import { setMaxListeners } from 'events'
 import { assign, isError, map, omit, range } from 'lodash-es'
-import Piscina from 'piscina'
+// import Piscina from 'piscina'
+import Tinypool from 'tinypool'
+
 import { createStore } from './store'
 import {
   CepheusState,
@@ -54,8 +56,10 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
 
   const store = createStore(options, options.initialState)
 
-  const piscina = new Piscina({
+  const pool = new Tinypool({
     filename: new URL('./worker.mjs', import.meta.url).href
+    // idleTimeout: 100,
+    // maxQueue: 'auto'
   })
 
   const abortController = new AbortController()
@@ -75,7 +79,7 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
           map(Object.entries(tasks), async ([key, task]) => {
             const options: OptimizeOptions = omit(task.options, ['key'])
 
-            const state = (await piscina.run(options, {
+            const state = (await pool.run(options, {
               name: 'optimize',
               signal: abortController.signal
             })) as OptimizationState
@@ -97,7 +101,7 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
       }
     })
     .then(async (value) => await store.actionUpdateStage(value))
-    .then(async () => await piscina.destroy())
+    .then(async () => await pool.destroy())
     .then(async () => {
       if (store.state().type === TypeCepheusState.OptimizationDone) {
         if (Array.from(store.squares()).length > 0) {

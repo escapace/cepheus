@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    "noImplicitThis": true,
+    "preserveValueImports": true,
+    "importsNotUsedAsValues": "error",
     "allowJs": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

@@ -2,10 +2,10 @@
 import data from '../sessions/light-model.json'
 import { cartesianProduct, szudzik } from '@cepheus/utilities'
 import { range } from 'lodash-es'
+import type { Color } from '@cepheus/color'
 import {
   ColorSpace,
   LCH,
-  Color,
   OKLCH,
   sRGB,
   convert,
@@ -65,7 +65,7 @@ const toStyle = (squareIndex: number, colorIndex: number) => {
   const colorSRGB = convert(colorOKLCH, sRGB, { inGamut: true })
   const colorP3 = convert(colorOKLCH, P3, { inGamut: true })
 
-  return [serialize(colorSRGB), serialize(colorOKLCH), serialize(colorP3)]
+  return [serialize(colorSRGB), serialize(colorP3)]
 }
 
 const colors = range(0, NUM_COLORS)
@@ -77,7 +77,7 @@ const colors = range(0, NUM_COLORS)
       <div
         v-for="(square, index) in squares"
         :key="index"
-        :style="{ background: toStyle(square, colorIndex) ?? 'none' }"
+        :style="{ 'backgroundColor': toStyle(square, colorIndex) as any ?? 'none' }"
         class="square"
       >
         <div class="label">
