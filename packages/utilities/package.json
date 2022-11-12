@@ -4,6 +4,9 @@
   "version": "0.0.0",
   "author": "escapace <opensource@escapace.com>",
   "bugs": "https://github.com/escapace/cepheus/issues",
+  "dependencies": {
+    "lodash-es": "4.17.21"
+  },
   "devDependencies": {
     "@types/chai": "4.3.4",
     "@types/lodash-es": "4.17.6",
@@ -18,7 +21,6 @@
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-editorconfig": "4.0.2",
     "eslint-plugin-no-null": "1.0.2",
-    "lodash-es": "4.17.21",
     "mocha": "10.1.0",
     "prettier": "2.7.1",
     "prettier-config-escapace": "1.0.4",
@@ -26,18 +28,15 @@
   },
   "exports": {
     ".": {
-      "import": "./lib/esm/index.mjs",
-      "require": "./lib/cjs/index.cjs"
+      "import": "./lib/esm/index.mjs"
     }
   },
   "files": [
-    "lib/cjs",
     "lib/esm",
     "lib/types"
   ],
   "homepage": "https://github.com/escapace/cepheus",
   "license": "MPL-2.0",
-  "main": "lib/cjs/index.cjs",
   "module": "lib/esm/index.mjs",
   "private": false,
   "publishConfig": {

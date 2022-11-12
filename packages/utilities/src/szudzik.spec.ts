@@ -1,7 +1,7 @@
 import { assert } from 'chai'
 import { szudzik, unszudzik } from './szudzik'
 
-describe('./src/utilities/szudzik.spec.ts', () => {
+describe('./src/szudzik.spec.ts', () => {
   it('.', () => {
     assert.equal(szudzik(1, 1), 3)
     assert.equal(szudzik(100, 100), 10200)

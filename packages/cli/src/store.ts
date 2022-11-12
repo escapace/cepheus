@@ -1,8 +1,11 @@
 import { convert, fixNaN, OKLCH, parse } from '@cepheus/color'
+import { isolate, N, neighbours, tile, toPosition } from '@cepheus/utilities'
+import { BigNumber } from 'bignumber.js'
 import Emittery from 'emittery'
 import {
   compact,
   difference,
+  flattenDeep,
   groupBy,
   isInteger,
   isString,
@@ -12,55 +15,29 @@ import {
   uniq
 } from 'lodash-es'
 import { mean, standardDeviation } from 'simple-statistics'
+import { DEFAULT_ITERATIONS, DEFAULT_N_DIVISOR, N_DIVISORS } from './constants'
 import {
   CepheusState,
-  Square,
   Model,
   OptimizationState,
   OptimizationStateFulfilled,
   OptimizationStatePending,
   RequiredStoreOptions,
+  Square,
   StoreOptions,
   Task,
   TaskOptions,
   TypeCepheusState,
   TypeOptimizationState
 } from './types'
-import { cartesianProduct, szudzik, unszudzik } from '@cepheus/utilities'
 import { hash } from './utilities/hash'
 import { objectHash } from './utilities/object-hash'
-import {
-  DEFAULT_OPTIMIZE_RANGE_DIVISOR,
-  DEFAULT_ITERATIONS,
-  OPTIMIZE_RANGE_DIVISORS,
-  OPTIMIZE_RANGE_MAX
-} from './constants'
 
-const fromXYZ = (value: number[], interval: number): number =>
-  szudzik(...value.map((v) => v / interval))
-
-const toXYZ = (square: Square): [number, number] =>
-  unszudzik(square.position, 2).map((v) => v * square.interval) as [
-    number,
-    number
-  ]
-
-const tile = (interval: number): Square[] => {
-  const distribution = range(0, OPTIMIZE_RANGE_MAX, interval)
-
-  return cartesianProduct(distribution, distribution).map(
-    (value): Square => ({
-      interval,
-      position: fromXYZ(value as [number, number], interval)
-    })
-  )
-}
-
-const rangeFrom = (square: Square) => {
-  const positions = toXYZ(square)
+const rangeFrom = (square: Square, interval: number) => {
+  const position = toPosition(square, interval)
 
   const [lightness, chroma] = range(2).map((_, index) => {
-    const range = [positions[index], positions[index] + square.interval] as [
+    const range = [position[index], position[index] + interval] as [
       number,
       number
     ]
@@ -77,35 +54,6 @@ const rangeFrom = (square: Square) => {
     lightness,
     chroma
   }
-}
-
-const surroundingSquares = (square: Square): Square[] => {
-  const [xs, ys] = toXYZ(square)
-  const i = square.interval
-
-  // y
-  // |
-  // |  nw  n  ne
-  // |  w   !   e
-  // |  sw  s  se
-  // |
-  // +------------x
-
-  const n = [xs, ys + i]
-  const ne = [xs + i, ys + i]
-  const e = [xs + i, ys]
-  const se = [xs + i, ys - i]
-  const s = [xs, ys - i]
-  const sw = [xs - i, ys - i]
-  const w = [xs - i, ys]
-  const nw = [xs - i, ys + i]
-
-  return [n, ne, e, se, s, sw, w, nw]
-    .filter(([x, y]) => x >= 0 && y >= 0)
-    .map((position) => ({
-      position: fromXYZ(position, i),
-      interval: i
-    }))
 }
 
 const normalizeOptions = (options: StoreOptions): RequiredStoreOptions => {
@@ -127,14 +75,11 @@ const normalizeOptions = (options: StoreOptions): RequiredStoreOptions => {
       ).coords
   )
 
-  const interval =
-    OPTIMIZE_RANGE_MAX / (options.levels ?? DEFAULT_OPTIMIZE_RANGE_DIVISOR)
+  const interval = N / (options.levels ?? DEFAULT_N_DIVISOR)
   const iterations = options.iterations ?? DEFAULT_ITERATIONS
 
-  if (!OPTIMIZE_RANGE_DIVISORS.includes(interval)) {
-    throw new Error(
-      `'levels' must be one of ${OPTIMIZE_RANGE_DIVISORS.join(', ')}`
-    )
+  if (!N_DIVISORS.includes(interval)) {
+    throw new Error(`'levels' must be one of ${N_DIVISORS.join(', ')}`)
   }
 
   if (!(isInteger(iterations) && iterations >= 2 && iterations % 2 === 0)) {
@@ -154,18 +99,14 @@ const normalizeOptions = (options: StoreOptions): RequiredStoreOptions => {
 
 const taskOptionsFrom = (
   square: Square,
+  interval: number,
   iteration: number,
   options: RequiredStoreOptions,
   colorsPrevious?: Array<[number, number, number]>,
   colorsSurrounding?: Array<Array<[number, number, number]>>
 ): TaskOptions => ({
-  key: hash(square.position, square.interval, options.randomSeed),
-  randomSeed: hash(
-    iteration,
-    square.position,
-    square.interval,
-    options.randomSeed
-  ),
+  key: hash(square, interval, options.randomSeed),
+  randomSeed: hash(iteration, square, interval, options.randomSeed),
   randomSource: options.randomSource,
   colors: options.colors,
   background: options.background,
@@ -174,7 +115,7 @@ const taskOptionsFrom = (
   weights: options.weights,
   colorsSurrounding,
   colorsPrevious,
-  ...rangeFrom(square)
+  ...rangeFrom(square, interval)
 })
 
 export const createStore = (
@@ -189,10 +130,12 @@ export const createStore = (
     state: CepheusState
   }>()
 
+  const interval = storeOptions.interval
+
   const squares = tile(storeOptions.interval)
 
-  const indexSquare: Map<number, Map<number, string>> = new Map(
-    squares.map((value) => [value.position, new Map<number, string>()])
+  const indexSquare: Map<Square, Map<number, string>> = new Map(
+    squares.map((value) => [value, new Map<number, string>()])
   )
 
   const indexState: Map<string, Task> = new Map()
@@ -216,23 +159,23 @@ export const createStore = (
       let options: TaskOptions
 
       if (iterationsLast.includes(iteration)) {
-        const colorsPrevious =
-          iteratedSquares.get(square.position)?.state.colors ?? []
+        const colorsPrevious = iteratedSquares.get(square)?.state.colors ?? []
         const colorsSurrounding = compact(
-          surroundingSquares(square).map(
-            (square) => iteratedSquares.get(square.position)?.options.colors
+          neighbours(square, interval, true).map(
+            (square) => iteratedSquares.get(square)?.options.colors
           )
         )
 
         options = taskOptionsFrom(
           square,
+          interval,
           iteration,
           storeOptions,
           colorsPrevious,
           colorsSurrounding
         )
       } else {
-        options = taskOptionsFrom(square, iteration, storeOptions)
+        options = taskOptionsFrom(square, interval, iteration, storeOptions)
       }
 
       // const options = taskOptionsFrom(square, iteration, storeOptions)
@@ -254,7 +197,7 @@ export const createStore = (
         }
       }
 
-      indexSquare.get(square.position)?.set(iteration, key)
+      indexSquare.get(square)?.set(iteration, key)
     })
   }
 
@@ -385,9 +328,9 @@ export const createStore = (
       Object.entries(selectorTasksFulfilled(iterations))
     )
 
-    return new Map(
+    const result = new Map(
       compact(
-        Array.from(indexSquare.entries()).map(([position, iterationsMap]) => {
+        Array.from(indexSquare.entries()).map(([square, iterationsMap]) => {
           const keys = compact(
             iterations.map((iteration) => iterationsMap.get(iteration))
           )
@@ -400,13 +343,21 @@ export const createStore = (
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const task = bestTasks.get(key)!
 
-            return [position, task]
+            return [square, task]
           }
 
           return undefined
         })
       )
     )
+
+    const squares = Array.from(result.keys())
+
+    difference(squares, isolate(squares, interval, false)[0]).forEach(
+      (square) => result.delete(square)
+    )
+
+    return result
   }
 
   const selectorStats = () => {
@@ -431,18 +382,30 @@ export const createStore = (
   }
 
   const selectorModel = (): Model => {
-    const squares = Array.from(selectorSquares(iterationsLast).entries()).map(
-      ([position, task]): [number, Array<[number, number, number]>] => {
-        return [position, task.state.colors]
-      }
+    const values = new Map(
+      Array.from(selectorSquares(iterationsLast).entries()).map(
+        ([square, task]): [number, Array<[number, number, number]>] => {
+          return [
+            square,
+            map(
+              task.state.colors,
+              (value) =>
+                map(value, (value) =>
+                  parseFloat(new BigNumber(value).toPrecision(5))
+                ) as [number, number, number]
+            )
+          ]
+        }
+      )
     )
 
     const interval = storeOptions.interval
+    const length = storeOptions.colors.length
+    const squares = Array.from(values.keys())
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const colors = flattenDeep(squares.map((square) => values.get(square)!))
 
-    return {
-      squares,
-      interval
-    }
+    return [interval, length, squares, colors]
   }
 
   const state = () => log[0]

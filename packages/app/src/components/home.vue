@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import data from '../sessions/light-model.json'
-import { cartesianProduct, szudzik } from '@cepheus/utilities'
+import { N, szudzik, cartesianProduct } from '@cepheus/utilities'
+import type { Model } from '@cepheus/utilities'
 import { range } from 'lodash-es'
 import type { Color } from '@cepheus/color'
+import _model from '../sessions/model.json'
 import {
   ColorSpace,
   LCH,
@@ -18,33 +19,51 @@ ColorSpace.register(sRGB)
 ColorSpace.register(OKLCH)
 ColorSpace.register(P3)
 
-const CUBE_INDEX = new Map(
-  data.squares as Array<[number, Array<[number, number, number]>]>
-)
+const chunk = <T>(array: T[], n = 3) =>
+  array.reduce((resultArray, item, index) => {
+    const chunkIndex = Math.floor(index / n)
 
-const interval = data.interval
-const levels = 120 / data.interval
-const distribution = range(0, 120, interval)
-const NUM_COLORS = 4
+    if (!resultArray[chunkIndex]) {
+      resultArray[chunkIndex] = [] // start a new chunk
+    }
+
+    resultArray[chunkIndex].push(item)
+
+    return resultArray
+  }, [] as T[][])
+
+const fromModel = (model: Model) => {
+  const [interval, length, squares, data] = model
+  const step = length * 3
+
+  const colors = new Map(
+    squares.map((square, index) => {
+      return [
+        square,
+        chunk(data.slice(index * step, (index + 1) * step)) as Array<
+          [number, number, number]
+        >
+      ]
+    })
+  )
+
+  return { interval, length, squares, colors }
+}
+
+const model = fromModel(_model as unknown as Model)
+const levels = N / model.interval
+const distribution = range(0, N, model.interval)
+const numColors = model.length
+const colors = range(0, numColors)
 
 const squares = (
-  cartesianProduct(distribution, distribution) as Array<[number, number]>
-)
-  .map((value) => szudzik(...value.map((v) => v / interval)))
-  .reverse()
-
-// if (CUBE_INDEX.has(index)) {
-//   const colors = CUBE_INDEX.get(index)!
-//
-//   const color = []
-// }
-//
-// return {
-//   style: {}
-// }
+  cartesianProduct([...distribution].reverse(), distribution) as Array<
+    [number, number]
+  >
+).map((value) => szudzik(...value.map((v) => v / model.interval)))
 
 const toStyle = (squareIndex: number, colorIndex: number) => {
-  const colors = CUBE_INDEX.get(squareIndex)
+  const colors = model.colors.get(squareIndex)
 
   if (colors === undefined) {
     return undefined
@@ -67,8 +86,6 @@ const toStyle = (squareIndex: number, colorIndex: number) => {
 
   return [serialize(colorSRGB), serialize(colorP3)]
 }
-
-const colors = range(0, NUM_COLORS)
 </script>
 
 <template>
@@ -95,7 +112,7 @@ const colors = range(0, NUM_COLORS)
 .grid-container {
   padding-left: 2em;
   padding-right: 2em;
-  width: calc(min(100vh, 100vw) * v-bind(NUM_COLORS));
+  width: calc(min(100vh, 100vw) * v-bind(numColors));
   height: 100vh;
   display: flex;
   flex-direction: row;
