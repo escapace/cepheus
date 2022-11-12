@@ -2,13 +2,11 @@ import type { Color, ColorSpace } from '@cepheus/color'
 import type { ColorSpaceId } from 'colorjs.io/fn'
 import type { DeepRequired } from 'utility-types'
 import type { PRNG, PRNGName } from './utilities/create-prng'
+export type { Model } from '@cepheus/utilities'
 
 export { PRNG, PRNGName }
 
-export interface Square {
-  interval: number
-  position: number
-}
+export type Square = number
 
 export interface Task<T extends OptimizationState = OptimizationState> {
   state: T
@@ -37,7 +35,6 @@ export interface CepheusStateOptimizationAbort {
 
 export interface CepheusStateDone {
   type: TypeCepheusState.Done
-  model: Model
 }
 
 export interface CepheusStateError {
@@ -169,8 +166,3 @@ export type OptimizationState =
   | OptimizationStateFulfilled
   | OptimizationStateRejected
   | OptimizationStatePending
-
-export interface Model {
-  squares: Array<[number, Array<[number, number, number]>]>
-  interval: number
-}

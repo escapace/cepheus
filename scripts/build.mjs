@@ -24,7 +24,7 @@ const getOptions = (format) => ({
   /*   : ['src/index.ts'] */
 })
 
-const formats = name === 'utilities' ? ['cjs', 'esm'] : ['esm']
+const formats = ['esm']
 
 process.umask(0o022)
 process.chdir(cwd)

@@ -7,17 +7,13 @@ import path, { resolve } from 'path'
 import { Task, TypeCepheusState } from './types'
 import chalk from 'chalk'
 import wrap from 'wrap-ansi'
-import {
-  OPTIMIZE_RANGE_DIVISORS,
-  DEFAULT_OPTIMIZE_RANGE_DIVISOR,
-  DEFAULT_ITERATIONS,
-  OPTIMIZE_RANGE_MAX
-} from './constants'
+import { N } from '@cepheus/utilities'
+import { N_DIVISORS, DEFAULT_N_DIVISOR, DEFAULT_ITERATIONS } from './constants'
 
 const HELP = `${chalk.bold('Usage:')}
   cepheus --seed <string> (--background <color>)... (--color <color>)...
         [--color-space p3|srgb] [--prng xoshiro128++|xorwow|xorshift128|sfc32]
-        [--iterations <number>] [--levels ${OPTIMIZE_RANGE_DIVISORS.join('|')}]
+        [--iterations <number>] [--levels ${N_DIVISORS.join('|')}]
         [--restore <file>] [--save <file>]
   cepheus -h | --help
   cepheus --version
@@ -30,7 +26,7 @@ ${chalk.bold('Options:')}
   --output        Write output palette model to file.
   --color-space   Ensure that colors are inside the color space gamut. [default: p3]
   --prng          Pseudorandom number generator. [default: xoshiro128++]
-  --levels        Number of uniform sampling steps along each square axis. [default: ${DEFAULT_OPTIMIZE_RANGE_DIVISOR}]
+  --levels        Number of uniform sampling steps along each square axis. [default: ${DEFAULT_N_DIVISOR}]
   --terations     Even number of iterations. [default: ${DEFAULT_ITERATIONS}]
   --save          Save session to file.
   --restore       Restore session from file.
@@ -138,11 +134,9 @@ const run = async () => {
     process.exit(1)
   }
 
-  if (levels !== undefined && !OPTIMIZE_RANGE_DIVISORS.includes(levels)) {
+  if (levels !== undefined && !N_DIVISORS.includes(levels)) {
     console.log(HELP)
-    console.error(
-      `Option '--levels' must be one of ${OPTIMIZE_RANGE_DIVISORS.join(', ')}.`
-    )
+    console.error(`Option '--levels' must be one of ${N_DIVISORS.join(', ')}.`)
     process.exit(1)
   }
 
@@ -185,7 +179,7 @@ const run = async () => {
 
   const total =
     instance.store.options.iterations *
-    Math.pow(OPTIMIZE_RANGE_MAX / instance.store.options.interval, 2)
+    Math.pow(N / instance.store.options.interval, 2)
 
   const updateSpinnerOptimization = (type: TypeCepheusState) => {
     const { rejected, fulfilled } = instance.store.tasksCount()

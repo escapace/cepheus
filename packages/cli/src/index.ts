@@ -106,8 +106,7 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
       if (store.state().type === TypeCepheusState.OptimizationDone) {
         if (Array.from(store.squares()).length > 0) {
           return await store.actionUpdateStage({
-            type: TypeCepheusState.Done,
-            model: store.model()
+            type: TypeCepheusState.Done
           })
         }
 

@@ -2,7 +2,7 @@ import { assert } from 'chai'
 import { range } from 'lodash-es'
 import { cartesianProduct } from './cartesian-product'
 
-describe('./src/utilities/cartesian-product.spec.ts', () => {
+describe('./src/cartesian-product.spec.ts', () => {
   it('.', () => {
     assert.deepEqual(cartesianProduct([1, 2], [3, 4], [5, 6]), [
       [1, 3, 5],

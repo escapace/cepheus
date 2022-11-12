@@ -7,6 +7,7 @@
   "dependencies": {
     "@cepheus/color": "workspace:*",
     "@cepheus/utilities": "workspace:*",
+    "@josh-brown/vector": "4.2.0",
     "@types/lodash-es": "4.17.6",
     "lodash-es": "4.17.21",
     "snaproll": "0.1.1"

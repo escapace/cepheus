@@ -21,7 +21,6 @@ import {
   standardDeviation,
   sum
 } from 'simple-statistics'
-import { OPTIMIZE_RANGE_MAX } from './constants'
 import {
   OptimizationState,
   OptimizeOptions,
@@ -34,6 +33,7 @@ import { isWithin } from './utilities/is-within'
 import { percentile } from './utilities/percentile'
 import { randomWithin } from './utilities/random-within'
 import { relativeDifference } from './utilities/relative-difference'
+import { N } from '@cepheus/utilities'
 
 class IterationError extends Error {
   constructor(message: string) {
@@ -370,18 +370,15 @@ const normalizeWeights = (
 const normalizeLightness = (
   value: Required<Exclude<OptimizeOptions['lightness'], undefined>>
 ): Required<Exclude<OptimizeOptions['lightness'], undefined>> => ({
-  range: map(value.range, (v) => v / OPTIMIZE_RANGE_MAX) as [number, number],
-  target: value.target / OPTIMIZE_RANGE_MAX
+  range: map(value.range, (v) => v / N) as [number, number],
+  target: value.target / N
 })
 
 const normalizeChroma = (
   value: Required<Exclude<OptimizeOptions['chroma'], undefined>>
 ): Required<Exclude<OptimizeOptions['chroma'], undefined>> => ({
-  range: map(value.range, (v) => (v / OPTIMIZE_RANGE_MAX) * 0.4) as [
-    number,
-    number
-  ],
-  target: (value.target / OPTIMIZE_RANGE_MAX) * 0.4
+  range: map(value.range, (v) => (v / N) * 0.4) as [number, number],
+  target: (value.target / N) * 0.4
 })
 
 const normalizeOptions = (
@@ -457,13 +454,13 @@ const normalizeOptions = (
       // pushes color to initial value
       difference: 45,
       // pushes color away from surrounding colors
-      surround: 15,
+      surround: 10,
       // pushes color to the lightness center
-      lightness: 5,
+      lightness: 8.75,
       // pushes color to the chroma center
-      chroma: 5,
+      chroma: 8.75,
       // pushes color away from background
-      contrast: 8.75,
+      contrast: 6.25,
       // pushes color away from pallete colors
       dispersion: 5,
       normal: 5,
@@ -474,13 +471,13 @@ const normalizeOptions = (
     }),
     colorSpace,
     lightness: normalizeLightness({
-      range: [0, OPTIMIZE_RANGE_MAX],
-      target: mean(options.lightness?.range ?? [0, OPTIMIZE_RANGE_MAX]),
+      range: [0, N],
+      target: mean(options.lightness?.range ?? [0, N]),
       ...options.lightness
     }),
     chroma: normalizeChroma({
-      range: [0, OPTIMIZE_RANGE_MAX],
-      target: mean(options.chroma?.range ?? [0, OPTIMIZE_RANGE_MAX]),
+      range: [0, N],
+      target: mean(options.chroma?.range ?? [0, N]),
       ...options.chroma
     })
   } as RequiredOptimizeOptions
