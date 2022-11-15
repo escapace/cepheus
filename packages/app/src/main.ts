@@ -5,7 +5,9 @@ import { createApp, watch } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 import App from './components/app.vue'
-import Home from './components/home.vue'
+import HomeA from './components/home.vue'
+import HomeB from './components/home2.vue'
+import Canvas from './components/canvas.vue'
 
 import '@unocss/reset/antfu.css'
 import 'uno.css'
@@ -23,7 +25,11 @@ watch(pinia.state, () => {
 
 const router = createRouter({
   history: createWebHistory(),
-  routes: [{ path: '/', component: Home }]
+  routes: [
+    { path: '/', component: HomeA },
+    { path: '/b', component: HomeB },
+    { path: '/c', component: Canvas }
+  ]
 })
 
 createApp(App).use(router).use(pinia).mount('#app')

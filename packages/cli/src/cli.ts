@@ -27,7 +27,7 @@ ${chalk.bold('Options:')}
   --color-space   Ensure that colors are inside the color space gamut. [default: p3]
   --prng          Pseudorandom number generator. [default: xoshiro128++]
   --levels        Number of uniform sampling steps along each square axis. [default: ${DEFAULT_N_DIVISOR}]
-  --terations     Even number of iterations. [default: ${DEFAULT_ITERATIONS}]
+  --terations     Number of iterations. [default: ${DEFAULT_ITERATIONS}]
   --save          Save session to file.
   --restore       Restore session from file.
   -v, --version   Show version.
@@ -140,13 +140,10 @@ const run = async () => {
     process.exit(1)
   }
 
-  if (
-    iterations !== undefined &&
-    !(isInteger(iterations) && iterations >= 2 && iterations % 2 === 0)
-  ) {
+  if (iterations !== undefined && !(isInteger(iterations) && iterations >= 2)) {
     console.log(HELP)
     console.error(
-      `Option '--iterations' must be an even integer greater or equal to 2.`
+      `Option '--iterations' must be an integer greater or equal to 2.`
     )
     process.exit(1)
   }

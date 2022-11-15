@@ -9,7 +9,7 @@ import {
   serialize,
   sRGB
 } from '@cepheus/color'
-import { N, toSquare, type Model } from '@cepheus/utilities'
+import type { Model } from '@cepheus/utilities'
 import { range } from 'lodash-es'
 import { fromModel } from '../drafts'
 import _model from '../sessions/model-3.json'
@@ -19,8 +19,11 @@ ColorSpace.register(sRGB)
 ColorSpace.register(OKLCH)
 ColorSpace.register(P3)
 
+const N = 100
 const model = fromModel(_model as unknown as Model)
-const levels = N / model.interval
+const targetLevels = 100 // 120 / model.interval
+const interval = 100 / targetLevels
+const levels = N / interval
 const numColors = model.length
 const colors = range(0, numColors)
 
@@ -31,25 +34,24 @@ const cartesianProduct = <T>(...sets: T[][]) =>
     [[]]
   )
 
-const tile = (interval: number): number[] => {
+const tile = (interval: number) => {
   const tuple = range(0, N, interval)
 
-  return cartesianProduct([...tuple].reverse(), tuple).map((value): number =>
-    toSquare(value as [number, number], interval)
-  )
+  return cartesianProduct([...tuple].reverse(), tuple) as Array<
+    [number, number]
+  >
+  // .map((value): number =>
+  //   toSquare(value as [number, number], interval)
+  // )
 }
 
-const squares = tile(model.interval)
+const squares = tile(interval)
 
-const toStyle = (squareIndex: number, colorIndex: number) => {
-  const colors = model.colors.get(squareIndex)
+const toStyle = (xy: [number, number], colorIndex: number) => {
+  const [x, y] = xy
 
-  if (colors === undefined) {
-    return undefined
-  }
-
-  const coords = colors[colorIndex]
-
+  const coords = model.get(x, y, colorIndex)
+  //
   if (coords === undefined) {
     return undefined
   }

@@ -44,7 +44,7 @@ class IterationError extends Error {
   }
 }
 
-const HUE_ANGLE = 30
+const HUE_ANGLE = 20
 
 function randomColor(
   options: RequiredOptimizeOptions,
@@ -295,22 +295,6 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
       ].sort((a, b) => a - b)
     )
 
-  // reward the increase of the centeral tendency of the distance from
-  // surrounding colors
-  const surroundingColorsScore =
-    options.colorsSurrounding.length === 0
-      ? 1
-      : 1 -
-        mean(
-          map(state, (c, index) =>
-            mean(
-              map(options.colorsSurrounding, (colors) =>
-                distance(c, colors[index])
-              )
-            )
-          )
-        )
-
   const issues = Object.entries({
     chromaScore,
     contrastScore,
@@ -320,8 +304,7 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
     lightnessScore,
     normalScore,
     protanopiaScore,
-    tritanopiaScore,
-    surroundingColorsScore
+    tritanopiaScore
   }).filter(([_, value]) => value > 1 || value < 0 || isNaN(value))
 
   if (issues.length !== 0) {
@@ -354,8 +337,7 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
     options.weights.lightness * lightnessScore +
     options.weights.normal * normalScore +
     options.weights.protanopia * protanopiaScore +
-    options.weights.tritanopia * tritanopiaScore +
-    options.weights.surround * surroundingColorsScore
+    options.weights.tritanopia * tritanopiaScore
   )
 }
 
@@ -394,28 +376,6 @@ const normalizeOptions = (
       })
   )
 
-  const colorsPrevious = map(
-    options.colorsPrevious ?? [],
-    (coords): Color =>
-      fixNaN({
-        space: OKLCH,
-        coords,
-        alpha: 1
-      })
-  )
-
-  const colorsSurrounding = map(options.colorsSurrounding, (value) =>
-    map(
-      value,
-      (coords): Color =>
-        fixNaN({
-          space: OKLCH,
-          coords,
-          alpha: 1
-        })
-    )
-  )
-
   const background = map(
     options.background,
     (coords): Color =>
@@ -439,8 +399,6 @@ const normalizeOptions = (
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const value = {
     colors,
-    colorsPrevious,
-    colorsSurrounding,
     background,
     prng,
     hyperparameters: {
@@ -452,9 +410,7 @@ const normalizeOptions = (
 
     weights: normalizeWeights({
       // pushes color to initial value
-      difference: 45,
-      // pushes color away from surrounding colors
-      surround: 10,
+      difference: 47.5,
       // pushes color to the lightness center
       lightness: 8.75,
       // pushes color to the chroma center
@@ -462,8 +418,8 @@ const normalizeOptions = (
       // pushes color away from background
       contrast: 6.25,
       // pushes color away from pallete colors
-      dispersion: 5,
-      normal: 5,
+      dispersion: 10,
+      normal: 7.5,
       protanopia: 3.75,
       tritanopia: 3.75,
       deuteranopia: 3.75,
@@ -494,10 +450,7 @@ const normalizeOptions = (
 }
 
 const iterate = (options: RequiredOptimizeOptions) => {
-  const initialColors: Color[] =
-    options.colorsPrevious.length === 0
-      ? options.colors
-      : options.colorsPrevious
+  const initialColors: Color[] = options.colors
 
   const colors: Color[] = map(initialColors, (color) =>
     randomColor(options, color)

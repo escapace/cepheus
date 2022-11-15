@@ -1,5 +1,5 @@
 import { convert, fixNaN, OKLCH, parse } from '@cepheus/color'
-import { isolate, N, neighbours, tile, toPosition } from '@cepheus/utilities'
+import { isolate, N, tile, toPosition } from '@cepheus/utilities'
 import { BigNumber } from 'bignumber.js'
 import Emittery from 'emittery'
 import {
@@ -82,10 +82,8 @@ const normalizeOptions = (options: StoreOptions): RequiredStoreOptions => {
     throw new Error(`'levels' must be one of ${N_DIVISORS.join(', ')}`)
   }
 
-  if (!(isInteger(iterations) && iterations >= 2 && iterations % 2 === 0)) {
-    throw new Error(
-      `'iterations' must be an even integer greater or equal to 2`
-    )
+  if (!(isInteger(iterations) && iterations >= 2)) {
+    throw new Error(`'iterations' must be an integer greater or equal to 2`)
   }
 
   return {
@@ -101,9 +99,7 @@ const taskOptionsFrom = (
   square: Square,
   interval: number,
   iteration: number,
-  options: RequiredStoreOptions,
-  colorsPrevious?: Array<[number, number, number]>,
-  colorsSurrounding?: Array<Array<[number, number, number]>>
+  options: RequiredStoreOptions
 ): TaskOptions => ({
   key: hash(square, interval, options.randomSeed),
   randomSeed: hash(iteration, square, interval, options.randomSeed),
@@ -113,8 +109,6 @@ const taskOptionsFrom = (
   colorSpace: options.colorSpace,
   hyperparameters: options.hyperparameters,
   weights: options.weights,
-  colorsSurrounding,
-  colorsPrevious,
   ...rangeFrom(square, interval)
 })
 
@@ -144,39 +138,11 @@ export const createStore = (
     Object.entries(initialState)
   )
 
-  const iterations = range(storeOptions.iterations)
-  const iterationsFirst = iterations.slice(0, iterations.length / 2)
-  const iterationsLast = difference(iterations, iterationsFirst)
-
-  let iteratedSquares: Map<number, Task<OptimizationStateFulfilled>>
+  const allIterations = range(storeOptions.iterations)
 
   const iterate = (iteration: number) => {
-    if (iteration === iterationsLast[0]) {
-      iteratedSquares = selectorSquares(iterationsFirst)
-    }
-
     squares.forEach((square) => {
-      let options: TaskOptions
-
-      if (iterationsLast.includes(iteration)) {
-        const colorsPrevious = iteratedSquares.get(square)?.state.colors ?? []
-        const colorsSurrounding = compact(
-          neighbours(square, interval, true).map(
-            (square) => iteratedSquares.get(square)?.options.colors
-          )
-        )
-
-        options = taskOptionsFrom(
-          square,
-          interval,
-          iteration,
-          storeOptions,
-          colorsPrevious,
-          colorsSurrounding
-        )
-      } else {
-        options = taskOptionsFrom(square, interval, iteration, storeOptions)
-      }
+      const options = taskOptionsFrom(square, interval, iteration, storeOptions)
 
       // const options = taskOptionsFrom(square, iteration, storeOptions)
 
@@ -322,7 +288,7 @@ export const createStore = (
   }
 
   const selectorSquares = (
-    iterations: number[] = iterationsLast
+    iterations: number[] = allIterations
   ): Map<number, Task<OptimizationStateFulfilled>> => {
     const bestTasks = new Map(
       Object.entries(selectorTasksFulfilled(iterations))
@@ -361,7 +327,7 @@ export const createStore = (
   }
 
   const selectorStats = () => {
-    const squares = Array.from(selectorSquares(iterationsLast).entries())
+    const squares = Array.from(selectorSquares(allIterations).entries())
     const squaresRemaining = squares.length
     const squaresTotal = indexSquare.size
     const costs = squares.map(([_, task]) => task.state.cost)
@@ -383,7 +349,7 @@ export const createStore = (
 
   const selectorModel = (): Model => {
     const values = new Map(
-      Array.from(selectorSquares(iterationsLast).entries()).map(
+      Array.from(selectorSquares(allIterations).entries()).map(
         ([square, task]): [number, Array<[number, number, number]>] => {
           return [
             square,
