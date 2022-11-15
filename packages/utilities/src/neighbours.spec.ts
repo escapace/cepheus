@@ -9,9 +9,9 @@ describe('./src/neighbours.spec.ts', () => {
     const interval = N / 3
 
     assert.deepEqual(
-      neighbours(toSquare([40, 40], interval), interval, false).map((square) =>
-        toPosition(square, N / 3)
-      ),
+      neighbours(toSquare([40, 40], interval), interval, false)
+        .filter((value): value is number => value !== undefined)
+        .map((square) => toPosition(square, N / 3)),
       [
         [40, 80],
         [80, 40],
@@ -21,9 +21,9 @@ describe('./src/neighbours.spec.ts', () => {
     )
 
     assert.deepEqual(
-      neighbours(toSquare([40, 40], interval), interval, true).map((square) =>
-        toPosition(square, N / 3)
-      ),
+      neighbours(toSquare([40, 40], interval), interval, true)
+        .filter((value): value is number => value !== undefined)
+        .map((square) => toPosition(square, N / 3)),
       [
         [40, 80],
         [80, 80],
@@ -37,9 +37,9 @@ describe('./src/neighbours.spec.ts', () => {
     )
 
     assert.deepEqual(
-      neighbours(toSquare([0, 0], interval), interval, false).map((square) =>
-        toPosition(square, N / 3)
-      ),
+      neighbours(toSquare([0, 0], interval), interval, false)
+        .filter((value): value is number => value !== undefined)
+        .map((square) => toPosition(square, N / 3)),
       [
         [0, 40],
         [40, 0]
@@ -47,9 +47,9 @@ describe('./src/neighbours.spec.ts', () => {
     )
 
     assert.deepEqual(
-      neighbours(toSquare([80, 80], interval), interval, false).map((square) =>
-        toPosition(square, N / 3)
-      ),
+      neighbours(toSquare([80, 80], interval), interval, false)
+        .filter((value): value is number => value !== undefined)
+        .map((square) => toPosition(square, N / 3)),
       [
         [80, 40],
         [40, 80]

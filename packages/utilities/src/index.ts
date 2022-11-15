@@ -1,7 +1,7 @@
 export { cartesianProduct } from './cartesian-product'
 export { N } from './constants'
 export { neighbours } from './neighbours'
-export { szudzik, unszudzik } from './szudzik'
+export { szudzik, unszudzik, szudzik2, unszudzik2 } from './szudzik'
 export { tile } from './tile'
 export { toPosition } from './to-position'
 export { toSquare } from './to-square'

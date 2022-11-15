@@ -76,8 +76,6 @@ export interface OptimizeOptions {
   randomSeed: string
   randomSource?: PRNGName
   colors: Array<[number, number, number]>
-  colorsSurrounding?: Array<Array<[number, number, number]>>
-  colorsPrevious?: Array<[number, number, number]>
   background: Array<[number, number, number]>
   colorSpace?: ColorSpaceId
   hyperparameters?: {
@@ -86,7 +84,6 @@ export interface OptimizeOptions {
     cutoff: number
   }
   weights?: {
-    surround: number
     chroma: number
     contrast: number
     deuteranopia: number
@@ -121,20 +118,12 @@ export interface OptimizeOptions {
 export type RequiredOptimizeOptions = DeepRequired<
   Omit<
     OptimizeOptions,
-    | 'colorSpace'
-    | 'colors'
-    | 'background'
-    | 'randomSeed'
-    | 'randomSource'
-    | 'colorsPrevious'
-    | 'colorsSurrounding'
+    'colorSpace' | 'colors' | 'background' | 'randomSeed' | 'randomSource'
   >
 > & {
   prng: PRNG
   colorSpace: ColorSpace
   colors: Color[]
-  colorsSurrounding: Color[][]
-  colorsPrevious: Color[]
   background: Color[]
 }
 

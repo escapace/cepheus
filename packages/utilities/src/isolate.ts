@@ -15,9 +15,11 @@ export const isolate = (
       if (squares.includes(square) && !seen.includes(square)) {
         seen.push(square)
 
-        neighbours(square, interval, intercardinal).forEach((square) =>
-          next(square)
-        )
+        neighbours(square, interval, intercardinal).forEach((square) => {
+          if (square !== undefined) {
+            next(square)
+          }
+        })
       }
     }
 

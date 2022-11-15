@@ -1,66 +1,45 @@
 <script setup lang="ts">
-import { N, szudzik, cartesianProduct } from '@cepheus/utilities'
-import type { Model } from '@cepheus/utilities'
-import { range } from 'lodash-es'
 import type { Color } from '@cepheus/color'
-import _model from '../sessions/model.json'
 import {
   ColorSpace,
+  convert,
   LCH,
   OKLCH,
-  sRGB,
-  convert,
   P3,
-  serialize
+  serialize,
+  sRGB
 } from '@cepheus/color'
+import { N, toSquare, type Model } from '@cepheus/utilities'
+import { range } from 'lodash-es'
+import { fromModel } from '../drafts'
+import _model from '../sessions/model-3.json'
 
 ColorSpace.register(LCH)
 ColorSpace.register(sRGB)
 ColorSpace.register(OKLCH)
 ColorSpace.register(P3)
 
-const chunk = <T>(array: T[], n = 3) =>
-  array.reduce((resultArray, item, index) => {
-    const chunkIndex = Math.floor(index / n)
-
-    if (!resultArray[chunkIndex]) {
-      resultArray[chunkIndex] = [] // start a new chunk
-    }
-
-    resultArray[chunkIndex].push(item)
-
-    return resultArray
-  }, [] as T[][])
-
-const fromModel = (model: Model) => {
-  const [interval, length, squares, data] = model
-  const step = length * 3
-
-  const colors = new Map(
-    squares.map((square, index) => {
-      return [
-        square,
-        chunk(data.slice(index * step, (index + 1) * step)) as Array<
-          [number, number, number]
-        >
-      ]
-    })
-  )
-
-  return { interval, length, squares, colors }
-}
-
 const model = fromModel(_model as unknown as Model)
 const levels = N / model.interval
-const distribution = range(0, N, model.interval)
 const numColors = model.length
 const colors = range(0, numColors)
 
-const squares = (
-  cartesianProduct([...distribution].reverse(), distribution) as Array<
-    [number, number]
-  >
-).map((value) => szudzik(...value.map((v) => v / model.interval)))
+const cartesianProduct = <T>(...sets: T[][]) =>
+  sets.reduce<T[][]>(
+    (accSets, set) =>
+      accSets.flatMap((accSet) => set.map((value) => [value, ...accSet])),
+    [[]]
+  )
+
+const tile = (interval: number): number[] => {
+  const tuple = range(0, N, interval)
+
+  return cartesianProduct([...tuple].reverse(), tuple).map((value): number =>
+    toSquare(value as [number, number], interval)
+  )
+}
+
+const squares = tile(model.interval)
 
 const toStyle = (squareIndex: number, colorIndex: number) => {
   const colors = model.colors.get(squareIndex)
@@ -129,7 +108,7 @@ const toStyle = (squareIndex: number, colorIndex: number) => {
   grid-template-columns: repeat(v-bind(levels), 1fr);
   grid-template-rows: repeat(v-bind(levels), 1fr);
   place-items: center;
-  gap: calc(10% / v-bind(levels));
+  /* gap: calc(1% / v-bind(levels)); */
 }
 
 .square {
