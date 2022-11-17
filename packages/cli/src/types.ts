@@ -8,29 +8,39 @@ export { PRNG, PRNGName }
 
 export type Square = number
 
-export interface Task<T extends OptimizationState = OptimizationState> {
+export interface OptimizeTask<T extends OptimizationState = OptimizationState> {
   state: T
-  options: TaskOptions
+  options: OptimizeTaskOptions
 }
 
 export enum TypeCepheusState {
-  None,
-  OptimizationDone,
-  OptimizationAbort,
+  Abort,
   Done,
-  Error
+  Error,
+  Optimization,
+  OptimizationDone,
+  TriangleFitting,
+  TriangleFittingDone
 }
 
-export interface CepheusStateNone {
-  type: TypeCepheusState.None
+export interface CepheusStateOptimization {
+  type: TypeCepheusState.Optimization
 }
 
 export interface CepheusStateOptimizationDone {
   type: TypeCepheusState.OptimizationDone
 }
 
-export interface CepheusStateOptimizationAbort {
-  type: TypeCepheusState.OptimizationAbort
+export interface CepheusStateAbort {
+  type: TypeCepheusState.Abort
+}
+
+export interface CepheusStateTriangleFitting {
+  type: TypeCepheusState.TriangleFitting
+}
+
+export interface CepheusStateTriangleFittingDone {
+  type: TypeCepheusState.TriangleFittingDone
 }
 
 export interface CepheusStateDone {
@@ -43,11 +53,13 @@ export interface CepheusStateError {
 }
 
 export type CepheusState =
-  | CepheusStateNone
-  | CepheusStateOptimizationDone
-  | CepheusStateOptimizationAbort
-  | CepheusStateError
+  | CepheusStateAbort
   | CepheusStateDone
+  | CepheusStateError
+  | CepheusStateOptimization
+  | CepheusStateOptimizationDone
+  | CepheusStateTriangleFitting
+  | CepheusStateTriangleFittingDone
 
 export interface StoreOptions
   extends Omit<
@@ -68,7 +80,7 @@ export interface RequiredStoreOptions
   iterations: number
 }
 
-export interface TaskOptions extends OptimizeOptions {
+export interface OptimizeTaskOptions extends OptimizeOptions {
   key: string
 }
 
@@ -155,3 +167,17 @@ export type OptimizationState =
   | OptimizationStateFulfilled
   | OptimizationStateRejected
   | OptimizationStatePending
+
+export type Pixel = [number, number]
+export type Triangle = [Pixel, Pixel, Pixel]
+export type TriangleTaskResult = undefined | [triangle: Triangle, area: number]
+
+export interface TriangleTaskOptions {
+  triangles: Triangle[]
+  pixels: number[]
+}
+
+export interface TriangleOptions {
+  factors: [Pixel[], Pixel[], Pixel[]]
+  pixels: number[]
+}

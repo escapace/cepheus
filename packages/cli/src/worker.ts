@@ -1,1 +1,2 @@
-export { optimize } from './optimize'
+export { optimize } from './workers/optimize'
+export { triangle } from './workers/triangle'

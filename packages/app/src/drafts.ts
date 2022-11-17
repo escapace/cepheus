@@ -1,10 +1,4 @@
-import {
-  N,
-  szudzik2,
-  toPosition,
-  toSquare,
-  type Model
-} from '@cepheus/utilities'
+import { N, szudzik2, type Model } from '@cepheus/utilities'
 
 export function constrain(angle: number) {
   return ((angle % 360) + 360) % 360
@@ -40,6 +34,9 @@ const chunk = <T>(array: T[], n = 3) =>
 const distanceF = (px: number, py: number, qx = 0, qy = 0) =>
   Math.abs(px - qx) + Math.abs(py - qy)
 
+// const distanceF = (px: number, py: number, qx = 0, qy = 0) =>
+//   Math.hypot(px - qx, py - qy)
+
 function lerp(v0: number, v1: number, t: number) {
   return v0 * (1 - t) + v1 * t
 }
@@ -51,6 +48,34 @@ const normalize = (values: number[]) => {
 
   return values.map((value) => value / s)
 }
+
+// function erf(x: number) {
+//     const t = 1 / (1 + 0.5 * Math.abs(x));
+//     const tau =
+//         t *
+//         Math.exp(
+//             -x * x +
+//                 ((((((((0.17087277 * t - 0.82215223) * t + 1.48851587) * t -
+//                     1.13520398) *
+//                     t +
+//                     0.27886807) *
+//                     t -
+//                     0.18628806) *
+//                     t +
+//                     0.09678418) *
+//                     t +
+//                     0.37409196) *
+//                     t +
+//                     1.00002368) *
+//                     t -
+//                 1.26551223
+//         );
+//     if (x >= 0) {
+//         return 1 - tau;
+//     } else {
+//         return tau - 1;
+//     }
+// }
 
 export function erfc(x: number): number {
   const z = Math.abs(x)
@@ -64,27 +89,8 @@ export function erfc(x: number): number {
   return x >= 0 ? r : 2 - r
 }
 
-export const neighbours = (square: number, interval: number): number[] => {
-  const [xs, ys] = toPosition(square, interval)
-  const i = interval
-
-  const n = [xs, ys + i]
-  const e = [xs + i, ys]
-  const s = [xs, ys - i]
-  const w = [xs - i, ys]
-
-  const ne = [xs + i, ys + i]
-  const se = [xs + i, ys - i]
-  const sw = [xs - i, ys - i]
-  const nw = [xs - i, ys + i]
-
-  return [n, ne, e, se, s, sw, w, nw]
-    .filter(([x, y]) => x >= 0 && y >= 0 && x < N && y < N)
-    .map((position) => toSquare(position as [number, number], i))
-}
-
 export const fromModel = (model: Model) => {
-  const [interval, length, squares, data] = model
+  const [interval, length, triangle, squares, data] = model
   const step = length * 3
 
   const colors = new Map(
@@ -98,7 +104,7 @@ export const fromModel = (model: Model) => {
     })
   )
 
-  const maxDistance = interval / 2
+  const maxDistance = interval
 
   const toWeight = (x: number, y: number, sx: number, sy: number) =>
     erfc(distanceF(x, y, sx + interval / 2, sy + interval / 2) / maxDistance)
@@ -107,7 +113,7 @@ export const fromModel = (model: Model) => {
     xp: number,
     yp: number,
     colorIndex: number,
-    extend = true
+    extend = false
   ): [number, number, number] | undefined => {
     const x = (N / 100) * xp
     const y = (N / 100) * yp
@@ -132,25 +138,44 @@ export const fromModel = (model: Model) => {
       return undefined
     }
 
-    ;(
-      [
-        [sx, sy + interval],
-        [sx + interval, sy],
-        [sx, sy - interval],
-        [sx - interval, sy],
-        [sx + interval, sy + interval],
-        [sx + interval, sy - interval],
-        [sx - interval, sy - interval],
-        [sx - interval, sy + interval]
-      ] as Array<[number, number]>
-    ).forEach(([sx, sy]) => {
+    const n = [sx, sy + interval]
+    const e = [sx + interval, sy]
+    const s = [sx, sy - interval]
+    const w = [sx - interval, sy]
+    const ne = [sx + interval, sy + interval]
+    const se = [sx + interval, sy - interval]
+    const sw = [sx - interval, sy - interval]
+    const nw = [sx - interval, sy + interval]
+
+    // prettier-ignore
+    const order = [
+      // long walk
+      //
+      // n, s, ne, sw, e, nw, se, w // !
+      // s, ne, sw, n, se, nw, e, w // !
+      // n, se, nw, s, ne, sw, e, w // !
+      // s, n, se, nw, e, sw, ne, w // !
+      // n, sw, ne, s, nw, se, w, e // !
+      // s, nw, se, n, sw, ne, w, e // !
+      // n, s, nw, se, w, ne, sw, e // !
+      s, n, sw, ne, w, se, nw, e // !
+      // e, nw, se, w, ne, sw, n, s
+      // w, ne, sw, e, nw, se, n, s
+      // w, e, nw, se, n, sw, ne, s
+      // e, w, ne, sw, n, se, nw, s
+      // e, w, se, nw, s, ne, sw, n
+      // w, e, sw, ne, s, nw, se, n
+      // w, se, nw, e, sw, ne, s, n
+      // e, sw, ne, w, se, nw, s, n
+    ]
+
+    order.forEach(([sx, sy]) => {
       if (sx >= 0 && sy >= 0 && sx < N && sy < N) {
         const square = szudzik2(sx / interval, sy / interval)
-
         const color = colors.get(square)?.[colorIndex]
 
         if (color !== undefined) {
-          weights.push(toWeight(x, y, sx, sy))
+          weights.push(toWeight(x, y, sx, sy) * 2)
           values.push(color)
         }
       }
@@ -162,15 +187,15 @@ export const fromModel = (model: Model) => {
       return undefined
     }
 
-    const nWeights = normalize(weights)
+    const normalizedWeights = normalize(weights)
 
     return values.reduce((prev, next, index) => {
       const [a, b] = adjust(prev[2], next[2])
 
       return [
-        lerp(prev[0], next[0], nWeights[index]),
-        lerp(prev[1], next[1], nWeights[index]),
-        lerp(a, b, nWeights[index])
+        lerp(prev[0], next[0], normalizedWeights[index]),
+        lerp(prev[1], next[1], normalizedWeights[index]),
+        lerp(a, b, normalizedWeights[index])
       ]
     })
 
@@ -187,10 +212,10 @@ export const fromModel = (model: Model) => {
     //       closed: false,
     //       type: 'catmullrom'
     //     },
-    //     nWeights[index]
+    //     normalizedWeights[index]
     //   ) as [number, number, number]
     // })
   }
 
-  return { interval, length, squares, colors, get }
+  return { interval, length, squares, colors, get, triangle }
 }

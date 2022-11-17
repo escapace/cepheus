@@ -1,14 +1,16 @@
 import arg from 'arg'
+import chalk from 'chalk'
 import { readFileSync } from 'fs'
 import { readFile, writeFile } from 'fs/promises'
-import { isError, isInteger, isString } from 'lodash-es'
+import { isError, isInteger, isString, repeat, throttle } from 'lodash-es'
 import ora from 'ora'
 import path, { resolve } from 'path'
-import { Task, TypeCepheusState } from './types'
-import chalk from 'chalk'
-import wrap from 'wrap-ansi'
-import { N } from '@cepheus/utilities'
-import { N_DIVISORS, DEFAULT_N_DIVISOR, DEFAULT_ITERATIONS } from './constants'
+import { promisify } from 'util'
+import { gzip } from 'zlib'
+import { DEFAULT_ITERATIONS, DEFAULT_N_DIVISOR, N_DIVISORS } from './constants'
+import { OptimizeTask, TypeCepheusState } from './types'
+
+const compress = promisify(gzip)
 
 const HELP = `${chalk.bold('Usage:')}
   cepheus --seed <string> (--background <color>)... (--color <color>)...
@@ -158,10 +160,10 @@ const run = async () => {
   const initialState = isString(args['--restore'])
     ? (JSON.parse(
         await readFile(path.resolve(process.cwd(), args['--restore']), 'utf8')
-      ) as Record<string, Task>)
+      ) as Record<string, OptimizeTask>)
     : undefined
 
-  const spinner = ora({ text: 'Starting up' }).start()
+  const spinner = ora({ text: 'Preparing' }).start()
 
   const instance = cepheus({
     background,
@@ -174,88 +176,137 @@ const run = async () => {
     iterations
   })
 
-  const total =
-    instance.store.options.iterations *
-    Math.pow(N / instance.store.options.interval, 2)
+  const ns = (n: number, base: number) => {
+    const string = n.toString()
 
-  const updateSpinnerOptimization = (type: TypeCepheusState) => {
-    const { rejected, fulfilled } = instance.store.tasksCount()
-    const done = rejected + fulfilled
-
-    spinner.text = `${done}/${total} palette optimization`
-
-    switch (type) {
-      case TypeCepheusState.OptimizationDone:
-        spinner.succeed()
-        break
-      case TypeCepheusState.OptimizationAbort:
-        spinner.fail()
-        break
-      case TypeCepheusState.Error:
-        spinner.fail()
-        break
-    }
+    return `${repeat('0', base.toString().length - string.length)}${string}`
   }
 
-  instance.store.on('task', async () => {
+  const updateSpinner = throttle(
+    (type: TypeCepheusState) => {
+      if (type === TypeCepheusState.Optimization) {
+        const { total, rejected, fulfilled } =
+          instance.store.optimizeTasksCount()
+        const done = rejected + fulfilled
+
+        spinner.text = `Palette optimization \t${ns(done, total)} / ${total}`
+      } else if (type === TypeCepheusState.OptimizationDone) {
+        const { total, rejected, fulfilled } =
+          instance.store.optimizeTasksCount()
+        const done = rejected + fulfilled
+
+        spinner.succeed(`Palette optimization \t${ns(done, total)} / ${total}`)
+      } else if (type === TypeCepheusState.TriangleFitting) {
+        if (!spinner.isSpinning) {
+          spinner.start('Triangle fitting …')
+        }
+
+        const { total, rejected, fulfilled } =
+          instance.store.triangleTasksCount()
+        const done = rejected + fulfilled
+
+        if (total === 0) {
+          spinner.text = 'Triangle fitting …'
+        } else {
+          spinner.text = `Triangle fitting     \t${ns(done, total)} / ${total}`
+        }
+      } else if (type === TypeCepheusState.TriangleFittingDone) {
+        const { total, rejected, fulfilled } =
+          instance.store.triangleTasksCount()
+        const done = rejected + fulfilled
+
+        spinner.succeed(`Triangle fitting     \t${ns(done, total)} / ${total}`)
+      } else if (type === TypeCepheusState.Abort) {
+        spinner.fail()
+      } else if (type === TypeCepheusState.Error) {
+        spinner.fail()
+      }
+    },
+    200,
+    { leading: true }
+  )
+
+  instance.store.on('optimizeTask', async () => {
     if (args['--save'] !== undefined) {
       await writeFile(
         path.resolve(process.cwd(), args['--save']),
-        JSON.stringify(instance.store.tasksNotPending()),
+        JSON.stringify(instance.store.optimizeTasksNotPending()),
         'utf8'
       )
     }
 
-    updateSpinnerOptimization(TypeCepheusState.None)
+    updateSpinner(TypeCepheusState.Optimization)
+  })
+
+  instance.store.on('triangleTask', () => {
+    updateSpinner(TypeCepheusState.TriangleFitting)
   })
 
   instance.store.on(['state'], ({ type }) => {
-    switch (type) {
-      case TypeCepheusState.OptimizationDone:
-        updateSpinnerOptimization(type)
-        break
-      case TypeCepheusState.OptimizationAbort:
-        updateSpinnerOptimization(type)
-        break
-      case TypeCepheusState.Error:
-        updateSpinnerOptimization(type)
-        break
-    }
+    updateSpinner.cancel()
+    updateSpinner(type)
   })
 
   return await instance.then(async () => {
-    spinner.stop()
+    updateSpinner.flush()
     instance.store.clearListeners()
+    spinner.stop()
 
     const state = instance.store.state()
 
     if (state.type === TypeCepheusState.Done) {
-      spinner.start(`Writing '${path.relative(process.cwd(), output)}'`)
+      const content = JSON.stringify(instance.store.model())
+      const filePath = path.resolve(process.cwd(), output)
+      const relativeFilePath = path.relative(process.cwd(), output)
 
-      await writeFile(
-        path.resolve(process.cwd(), output),
-        JSON.stringify(instance.store.model()),
-        'utf8'
-      )
-
-      spinner.succeed()
-      spinner.stop()
+      await writeFile(filePath, content, 'utf8')
 
       const stats = instance.store.stats()
 
+      const kibs = content.length / 1024
+      const compressedSize = await getCompressedSize(content)
+
       console.log()
+      const gap = '   '
+      const prefix = `${repeat(' ', relativeFilePath.length)}${gap}`
+
       console.log(
-        wrap(
-          `${stats.squaresRemaining} out of ${
-            stats.squaresTotal
-          } squares remaining. Cost range is (${stats.costMin.toFixed(
-            6
-          )} … ${stats.costMax.toFixed(6)}) with ${stats.costMean.toFixed(
-            6
-          )} mean, and ${stats.costSd.toFixed(6)} standard deviation.`,
-          80
-        )
+        `${chalk.white(chalk.bold(relativeFilePath))}${gap}${chalk.grey(
+          `${kibs.toFixed(2)} KiB${compressedSize}`
+        )}`
       )
+
+      console.log(
+        `${prefix}${chalk.grey(
+          `${(
+            stats.colors * stats.squaresRemaining
+          ).toString()} (${stats.colors.toString()} * ${stats.squaresRemaining.toString()}) colors`
+        )}`
+      )
+      console.log(
+        `${prefix}${chalk.grey(
+          `∧ ${stats.costMin.toFixed(5)}  ∨ ${stats.costMax.toFixed(5)}`
+        )}`
+      )
+
+      console.log(
+        `${prefix}${chalk.grey(
+          `μ ${stats.costMean.toFixed(5)}  σ ${stats.costSd.toFixed(5)}`
+        )}`
+      )
+
+      // console.log(
+      //   wrap(
+      //     `${stats.squaresRemaining} out of ${
+      //       stats.squaresTotal
+      //     } squares remaining. Cost range is (${stats.costMin.toFixed(
+      //       6
+      //     )} … ${stats.costMax.toFixed(6)}) with ${stats.costMean.toFixed(
+      //       6
+      //     )} mean, and ${stats.costSd.toFixed(6)} standard deviation.`,
+      //     80
+      //   )
+      // )
     } else if (state.type === TypeCepheusState.Error) {
       const error = state.error
 
@@ -272,6 +323,13 @@ const run = async () => {
     //   return [num, task.state.colors]
     // })
   })
+}
+
+async function getCompressedSize(code: string | Uint8Array): Promise<string> {
+  return ` / gzip: ${(
+    (await compress(typeof code === 'string' ? code : Buffer.from(code)))
+      .length / 1024
+  ).toFixed(2)} KiB`
 }
 
 await run()

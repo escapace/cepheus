@@ -24,7 +24,7 @@
     "mocha": "10.1.0",
     "prettier": "2.7.1",
     "prettier-config-escapace": "1.0.4",
-    "typescript": "4.8.4"
+    "typescript": "4.9.3"
   },
   "exports": {
     ".": {

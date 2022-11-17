@@ -12,7 +12,7 @@ import {
 import type { Model } from '@cepheus/utilities'
 import { range } from 'lodash-es'
 import { fromModel } from '../drafts'
-import _model from '../sessions/model-3.json'
+import _model from '../models/model.json'
 
 ColorSpace.register(LCH)
 ColorSpace.register(sRGB)
