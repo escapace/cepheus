@@ -10,6 +10,7 @@ import {
   isInteger,
   isString,
   map,
+  memoize,
   omit,
   range,
   uniq
@@ -25,13 +26,20 @@ import {
   RequiredStoreOptions,
   Square,
   StoreOptions,
-  Task,
-  TaskOptions,
+  OptimizeTask,
+  OptimizeTaskOptions,
   TypeCepheusState,
-  TypeOptimizationState
+  TypeOptimizationState,
+  TriangleTaskResult,
+  Triangle,
+  TriangleOptions
 } from './types'
 import { hash } from './utilities/hash'
 import { objectHash } from './utilities/object-hash'
+import {
+  createTriangleOptions,
+  TRIANGLE_TASK_BATCH_SIZE
+} from './utilities/triangle'
 
 const rangeFrom = (square: Square, interval: number) => {
   const position = toPosition(square, interval)
@@ -95,12 +103,12 @@ const normalizeOptions = (options: StoreOptions): RequiredStoreOptions => {
   }
 }
 
-const taskOptionsFrom = (
+const optimizeTaskOptionsFrom = (
   square: Square,
   interval: number,
   iteration: number,
   options: RequiredStoreOptions
-): TaskOptions => ({
+): OptimizeTaskOptions => ({
   key: hash(square, interval, options.randomSeed),
   randomSeed: hash(iteration, square, interval, options.randomSeed),
   randomSource: options.randomSource,
@@ -114,13 +122,14 @@ const taskOptionsFrom = (
 
 export const createStore = (
   options: StoreOptions,
-  initialState: Record<string, Task> = {}
+  initialState: Record<string, OptimizeTask> = {}
 ) => {
-  const log: CepheusState[] = [{ type: TypeCepheusState.None }]
+  const log: CepheusState[] = [{ type: TypeCepheusState.Optimization }]
 
   const storeOptions = normalizeOptions(options)
   const emitter = new Emittery<{
-    task: [string, Task]
+    triangleTask: undefined
+    optimizeTask: [string, OptimizeTask]
     state: CepheusState
   }>()
 
@@ -132,22 +141,29 @@ export const createStore = (
     squares.map((value) => [value, new Map<number, string>()])
   )
 
-  const indexState: Map<string, Task> = new Map()
+  const indexState: Map<string, OptimizeTask> = new Map()
 
-  const indexInitialState: Map<string, Task> = new Map(
+  const triangleTaskResults: TriangleTaskResult[] = []
+
+  const indexInitialState: Map<string, OptimizeTask> = new Map(
     Object.entries(initialState)
   )
 
   const allIterations = range(storeOptions.iterations)
 
-  const iterate = (iteration: number) => {
+  const actionCreateOptimizeTasks = (iteration: number) => {
     squares.forEach((square) => {
-      const options = taskOptionsFrom(square, interval, iteration, storeOptions)
+      const optimizeTaskOptions = optimizeTaskOptionsFrom(
+        square,
+        interval,
+        iteration,
+        storeOptions
+      )
 
       // const options = taskOptionsFrom(square, iteration, storeOptions)
 
       // @ts-expect-error unable to type JSONType
-      const key = objectHash(options)
+      const key = objectHash(optimizeTaskOptions)
 
       if (!indexState.has(key)) {
         if (indexInitialState.has(key)) {
@@ -155,7 +171,7 @@ export const createStore = (
           indexState.set(key, indexInitialState.get(key)!)
         } else {
           indexState.set(key, {
-            options,
+            options: optimizeTaskOptions,
             state: {
               type: TypeOptimizationState.Pending
             }
@@ -169,31 +185,24 @@ export const createStore = (
 
   // select the best iteration in preflight
 
-  // const selectorTasksBySquare = (square: Square) => {
-  //   const keys = indexSquare.get(square.position)
-  //
-  //   if (keys === undefined) {
-  //     return []
-  //   }
-  //
-  //   const qwe = Array.from(keys).map(key => indexState.get(key))
-  // }
-
-  const actionUpdateTask = async (key: string, state: OptimizationState) => {
+  const actionUpdateOptimizeTask = async (
+    key: string,
+    state: OptimizationState
+  ) => {
     const value = indexState.get(key)
 
     if (value === undefined) {
       throw new Error('Task key unknown.')
     }
 
-    const task: Task = {
+    const task: OptimizeTask = {
       ...value,
       state
     }
 
     indexState.set(key, task)
 
-    await emitter.emit('task', [key, task])
+    await emitter.emit('optimizeTask', [key, task])
   }
 
   const actionUpdateStage = async (value: CepheusState) => {
@@ -202,26 +211,26 @@ export const createStore = (
     await emitter.emit('state', value)
   }
 
-  const selectorTasksPending = (): Record<
+  const selectorOptimizeTasksPending = (): Record<
     string,
-    Task<OptimizationStatePending>
+    OptimizeTask<OptimizationStatePending>
   > =>
     Object.fromEntries(
       Array.from(indexState.entries()).filter(
         ([_, task]) => task.state.type === TypeOptimizationState.Pending
       )
-    ) as Record<string, Task<OptimizationStatePending>>
+    ) as Record<string, OptimizeTask<OptimizationStatePending>>
   //
-  const selectorTasksNotPending = (): Record<string, Task> =>
+  const selectorOptimizeTasksNotPending = (): Record<string, OptimizeTask> =>
     Object.fromEntries(
       Array.from(indexState.entries()).filter(
         ([_, task]) => task.state.type !== TypeOptimizationState.Pending
       )
     )
 
-  const selectorTasksFulfilledAll = (
+  const selectorOptimizeTasksFulfilledAll = (
     iterations: number[]
-  ): Record<string, Task<OptimizationStateFulfilled>> => {
+  ): Record<string, OptimizeTask<OptimizationStateFulfilled>> => {
     const keys = uniq(
       Array.from(indexSquare.values()).flatMap((iterationsMap) => {
         return compact(
@@ -236,16 +245,16 @@ export const createStore = (
           keys.includes(key) &&
           task.state.type === TypeOptimizationState.Fulfilled
       )
-    ) as Record<string, Task<OptimizationStateFulfilled>>
+    ) as Record<string, OptimizeTask<OptimizationStateFulfilled>>
   }
 
-  const selectorTasksFulfilled = (
+  const selectorOptimizeTasksFulfilled = (
     iterations: number[]
-  ): Record<string, Task<OptimizationStateFulfilled>> =>
+  ): Record<string, OptimizeTask<OptimizationStateFulfilled>> =>
     Object.fromEntries(
       map(
         groupBy(
-          Object.values(selectorTasksFulfilledAll(iterations)),
+          Object.values(selectorOptimizeTasksFulfilledAll(iterations)),
           (value) => value.options.key
         ),
         (array) => {
@@ -256,14 +265,19 @@ export const createStore = (
           // @ts-expect-error unable to type JSONType
           const key = objectHash(value.options)
 
-          const task = indexState.get(key) as Task<OptimizationStateFulfilled>
+          const task = indexState.get(
+            key
+          ) as OptimizeTask<OptimizationStateFulfilled>
 
           return [key, task] as const
         }
       )
     )
 
-  const selectorTasksCount = () => {
+  const totalOptimzeTasks =
+    storeOptions.iterations * Math.pow(N / storeOptions.interval, 2)
+
+  const selectorOptimizeTasksCount = () => {
     return Array.from(indexState.values()).reduce(
       (counts, task) => {
         switch (task.state.type) {
@@ -280,6 +294,7 @@ export const createStore = (
         return counts
       },
       {
+        total: totalOptimzeTasks,
         pending: 0,
         rejected: 0,
         fulfilled: 0
@@ -289,9 +304,9 @@ export const createStore = (
 
   const selectorSquares = (
     iterations: number[] = allIterations
-  ): Map<number, Task<OptimizationStateFulfilled>> => {
+  ): Map<number, OptimizeTask<OptimizationStateFulfilled>> => {
     const bestTasks = new Map(
-      Object.entries(selectorTasksFulfilled(iterations))
+      Object.entries(selectorOptimizeTasksFulfilled(iterations))
     )
 
     const result = new Map(
@@ -331,6 +346,7 @@ export const createStore = (
     const squaresRemaining = squares.length
     const squaresTotal = indexSquare.size
     const costs = squares.map(([_, task]) => task.state.cost)
+    const colors = storeOptions.colors.length
 
     const costMin = Math.min(...costs)
     const costMax = Math.max(...costs)
@@ -338,6 +354,7 @@ export const createStore = (
     const costSd = standardDeviation(costs)
 
     return {
+      colors,
       squaresRemaining,
       squaresTotal,
       costMin,
@@ -347,7 +364,7 @@ export const createStore = (
     }
   }
 
-  const selectorModel = (): Model => {
+  const selectorModel = (precision = 5): Model => {
     const values = new Map(
       Array.from(selectorSquares(allIterations).entries()).map(
         ([square, task]): [number, Array<[number, number, number]>] => {
@@ -357,7 +374,9 @@ export const createStore = (
               task.state.colors,
               (value) =>
                 map(value, (value) =>
-                  parseFloat(new BigNumber(value).toPrecision(5))
+                  Number.isFinite(precision)
+                    ? parseFloat(new BigNumber(value).toPrecision(5))
+                    : value
                 ) as [number, number, number]
             )
           ]
@@ -370,25 +389,93 @@ export const createStore = (
     const squares = Array.from(values.keys())
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const colors = flattenDeep(squares.map((square) => values.get(square)!))
+    const triangle = selectorTriangle()
 
-    return [interval, length, squares, colors]
+    if (triangle === undefined) {
+      throw new Error('Triangle fitting failed.')
+    }
+
+    const triangleF = triangle.flat() as [
+      number,
+      number,
+      number,
+      number,
+      number,
+      number
+    ]
+
+    return [interval, length, triangleF, squares, colors]
+  }
+  const selectorTriangle = (): Triangle | undefined => {
+    const results: Array<Exclude<TriangleTaskResult, undefined>> =
+      triangleTaskResults
+        .filter(
+          (value): value is Exclude<TriangleTaskResult, undefined> =>
+            value !== undefined
+        )
+        .sort((a, b) => b[1] - a[1])
+
+    if (results.length === 0) {
+      return undefined
+    }
+
+    return results[0][0] as Triangle
+  }
+
+  const actionUpdateTriangleTask = async (result: TriangleTaskResult) => {
+    triangleTaskResults.push(result)
+
+    await emitter.emit('triangleTask')
+  }
+
+  const selectorTriangleOptions = memoize(() => {
+    return createTriangleOptions(
+      storeOptions.interval,
+      Array.from(selectorSquares().keys())
+    )
+  }) as () => TriangleOptions
+
+  const selectorTriangleTasksCountTotal = memoize(() => {
+    const { factors } = selectorTriangleOptions()
+
+    return Math.ceil(
+      (factors[0].length * factors[1].length * factors[2].length) /
+        TRIANGLE_TASK_BATCH_SIZE
+    )
+  }) as () => number
+
+  const selectorTriangleTasksCount = () => {
+    const total = selectorTriangleTasksCountTotal()
+    const rejected =
+      triangleTaskResults?.filter((value) => value === undefined).length ?? 0
+    const fulfilled = (triangleTaskResults?.length ?? 0) - rejected
+
+    return {
+      total,
+      rejected,
+      fulfilled
+    }
   }
 
   const state = () => log[0]
 
   const store = {
+    actionUpdateOptimizeTask,
     actionUpdateStage,
-    actionUpdateTask,
-    iterate,
+    actionUpdateTriangleTask,
+    actionCreateOptimizeTasks,
     model: selectorModel,
+    optimizeTasksCount: selectorOptimizeTasksCount,
+    optimizeTasksFulfilled: selectorOptimizeTasksFulfilled,
+    optimizeTasksNotPending: selectorOptimizeTasksNotPending,
+    optimizeTasksPending: selectorOptimizeTasksPending,
     options: storeOptions,
     squares: selectorSquares,
     state,
     stats: selectorStats,
-    tasksCount: selectorTasksCount,
-    tasksFulfilled: selectorTasksFulfilled,
-    tasksNotPending: selectorTasksNotPending,
-    tasksPending: selectorTasksPending
+    triangle: selectorTriangle,
+    triangleOptions: selectorTriangleOptions,
+    triangleTasksCount: selectorTriangleTasksCount
   }
 
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

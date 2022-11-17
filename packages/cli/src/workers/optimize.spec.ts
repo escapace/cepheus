@@ -1,5 +1,5 @@
 import { optimize } from './optimize'
-import { OptimizeOptions } from './types'
+import { OptimizeOptions } from '../types'
 
 const CASE_A: OptimizeOptions = {
   randomSeed:

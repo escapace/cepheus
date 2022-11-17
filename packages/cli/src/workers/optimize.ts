@@ -26,13 +26,13 @@ import {
   OptimizeOptions,
   RequiredOptimizeOptions,
   TypeOptimizationState
-} from './types'
-import { constrainAngle } from './utilities/constrain-angle'
-import { createPRNG } from './utilities/create-prng'
-import { isWithin } from './utilities/is-within'
-import { percentile } from './utilities/percentile'
-import { randomWithin } from './utilities/random-within'
-import { relativeDifference } from './utilities/relative-difference'
+} from '../types'
+import { constrainAngle } from '../utilities/constrain-angle'
+import { createPRNG } from '../utilities/create-prng'
+import { isWithin } from '../utilities/is-within'
+import { percentile } from '../utilities/percentile'
+import { randomWithin } from '../utilities/random-within'
+import { relativeDifference } from '../utilities/relative-difference'
 import { N } from '@cepheus/utilities'
 
 class IterationError extends Error {
