@@ -9,9 +9,9 @@ import {
   serialize,
   sRGB
 } from '@cepheus/color'
-import type { Model } from '@cepheus/utilities'
+import { cepheus, parseJSONModel, type JSONModel } from '@cepheus/core'
+import { N } from '@cepheus/utilities'
 import { range } from 'lodash-es'
-import { fromModel } from '../drafts'
 import _model from '../models/model.json'
 
 ColorSpace.register(LCH)
@@ -19,13 +19,13 @@ ColorSpace.register(sRGB)
 ColorSpace.register(OKLCH)
 ColorSpace.register(P3)
 
-const N = 100
-const model = fromModel(_model as unknown as Model)
-const targetLevels = 100 // 120 / model.interval
-const interval = 100 / targetLevels
-const levels = N / interval
+const model = parseJSONModel(_model as unknown as JSONModel)
+const levels = 100 // 120 / model.interval
+const interval = N / levels
 const numColors = model.length
 const colors = range(0, numColors)
+
+const instance = cepheus(model)
 
 const cartesianProduct = <T>(...sets: T[][]) =>
   sets.reduce<T[][]>(
@@ -50,7 +50,7 @@ const squares = tile(interval)
 const toStyle = (xy: [number, number], colorIndex: number) => {
   const [x, y] = xy
 
-  const coords = model.get(x, y, colorIndex)
+  const coords = instance.cartesian(x, y, colorIndex)
   //
   if (coords === undefined) {
     return undefined

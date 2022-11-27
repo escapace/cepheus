@@ -11,9 +11,9 @@ export const TRIANGLE_CANVAS_HEIGHT = 320
 export const TRIANGLE_CANVAS_WIDTH = 320
 export const TRIANGLE_TASK_BATCH_SIZE = 100000
 
-const CORNER_RATIO_A = 5 / 100
-const CORNER_RATIO_B = 10 / 100
-const CORNER_RATIO_C = 5 / 100
+const CORNER_RATIO_A = 5 / N
+const CORNER_RATIO_B = 10 / N
+const CORNER_RATIO_C = 5 / N
 
 const isPixel = (
   interval: number,
@@ -22,11 +22,8 @@ const isPixel = (
   _y: number,
   extend: boolean
 ): boolean => {
-  const xp = (100 * _x) / TRIANGLE_CANVAS_WIDTH
-  const yp = (100 * _y) / TRIANGLE_CANVAS_HEIGHT
-
-  const x = (N / 100) * xp
-  const y = (N / 100) * yp
+  const x = (N * _x) / TRIANGLE_CANVAS_WIDTH
+  const y = (N * _y) / TRIANGLE_CANVAS_HEIGHT
 
   const nXf = Math.floor(x / interval)
   const nYf = Math.floor(y / interval)

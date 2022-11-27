@@ -3,15 +3,16 @@
 import { ColorSpace, convert, LCH, OKLCH, P3, sRGB } from '@cepheus/color'
 import type { Model } from '@cepheus/utilities'
 import { onMounted } from 'vue'
-import { fromModel } from '../drafts'
 import _model from '../models/model.json'
+import { cepheus, parseJSONModel } from '@cepheus/core'
 
 ColorSpace.register(LCH)
 ColorSpace.register(sRGB)
 ColorSpace.register(OKLCH)
 ColorSpace.register(P3)
 
-const model = fromModel(_model as unknown as Model)
+const model = parseJSONModel(_model as unknown as Model)
+const instance = cepheus(model)
 
 onMounted(() => {
   const canvas = document.querySelector('canvas')!
@@ -43,7 +44,7 @@ onMounted(() => {
   )
 
   const interpolator = (x: number, y: number) => {
-    const coords = model.get(x, y, 3, true)
+    const coords = instance.cartesian(x, y, 2, true)
 
     if (coords === undefined) {
       return [255, 255, 255]
@@ -58,18 +59,16 @@ onMounted(() => {
       supportsDisplayP3 ? P3 : sRGB,
       { inGamut: true }
     ).coords.map((value) => value * 255)
-
-    // if (color)
   }
 
-  const toX = (x: number) => Math.floor((x / 100) * img.width)
-  const toY = (y: number) => Math.floor((y / 100) * img.height)
+  const toX = (x: number) => Math.floor((x / 120) * img.width)
+  const toY = (y: number) => Math.floor((y / 120) * img.height)
 
   for (let y = 0; y < img.height; y++) {
     for (let x = 0; x < img.width; x++) {
       const [R, G, B] = interpolator(
-        (100 * x) / img.width,
-        (100 * y) / img.height
+        (120 * x) / img.width,
+        (120 * y) / img.height
       )
 
       const i = x + y * img.width
@@ -92,9 +91,9 @@ onMounted(() => {
   // context.strokeStyle = 'black'
   context.beginPath()
   context.moveTo(0, 0)
-  context.lineTo(toX(model.triangle[0]), toY(model.triangle[1]))
-  context.lineTo(toX(model.triangle[2]), toY(model.triangle[3]))
-  context.lineTo(toX(model.triangle[4]), toY(model.triangle[5]))
+  context.lineTo(toX(model.triangle[0][0]), toY(model.triangle[0][1]))
+  context.lineTo(toX(model.triangle[1][0]), toY(model.triangle[1][1]))
+  context.lineTo(toX(model.triangle[2][0]), toY(model.triangle[2][1]))
   context.stroke()
 
   // context.translate(0, context.canvas.height) // reset where 0,0 is located

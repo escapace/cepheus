@@ -1,1 +1,1 @@
-export const N = 120
+export { LENGTH as N } from '@cepheus/core'

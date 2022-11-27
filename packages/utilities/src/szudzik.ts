@@ -1,5 +1,6 @@
-export const szudzik2 = (x: number, y: number): number =>
-  x >= y ? x * x + x + y : y * y + x
+import { szudzik as szudzik2 } from '@cepheus/core'
+
+export { szudzik2 }
 
 export const unszudzik2 = (z: number): [number, number] => {
   const sqrtz = Math.floor(Math.sqrt(z))

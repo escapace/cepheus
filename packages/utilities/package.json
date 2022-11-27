@@ -5,6 +5,7 @@
   "author": "escapace <opensource@escapace.com>",
   "bugs": "https://github.com/escapace/cepheus/issues",
   "dependencies": {
+    "@cepheus/core": "workspace:*",
     "lodash-es": "4.17.21"
   },
   "devDependencies": {
@@ -12,17 +13,17 @@
     "@types/lodash-es": "4.17.6",
     "@types/mocha": "10.0.0",
     "@types/node": "18.11.9",
-    "@typescript-eslint/eslint-plugin": "5.43.0",
-    "@typescript-eslint/parser": "5.43.0",
+    "@typescript-eslint/eslint-plugin": "5.44.0",
+    "@typescript-eslint/parser": "5.44.0",
     "c8": "7.12.0",
     "chai": "4.3.7",
-    "eslint": "8.27.0",
+    "eslint": "8.28.0",
     "eslint-config-escapace": "3.15.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-editorconfig": "4.0.2",
     "eslint-plugin-no-null": "1.0.2",
     "mocha": "10.1.0",
-    "prettier": "2.7.1",
+    "prettier": "2.8.0",
     "prettier-config-escapace": "1.0.4",
     "typescript": "4.9.3"
   },
