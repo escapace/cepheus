@@ -1,4 +1,4 @@
-import { szudzik2 } from '@cepheus/utilities'
+import { N, szudzik2 } from '@cepheus/utilities'
 import {
   Pixel,
   Triangle,
@@ -61,8 +61,8 @@ export const triangle = async (
     ? undefined
     : [
         best.map(([x, y]) => [
-          (100 * x) / TRIANGLE_CANVAS_WIDTH,
-          (100 * y) / TRIANGLE_CANVAS_HEIGHT
+          (N * x) / TRIANGLE_CANVAS_WIDTH,
+          (N * y) / TRIANGLE_CANVAS_HEIGHT
         ]) as Triangle,
         bestArea
       ]

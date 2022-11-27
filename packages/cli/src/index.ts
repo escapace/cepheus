@@ -29,10 +29,13 @@ import { createTriangleTaskIterator } from './utilities/triangle'
 export {
   TypeCepheusState,
   type CepheusState,
-  type CepheusStateAbort as CepheusStateOptimizationAbort,
+  type CepheusStateAbort,
   type CepheusStateDone,
   type CepheusStateError,
-  type CepheusStateOptimization as CepheusStateNone
+  type CepheusStateOptimization,
+  type CepheusStateOptimizationDone,
+  type CepheusStateTriangleFitting,
+  type CepheusStateTriangleFittingDone
 } from './types'
 
 export interface CepheusOptions extends StoreOptions {

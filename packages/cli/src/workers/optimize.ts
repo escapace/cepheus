@@ -3,7 +3,7 @@ import {
   clone,
   Color,
   ColorSpace,
-  contrast,
+  contrastAPCA,
   convert,
   deltaEOK,
   fixNaN,
@@ -257,11 +257,7 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
     mean(
       map(options.background, (background) =>
         mean(
-          map(
-            state,
-            (value) =>
-              Math.abs(contrast(background, value, { algorithm: 'APCA' })) / 108
-          )
+          map(state, (value) => Math.abs(contrastAPCA(background, value)) / 108)
         )
       )
     )

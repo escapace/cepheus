@@ -72,19 +72,25 @@ declare module 'colorjs.io/fn' {
   export const deltaEITP: (color: Color, sample: Color) => number
   export const deltaEOK: (color: Color, sample: Color) => number
 
-  export type ColorContrast =
-    | 'WCAG21'
-    | 'APCA'
-    | 'Michelson'
-    | 'Weber'
-    | 'Lstar'
-    | 'DeltaPhi'
-
-  export const contrast: (
-    background: Color,
-    foreground: Color,
-    options?: { algorithm: ColorContrast }
-  ) => number
+  export const contrastWCAG21: (color1: Color, color2: Color) => number
+  export const contrastAPCA: (background: Color, foreground: Color) => number
+  export const contrastMichelson: (color1: Color, color2: Color) => number
+  export const contrastWeber: (color1: Color, color2: Color) => number
+  export const contrastLstar: (color1: Color, color2: Color) => number
+  export const contrastDeltaPhi: (color1: Color, color2: Color) => number
+  // export type ColorContrast =
+  //   | 'WCAG21'
+  //   | 'APCA'
+  //   | 'Michelson'
+  //   | 'Weber'
+  //   | 'Lstar'
+  //   | 'DeltaPhi'
+  //
+  // export const contrast: (
+  //   background: Color,
+  //   foreground: Color,
+  //   options?: { algorithm: ColorContrast }
+  // ) => number
 
   export const clone: (color: Color) => Color
   export const to: (
