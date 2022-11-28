@@ -1,23 +1,23 @@
 {
-  "name": "@escapace/bruni-color",
+  "name": "@cepheus/color",
   "description": "",
   "version": "0.0.0",
   "author": "escapace <opensource@escapace.com>",
-  "bugs": "https://github.com/escapace/bruni/issues",
+  "bugs": "https://github.com/escapace/cepheus/issues",
   "dependencies": {
-    "colorjs.io": "0.4.0"
+    "colorjs.io": "0.4.2"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "5.39.0",
-    "@typescript-eslint/parser": "5.39.0",
-    "eslint": "8.24.0",
-    "eslint-config-escapace": "3.14.0",
+    "@typescript-eslint/eslint-plugin": "5.44.0",
+    "@typescript-eslint/parser": "5.44.0",
+    "eslint": "8.28.0",
+    "eslint-config-escapace": "3.15.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-editorconfig": "4.0.2",
     "eslint-plugin-no-null": "1.0.2",
-    "prettier": "2.7.1",
+    "prettier": "2.8.0",
     "prettier-config-escapace": "1.0.4",
-    "typescript": "4.8.4"
+    "typescript": "4.9.3"
   },
   "exports": {
     ".": {
@@ -28,14 +28,14 @@
     "lib/esm",
     "lib/types"
   ],
-  "homepage": "https://github.com/escapace/bruni",
+  "homepage": "https://github.com/escapace/cepheus",
   "license": "MPL-2.0",
   "module": "lib/esm/index.mjs",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
-  "repository": "https://github.com/escapace/bruni.git",
+  "repository": "https://github.com/escapace/cepheus.git",
   "scripts": {
     "build": "node ../../scripts/build.mjs && cp ./src/colorjs-io.d.ts ./lib/types/colorjs-io.d.ts",
     "lint": "eslint 'src/**/*.ts'",
