@@ -144,7 +144,7 @@ onMounted(() => {
   }
 
   const interpolator = (alpha: number, beta: number, gamma: number) => {
-    const coords = instance.barycentric(alpha, beta, gamma, 2)
+    const coords = instance.barycentric(alpha, beta, gamma, 0)
 
     if (coords === undefined) {
       return [255, 255, 255]
