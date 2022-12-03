@@ -10,6 +10,7 @@ import HomeB from './components/home2.vue'
 import Canvas from './components/canvas.vue'
 import Triangle from './components/triangle.vue'
 import Constraint from './components/constraint.vue'
+import Var from './components/var.vue'
 
 import '@unocss/reset/antfu.css'
 import 'uno.css'
@@ -28,11 +29,12 @@ watch(pinia.state, () => {
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', component: HomeA },
-    { path: '/b', component: HomeB },
-    { path: '/c', component: Canvas },
-    { path: '/d', component: Triangle },
-    { path: '/f', component: Constraint }
+    { path: '/b', component: HomeA },
+    { path: '/c', component: HomeB },
+    { path: '/d', component: Canvas },
+    { path: '/e', component: Triangle },
+    { path: '/f', component: Constraint },
+    { path: '/', component: Var }
   ]
 })
 
