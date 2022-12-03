@@ -80,11 +80,11 @@ defineExpose({ range: () => range })
 
 <style scoped>
 .range-slider {
-  width: 10rem;
-  margin: auto;
+  width: 20rem;
+  /* margin: auto; */
   text-align: center;
   position: relative;
-  height: 6em;
+  height: 2.2rem;
 }
 
 .range-slider input[type='range'] {

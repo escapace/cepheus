@@ -8,6 +8,7 @@
     "@cepheus/color": "workspace:*",
     "@cepheus/core": "workspace:*",
     "@cepheus/utilities": "workspace:*",
+    "get-css-data": "2.1.0",
     "lodash-es": "4.17.21"
   },
   "devDependencies": {
@@ -26,6 +27,7 @@
     "pinia": "2.0.23",
     "prettier": "2.8.0",
     "prettier-config-escapace": "1.0.4",
+    "sass": "1.56.1",
     "typescript": "4.9.3",
     "unocss": "0.46.3",
     "vite": "3.2.2",
