@@ -99,7 +99,6 @@ export const createPlugin = (
   options: Options = {}
 ): Plugin => {
   const p3support = options.p3 ?? window.matchMedia('(color-gamut: p3)').matches
-  let unsubscribe: Unsubscribe | undefined
 
   ColorSpace.register(LCH)
   ColorSpace.register(sRGB)
@@ -109,20 +108,24 @@ export const createPlugin = (
     ColorSpace.register(P3)
   }
 
-  const register = (
-    plugins: Map<string, () => PluginIterator>,
-    update: () => void
-  ) => {
-    unsubscribe = interpolator.subscribe(update)
+  return () => {
+    let unsubscribe: Unsubscribe | undefined
 
-    plugins.set('color', () => colorIterator(interpolator, p3support))
-  }
+    const register = (
+      plugins: Map<string, () => PluginIterator>,
+      update: () => void
+    ) => {
+      unsubscribe = interpolator.subscribe(update)
 
-  const deregister = () => {
-    if (unsubscribe !== undefined) {
-      unsubscribe()
+      plugins.set('color', () => colorIterator(interpolator, p3support))
     }
-  }
 
-  return { register, deregister }
+    const deregister = () => {
+      if (unsubscribe !== undefined) {
+        unsubscribe()
+      }
+    }
+
+    return { register, deregister }
+  }
 }

@@ -169,10 +169,10 @@ const cacheIterators = (values: PluginIterators) => {
   return [object, cache] as const
 }
 
-function* createMatcher(state: State): Matcher {
+function* createMatcher(pluginIterators: PluginIterators): Matcher {
   const seen = new Set<string>()
   const variables = createVariableIterator()
-  const [iterators, iteratorCache] = cacheIterators(state.iterators)
+  const [iterators, iteratorCache] = cacheIterators(pluginIterators)
 
   let cancelled = false
 
@@ -196,8 +196,6 @@ function* createMatcher(state: State): Matcher {
     plugin.next(variable)
     cancelled = (yield) === true
   }
-
-  variables.next(true)
 
   if (cancelled) {
     for (const iterator of iteratorCache.values()) {
@@ -235,73 +233,74 @@ type Update = () => void
 type Deregister = () => void
 type PluginIterators = Map<string, () => PluginIterator>
 
-export interface Plugin {
+export type Plugin = () => {
   register: (iterators: PluginIterators, update: Update) => void
   deregister: Deregister
 }
 
 const enum UpdateState {
+  Locked,
   None,
   Scheduled,
   Running
 }
 
-const createUpdate = (state: State) => (): void => {
-  if (
-    state.engineState === EngineState.Inactive ||
-    state.updateState === UpdateState.Scheduled
-  ) {
-    return
-  } else if (state.updateState === UpdateState.Running) {
+function schedulerTask(matcher: Matcher, state: State): void {
+  if (matcher === state.matcher && state.updateState === UpdateState.Running) {
+    const cursor = matcher.next()
+
+    if (cursor.done !== true) {
+      setTimeout(() => schedulerTask(matcher, state))
+      return
+    }
+
+    if (cursor.value !== undefined) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      state.styleElement!.innerHTML = cursor.value
+    }
+
     state.updateState = UpdateState.None
-
-    if (state.matcher !== undefined) {
-      state.matcher.next(true)
-      state.matcher = undefined
-    }
+    state.matcher = undefined
+  } else {
+    /* matcher has been updated or the state has changed, garbage collect */
+    matcher.next(true)
   }
-
-  state.updateState = UpdateState.Scheduled
-
-  requestAnimationFrame(() => {
-    if (state.updateState === UpdateState.Scheduled) {
-      state.updateState = UpdateState.Running
-
-      const matcher = (state.matcher = createMatcher(state))
-
-      const next = (): void => {
-        if (state.updateState === UpdateState.Running) {
-          const cursor = matcher.next()
-
-          if (cursor.done !== true) {
-            setTimeout(next)
-            return
-          }
-
-          if (cursor.value !== undefined) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            state.styleElement!.innerHTML = cursor.value
-            state.updateState = UpdateState.None
-          }
-        }
-      }
-
-      setTimeout(next)
-    }
-  })
 }
 
-export const createEngine = (plugins: Plugin[]) => {
-  const state: State = {
-    updateState: UpdateState.None,
-    engineState: EngineState.Inactive,
-    styleElement: undefined,
-    iterators: new Map(),
-    matcher: undefined
+function schedulerFrame(state: State) {
+  if (state.updateState === UpdateState.Scheduled) {
+    const matcher = (state.matcher = createMatcher(state.iterators))
+    state.updateState = UpdateState.Running
+
+    schedulerTask(matcher, state)
+  }
+}
+
+function createScheduler(state: State) {
+  const boundSchedulerFrame = schedulerFrame.bind(null, state)
+
+  const lock = (lock: boolean) => {
+    state.matcher = undefined
+
+    state.updateState = lock ? UpdateState.Locked : UpdateState.None
   }
 
-  const update = createUpdate(state)
+  const update = () => {
+    if (state.updateState === UpdateState.Running) {
+      state.matcher = undefined
+      state.updateState = UpdateState.None
+    }
 
+    if (state.updateState === UpdateState.None) {
+      state.updateState = UpdateState.Scheduled
+      requestAnimationFrame(boundSchedulerFrame)
+    }
+  }
+
+  return { update, lock }
+}
+
+const createMutationObserver = (state: State, update: () => void) => {
   const mutationObserver = new MutationObserver((mutations) => {
     if (state.engineState !== EngineState.Active) {
       return
@@ -312,7 +311,7 @@ export const createEngine = (plugins: Plugin[]) => {
     }
   })
 
-  const observe = () => {
+  const start = () => {
     if (state.engineState === EngineState.Active) return
 
     const target: HTMLElement | undefined =
@@ -336,9 +335,26 @@ export const createEngine = (plugins: Plugin[]) => {
     state.engineState = EngineState.Active
   }
 
+  return { start, stop: () => mutationObserver.disconnect() }
+}
+
+export const createEngine = (plugin: Plugin[]) => {
+  const plugins = plugin.map((value) => value())
+
+  const state: State = {
+    updateState: UpdateState.Locked,
+    engineState: EngineState.Inactive,
+    styleElement: undefined,
+    iterators: new Map(),
+    matcher: undefined
+  }
+
+  const scheduler = createScheduler(state)
+  const observer = createMutationObserver(state, scheduler.update)
+
   const init = () => {
     if (state.engineState === EngineState.Activating) {
-      if (state.styleElement !== undefined) {
+      if (state.styleElement === undefined) {
         state.styleElement = document.createElement('style')
         document.documentElement.prepend(state.styleElement)
       }
@@ -347,10 +363,13 @@ export const createEngine = (plugins: Plugin[]) => {
         state.iterators.clear()
       }
 
-      plugins.forEach((values) => values.register(state.iterators, update))
+      plugins.forEach((values) =>
+        values.register(state.iterators, scheduler.update)
+      )
 
-      update()
-      observe()
+      scheduler.lock(false)
+      scheduler.update()
+      observer.start()
     }
   }
 
@@ -370,7 +389,8 @@ export const createEngine = (plugins: Plugin[]) => {
     if (state.engineState !== EngineState.Inactive) {
       state.engineState = EngineState.Inactive
 
-      mutationObserver.disconnect()
+      observer.stop()
+      scheduler.lock(true)
       plugins.forEach((value) => value.deregister())
     }
   }
