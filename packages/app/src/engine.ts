@@ -26,12 +26,14 @@ const isSupportedCSSRule = (rule: CSSRule) =>
 
 const reg = /var\(---([a-zA-Z0-9]+)-([a-zA-Z-0-9]+)\)/gm
 
-function* createVariableIterator(): Generator<
-  [string, string, string],
-  void,
-  true | undefined
-> {
-  const elements = document.querySelectorAll('*[style]')
+// let customElem = document.querySelector('my-shadow-dom-element')!
+// let shadow = customElem.shadowRoot!;
+// let styleSheets = shadow.styleSheets;
+
+function* createVariableIterator(
+  root: Document | ShadowRoot
+): Generator<[string, string, string], void, true | undefined> {
+  const elements = root.querySelectorAll('*[style]')
 
   for (const element of elements) {
     const cssText = element.attributes.getNamedItem('style')?.value
@@ -47,7 +49,7 @@ function* createVariableIterator(): Generator<
     }
   }
 
-  for (const cssStyleSheet of document.styleSheets) {
+  for (const cssStyleSheet of root.styleSheets) {
     // TODO: exclude self style sheet using the ssr id
     if (isSameDomain(cssStyleSheet)) {
       for (const cssRule of cssStyleSheet.cssRules) {
@@ -121,6 +123,7 @@ interface State {
   iterators: PluginIterators
   styleElement?: HTMLStyleElement
   matcher?: Matcher
+  root: Document | ShadowRoot
 }
 
 // const add = (map: Map<string, Set<string>>, key: string, value: string) => {
@@ -169,10 +172,10 @@ const cacheIterators = (values: PluginIterators) => {
   return [object, cache] as const
 }
 
-function* createMatcher(pluginIterators: PluginIterators): Matcher {
+function* createMatcher(state: State): Matcher {
   const seen = new Set<string>()
-  const variables = createVariableIterator()
-  const [iterators, iteratorCache] = cacheIterators(pluginIterators)
+  const variables = createVariableIterator(state.root)
+  const [iterators, iteratorCache] = cacheIterators(state.iterators)
 
   let cancelled = false
 
@@ -256,7 +259,7 @@ function schedulerTask(matcher: Matcher, state: State): void {
 
     if (cursor.value !== undefined) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      state.styleElement!.innerHTML = cursor.value
+      state.styleElement!.textContent = cursor.value
     }
 
     state.updateState = UpdateState.None
@@ -269,7 +272,7 @@ function schedulerTask(matcher: Matcher, state: State): void {
 
 function schedulerFrame(state: State) {
   if (state.updateState === UpdateState.Scheduled) {
-    const matcher = (state.matcher = createMatcher(state.iterators))
+    const matcher = (state.matcher = createMatcher(state))
     state.updateState = UpdateState.Running
 
     schedulerTask(matcher, state)
@@ -314,15 +317,7 @@ const createMutationObserver = (state: State, update: () => void) => {
   const start = () => {
     if (state.engineState === EngineState.Active) return
 
-    const target: HTMLElement | undefined =
-      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-      document.documentElement || document.body
-
-    if (target === undefined) {
-      return
-    }
-
-    mutationObserver.observe(target, {
+    mutationObserver.observe(state.root, {
       attributes: true,
       // characterData: true,
       // characterDataOldValue: false,
@@ -338,7 +333,34 @@ const createMutationObserver = (state: State, update: () => void) => {
   return { start, stop: () => mutationObserver.disconnect() }
 }
 
-export const createEngine = (plugin: Plugin[]) => {
+interface Options {
+  root?: Document | ShadowRoot
+}
+
+export const isDocument = (value: Document | ShadowRoot): value is Document =>
+  value.nodeType === 9
+
+const createStyleElement = (root: Document | ShadowRoot): HTMLStyleElement => {
+  let styleElement =
+    (root.querySelector('style[cassiopeia=true]') as
+      | HTMLStyleElement
+      | undefined) ?? undefined
+
+  if (styleElement === undefined) {
+    styleElement = document.createElement('style')
+    styleElement.setAttribute('cassiopeia', 'true')
+
+    if (isDocument(root)) {
+      root.head.insertBefore(styleElement, null)
+    } else {
+      root.appendChild(styleElement)
+    }
+  }
+
+  return styleElement
+}
+
+export const createEngine = (plugin: Plugin[], options: Options = {}) => {
   const plugins = plugin.map((value) => value())
 
   const state: State = {
@@ -346,7 +368,8 @@ export const createEngine = (plugin: Plugin[]) => {
     engineState: EngineState.Inactive,
     styleElement: undefined,
     iterators: new Map(),
-    matcher: undefined
+    matcher: undefined,
+    root: options.root ?? document
   }
 
   const scheduler = createScheduler(state)
@@ -354,14 +377,7 @@ export const createEngine = (plugin: Plugin[]) => {
 
   const init = () => {
     if (state.engineState === EngineState.Activating) {
-      if (state.styleElement === undefined) {
-        state.styleElement = document.createElement('style')
-        document.documentElement.prepend(state.styleElement)
-      }
-
-      if (state.iterators.size !== 0) {
-        state.iterators.clear()
-      }
+      state.styleElement = state.styleElement ?? createStyleElement(state.root)
 
       plugins.forEach((values) =>
         values.register(state.iterators, scheduler.update)
@@ -370,6 +386,17 @@ export const createEngine = (plugin: Plugin[]) => {
       scheduler.lock(false)
       scheduler.update()
       observer.start()
+    }
+  }
+
+  const pause = () => {
+    if (state.engineState !== EngineState.Inactive) {
+      state.engineState = EngineState.Inactive
+
+      observer.stop()
+      scheduler.lock(true)
+      plugins.forEach((value) => value.deregister())
+      state.iterators.clear()
     }
   }
 
@@ -382,16 +409,6 @@ export const createEngine = (plugin: Plugin[]) => {
       } else {
         init()
       }
-    }
-  }
-
-  const pause = () => {
-    if (state.engineState !== EngineState.Inactive) {
-      state.engineState = EngineState.Inactive
-
-      observer.stop()
-      scheduler.lock(true)
-      plugins.forEach((value) => value.deregister())
     }
   }
 
