@@ -1,8 +1,13 @@
 import { chunk } from './chunk'
-import { JSONModel, Model, Triangle } from './types'
+import { ModelUnparsed, ModelParsed, Triangle } from './types'
 
-export const parseJSONModel = (model: JSONModel): Model => {
-  const [interval, length, _triangle, squares, data] = model
+// TODO: accept unknown
+export const parseModel = (model: unknown): ModelParsed => {
+  if (!Array.isArray(model)) {
+    return model as ModelParsed
+  }
+
+  const [interval, length, _triangle, squares, data] = model as ModelUnparsed
   const step = length * 3
   const triangle = [
     _triangle.slice(0, 2),

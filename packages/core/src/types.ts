@@ -1,7 +1,7 @@
 export type Point = [x: number, y: number]
 export type Triangle = [Point, Point, Point]
 export type Line = [Point, Point]
-export type JSONModel = [
+export type ModelUnparsed = [
   interval: number,
   length: number,
   triangle: [...Point, ...Point, ...Point],
@@ -9,7 +9,7 @@ export type JSONModel = [
   colors: number[]
 ]
 
-export interface Model {
+export interface ModelParsed {
   colors: Map<number, Array<[number, number, number]>>
   interval: number
   length: number
@@ -20,4 +20,31 @@ export interface Model {
 export interface State {
   lightness: [low: number, high: number]
   chroma: [low: number, high: number]
+  darkMode: boolean
+}
+
+export type Unsubscribe = () => void
+export type Subscription = () => void
+
+export interface Interpolator {
+  triangle: () => Readonly<Triangle>
+  lightness: () => Readonly<State['lightness']>
+  chroma: () => Readonly<State['chroma']>
+  darkMode: () => Readonly<State['darkMode']>
+  updateLightness: (value: [number, number]) => void
+  updateChroma: (value: [number, number]) => void
+  updateDarkMode: (value: boolean) => void
+  subscribe: (cb: Subscription) => Unsubscribe
+  cartesian: (
+    color: number,
+    x: number,
+    y: number,
+    extend?: boolean
+  ) => [number, number, number] | undefined
+  barycentric: (
+    color: number,
+    alpha: number,
+    beta: number,
+    gamma: number
+  ) => [number, number, number] | undefined
 }
