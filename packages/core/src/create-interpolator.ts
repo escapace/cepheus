@@ -6,16 +6,31 @@ import { intersection } from './intersection'
 import { lerp } from './lerp'
 import { lerpArray } from './lerp-array'
 import { normalize } from './normalize'
+import { parseModel } from './parse-model'
 import { szudzik } from './szudzik'
-import type { State, Line, Model, Point, Triangle } from './types'
+import type {
+  State,
+  Line,
+  Point,
+  Interpolator,
+  Unsubscribe,
+  Subscription
+} from './types'
 
-export const cepheus = (model: Model, initialState?: State) => {
-  const { interval, colors } = model
+export const createInterpolator = (
+  model: unknown,
+  initialState?: State
+): Interpolator => {
+  const { interval, colors, triangle } = parseModel(model)
 
-  const [v0, v1, v2] = model.triangle
+  const [v0, v1, v2] = triangle
   const x0 = intersection([v0, v2], [v1, [v1[0], 0]]) as Point
 
-  const state: State = initialState ?? { lightness: [0, 1], chroma: [0, 1] }
+  const state: State = initialState ?? {
+    lightness: [0, 1],
+    chroma: [0, 1],
+    darkMode: false
+  }
 
   let p0: Point
   let p1: Point
@@ -56,9 +71,9 @@ export const cepheus = (model: Model, initialState?: State) => {
     erfc(distance(x, y, sx + interval / 2, sy + interval / 2) / interval)
 
   const cartesian = (
+    color: number,
     x: number,
     y: number,
-    colorIndex: number,
     extend = false
   ): [number, number, number] | undefined => {
     const nXf = Math.floor(x / interval)
@@ -69,7 +84,7 @@ export const cepheus = (model: Model, initialState?: State) => {
     const sx = nXf * interval
     const sy = nYf * interval
 
-    const base = colors.get(square)?.[colorIndex]
+    const base = colors.get(square)?.[color]
 
     const weights: number[] = []
     const values: Array<[number, number, number]> = []
@@ -115,11 +130,11 @@ export const cepheus = (model: Model, initialState?: State) => {
     order.forEach(([sx, sy]) => {
       if (sx >= 0 && sy >= 0 && sx < N && sy < N) {
         const square = szudzik(sx / interval, sy / interval)
-        const color = colors.get(square)?.[colorIndex]
+        const coords = colors.get(square)?.[color]
 
-        if (color !== undefined) {
+        if (coords !== undefined) {
           weights.push(toWeight(x, y, sx, sy) * 2)
-          values.push(color)
+          values.push(coords)
         }
       }
 
@@ -161,49 +176,91 @@ export const cepheus = (model: Model, initialState?: State) => {
   }
 
   const barycentric = (
+    color: number,
     alpha: number,
     beta: number,
-    gamma: number,
-    colorIndex: number
+    gamma: number
   ) => {
-    const x = alpha * t0[0] + beta * t1[0] + gamma * t2[0]
-    const y = alpha * t0[1] + beta * t1[1] + gamma * t2[1]
+    const _alpha = state.darkMode ? gamma : alpha
+    const _gamma = state.darkMode ? alpha : gamma
 
-    return cartesian(x, y, colorIndex, true)
+    const x = _alpha * t0[0] + beta * t1[0] + _gamma * t2[0]
+    const y = _alpha * t0[1] + beta * t1[1] + _gamma * t2[1]
+
+    // TODO: this should be false or an arg
+    return cartesian(color, x, y, true)
   }
 
   chroma0()
   chroma1()
 
+  const subscriptions = new Set<Subscription>()
+
+  const notify = () => {
+    for (const subscription of subscriptions) {
+      subscription()
+    }
+  }
+
   return {
     cartesian,
     barycentric,
+    subscribe: (value: () => void): Unsubscribe => {
+      subscriptions.add(value)
+
+      return () => {
+        subscriptions.delete(value)
+      }
+    },
+    updateDarkMode: (value: boolean) => {
+      if (value !== state.darkMode) {
+        state.darkMode = value
+
+        notify()
+      }
+    },
     updateLightness: (value: [number, number]) => {
+      let change = false
+
       if (value[0] !== state.lightness[0]) {
         state.lightness[0] = value[0]
         lightness0()
+        change = true
       }
 
       if (value[1] !== state.lightness[1]) {
         state.lightness[1] = value[1]
         lightness1()
+        change = true
+      }
+
+      if (change) {
+        notify()
       }
     },
-
     updateChroma: (value: [number, number]) => {
+      let change = false
+
       if (value[0] !== state.chroma[0]) {
         state.chroma[0] = value[0]
         chroma0()
+        change = true
       }
 
       if (value[1] !== state.chroma[1]) {
         state.chroma[1] = value[1]
         chroma1()
+        change = true
+      }
+
+      if (change) {
+        notify()
       }
     },
-    triangle: (): Readonly<Triangle> => [t0, t1, t2],
-    lightness: (): Readonly<State['lightness']> => state.lightness,
-    chroma: (): Readonly<State['chroma']> => state.chroma
+    triangle: () => [t0, t1, t2],
+    lightness: () => state.lightness,
+    chroma: () => state.chroma,
+    darkMode: () => state.darkMode
   }
 }
 

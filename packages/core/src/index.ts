@@ -1,6 +1,14 @@
-export type { Point, Triangle, JSONModel, Model } from './types'
-export { cepheus } from './cepheus'
-export { parseJSONModel } from './parse-json-model'
 export { LENGTH } from './constants'
-export { szudzik } from './szudzik'
+export { createInterpolator } from './create-interpolator'
 export { normalize } from './normalize'
+export { parseModel } from './parse-model'
+export { szudzik } from './szudzik'
+export type {
+  Interpolator,
+  ModelParsed,
+  ModelUnparsed,
+  Point,
+  Subscription,
+  Triangle,
+  Unsubscribe
+} from './types'

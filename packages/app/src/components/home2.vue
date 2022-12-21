@@ -9,7 +9,11 @@ import {
   serialize,
   sRGB
 } from '@cepheus/color'
-import { cepheus, parseJSONModel, type JSONModel } from '@cepheus/core'
+import {
+  createInterpolator,
+  parseModel,
+  type ModelUnparsed
+} from '@cepheus/core'
 import { N } from '@cepheus/utilities'
 import { range } from 'lodash-es'
 import _model from '../models/model.json'
@@ -19,13 +23,13 @@ ColorSpace.register(sRGB)
 ColorSpace.register(OKLCH)
 ColorSpace.register(P3)
 
-const model = parseJSONModel(_model as unknown as JSONModel)
+const model = parseModel(_model as ModelUnparsed)
 const levels = 100 // 120 / model.interval
 const interval = N / levels
 const numColors = model.length
 const colors = range(0, numColors)
 
-const instance = cepheus(model)
+const instance = createInterpolator(model)
 
 const cartesianProduct = <T>(...sets: T[][]) =>
   sets.reduce<T[][]>(
