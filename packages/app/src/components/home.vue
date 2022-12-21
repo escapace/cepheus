@@ -9,7 +9,7 @@ import {
   serialize,
   sRGB
 } from '@cepheus/color'
-import { parseJSONModel, type JSONModel } from '@cepheus/core'
+import { parseModel, type ModelUnparsed } from '@cepheus/core'
 import { N, toSquare } from '@cepheus/utilities'
 import { range } from 'lodash-es'
 import _model from '../models/model.json'
@@ -19,7 +19,7 @@ ColorSpace.register(sRGB)
 ColorSpace.register(OKLCH)
 ColorSpace.register(P3)
 
-const model = parseJSONModel(_model as unknown as JSONModel)
+const model = parseModel(_model as ModelUnparsed)
 const levels = N / model.interval
 const numColors = model.length
 const colors = range(0, numColors)

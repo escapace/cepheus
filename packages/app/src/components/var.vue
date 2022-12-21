@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { createInterpolator } from '@cepheus/core'
 import { onMounted, ref, watch } from 'vue'
-import { init } from '../drafts'
+import { createPlugin } from '../drafts'
 import slider from './slider.vue'
+import model from '../models/model.json'
+import { createEngine } from '../engine'
 
 function setup() {
   // let br = document.getElementById('sliderBrightness')
@@ -238,19 +241,19 @@ onMounted(() => {
   createEvent(col4, 'event60', 'Workshop', 'UT-440', 'catBlue', 4)
   createEvent(col4, 'event120', 'Backlog', 'UT-112', 'catPrimary', 8)
 
-  const { updateChroma, updateLightness, toggleDarkMode } = init()
+  const interpolator = createInterpolator(model)
+  createEngine([createPlugin(interpolator)])
 
   watch([chroma.value.range()], ([value]) => {
-    updateChroma(value)
+    interpolator.updateChroma(value)
   })
 
   watch([lightness.value.range()], ([value]) => {
-    console.log(value)
-    updateLightness(value)
+    interpolator.updateLightness(value)
   })
 
   watch([darkMode], ([value]) => {
-    toggleDarkMode(value)
+    interpolator.updateDarkMode(value)
   })
 })
 </script>
@@ -271,7 +274,7 @@ onMounted(() => {
             name="darkMode"
             type="checkbox"
           />
-          <label for="darkMode" style="color: var(---c-0-100-0-0)"
+          <label for="darkMode" style="color: var(---color-0-100-0-0)"
             >Dark Mode</label
           >
         </div>
@@ -350,9 +353,9 @@ governing permissions and limitations under the License.
  */
 @import url('https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800&display=swap');
 :root {
-  --background: var(---c-0-0-0-1000);
-  --largeText: var(---c-0-10-1-100);
-  --smallText: var(---c-0-10-1-9);
+  --background: var(---color-3-0-0-30);
+  --largeText: var(---color-0-10-1-100);
+  --smallText: var(---color-0-10-1-9);
   /* --borderColor: var(--gray200); */
   /* --shadowColor: var(--gray1100); */
   --hour-height: 64px;
@@ -430,7 +433,7 @@ governing permissions and limitations under the License.
   width: 100%;
   min-height: 100%;
   overflow: hidden;
-  border: 1px solid var(---c-0-3-1-4);
+  border: 1px solid var(---color-0-3-1-4);
   border-right: 0;
   border-bottom: 0;
   border-radius: 6px 6px 0 0;
@@ -441,26 +444,26 @@ governing permissions and limitations under the License.
   width: calc(100vw / 5 - 40px);
   position: relative;
   flex-direction: column;
-  background-color: var(---c-3-0-0-30);
+  background-color: var(---color-3-0-0-30);
   border: 0;
-  border-right: 1px solid var(---c-0-5-0-20);
+  border-right: 1px solid var(---color-0-5-0-20);
   border-collapse: collapse;
 }
 
 .calendarColumnHeader {
   padding: 16px;
-  background-color: var(---c-0-2-1-25);
-  border-bottom: 1px solid var(---c-0-5-1-30);
-  color: var(---c-0-30-1-1);
+  background-color: var(---color-0-2-1-25);
+  border-bottom: 1px solid var(---color-0-5-1-30);
+  color: var(---color-0-30-1-1);
   font-weight: lighter;
   font-size: 18px;
 }
 
 /* Make first column appear selected */
 #calendarColumn0 .calendarColumnHeader {
-  border-top: 4px solid var(---c-0-4-40-20);
+  border-top: 4px solid var(---color-0-4-40-20);
   padding: 12px 16px 16px 16px;
-  color: var(---c-0-40-20-0);
+  color: var(---color-0-40-20-0);
 }
 
 .calendar30,
@@ -471,11 +474,11 @@ governing permissions and limitations under the License.
 }
 
 .calendar30 {
-  border-bottom: 1px dashed var(---c-0-5-1-30);
+  border-bottom: 1px dashed var(---color-0-5-1-30);
 }
 
 .calendar60 {
-  border-bottom: 1px solid var(---c-0-5-1-30);
+  border-bottom: 1px solid var(---color-0-5-1-30);
 }
 
 .event {
@@ -520,94 +523,94 @@ governing permissions and limitations under the License.
 }
 /* Categories */
 .catDefault {
-  background-color: var(---c-0-1-1-9);
-  border-color: var(---c-0-9-1-9);
+  background-color: var(---color-0-1-1-9);
+  border-color: var(---color-0-9-1-9);
 }
 
 .catDefault .eventTitle {
-  color: var(---c-0-35-1-9);
+  color: var(---color-0-35-1-9);
 }
 
 .catDefault .eventMeta {
-  color: var(---c-0-35-1-9);
+  color: var(---color-0-35-1-9);
 }
 
 .catPrimary {
-  background-color: var(---c-0-2-10-5);
-  border-color: var(---c-0-15-10-5);
+  background-color: var(---color-0-2-10-5);
+  border-color: var(---color-0-15-10-5);
 }
 
 .catPrimary .eventTitle {
-  color: var(---c-0-35-10-5);
+  color: var(---color-0-35-10-5);
 }
 
 .catPrimary .eventMeta {
-  color: var(---c-0-35-10-10);
+  color: var(---color-0-35-10-10);
 }
 
 .catPersonal {
-  background-color: var(---c-3-0-15-15);
-  border-color: var(---c-3-25-15-15);
+  background-color: var(---color-3-0-15-15);
+  border-color: var(---color-3-25-15-15);
 }
 
 .catPersonal .eventTitle {
-  color: var(---c-3-65-15-15);
+  color: var(---color-3-65-15-15);
 }
 
 .catPersonal .eventMeta {
-  color: var(---c-3-75-15-35);
+  color: var(---color-3-75-15-35);
 }
 
 .catImportant {
-  background-color: var(---c-2-1-100-30);
-  border-color: var(---c-2-15-10-5);
+  background-color: var(---color-2-1-100-30);
+  border-color: var(---color-2-15-10-5);
 }
 
 .catImportant .eventTitle {
-  color: var(---c-2-65-10-5);
+  color: var(---color-2-65-10-5);
 }
 
 .catImportant .eventMeta {
-  color: var(---c-2-65-10-15);
+  color: var(---color-2-65-10-15);
 }
 
 .catBlue {
-  background-color: var(---c-0-1-25-50);
-  border-color: var(---c-0-15-100-50);
+  background-color: var(---color-0-1-25-50);
+  border-color: var(---color-0-15-100-50);
 }
 
 .catBlue .eventTitle {
-  color: var(---c-0-220-100-50);
+  color: var(---color-0-220-100-50);
 }
 
 .catBlue .eventMeta {
-  color: var(---c-0-220-100-75);
+  color: var(---color-0-220-100-75);
 }
 
 .catBlue.is-selected {
-  background-color: var(---c-0-200-245-10);
-  border-color: var(---c-0-300-120-50);
+  background-color: var(---color-0-200-245-10);
+  border-color: var(---color-0-300-120-50);
 }
 
 .catBlue.is-selected .eventTitle {
-  color: var(---c-0-0-0-500);
+  color: var(---color-0-0-0-500);
 }
 
 .catBlue.is-selected .eventMeta {
-  color: var(---c-0-0-30-400);
+  color: var(---color-0-0-30-400);
 }
 
 .catUrgent {
-  background-color: var(---c-1-0-50-15);
-  border-color: var(---c-1-50-50-15);
+  background-color: var(---color-1-0-50-15);
+  border-color: var(---color-1-50-50-15);
 }
 
 .catUrgent .eventTitle {
-  color: var(---c-1-170-50-15);
+  color: var(---color-1-170-50-15);
 }
 
 .catUrgent .eventMeta {
-  color: var(---c-1-170-50-35);
+  color: var(---color-1-170-50-35);
 }
 
 .eventTitle,

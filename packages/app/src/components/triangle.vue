@@ -3,9 +3,9 @@
 import { ColorSpace, convert, LCH, OKLCH, P3, sRGB } from '@cepheus/color'
 import { onMounted } from 'vue'
 import {
-  cepheus,
-  parseJSONModel,
-  type JSONModel,
+  createInterpolator,
+  parseModel,
+  type ModelUnparsed,
   type Point,
   type Triangle
 } from '@cepheus/core'
@@ -16,8 +16,8 @@ ColorSpace.register(sRGB)
 ColorSpace.register(OKLCH)
 ColorSpace.register(P3)
 
-const model = parseJSONModel(_model as JSONModel)
-const instance = cepheus(model)
+const model = parseModel(_model as ModelUnparsed)
+const instance = createInterpolator(model)
 
 function cross(a: Point, b: Point, c: Point) {
   return (b[0] - a[0]) * -(c[1] - a[1]) - -(b[1] - a[1]) * (c[0] - a[0])
