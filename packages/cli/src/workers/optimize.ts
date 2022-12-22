@@ -44,8 +44,6 @@ class IterationError extends Error {
   }
 }
 
-const HUE_ANGLE = 20
-
 function randomColor(
   options: RequiredOptimizeOptions,
   color: Color,
@@ -73,8 +71,8 @@ function randomColor(
           ),
           constrainAngle(
             randomWithin(
-              selectedColor.coords[2] - HUE_ANGLE / 2,
-              selectedColor.coords[2] + HUE_ANGLE / 2,
+              selectedColor.coords[2] - options.hueAngle / 2,
+              selectedColor.coords[2] + options.hueAngle / 2,
               options.prng
             )
           )
@@ -114,8 +112,8 @@ function randomColor(
             percentile(
               hue,
               percentage,
-              referenceColor.coords[2] - HUE_ANGLE / 2,
-              referenceColor.coords[2] + HUE_ANGLE / 2,
+              referenceColor.coords[2] - options.hueAngle / 2,
+              referenceColor.coords[2] + options.hueAngle / 2,
               options.prng
             )
           )
@@ -392,6 +390,9 @@ const normalizeOptions = (
   const colorSpace =
     options.colorSpace !== undefined ? ColorSpace.get(options.colorSpace) : P3
 
+  const hueAngle =
+    options.hueAngle === undefined ? 30 : constrainAngle(options.hueAngle)
+
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const value = {
     colors,
@@ -403,7 +404,7 @@ const normalizeOptions = (
       cutoff: 0.0001,
       ...options.hyperparameters
     },
-
+    hueAngle,
     weights: normalizeWeights({
       // pushes color to initial value
       difference: 47.5,
