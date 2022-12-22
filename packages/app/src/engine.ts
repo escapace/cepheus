@@ -12,17 +12,17 @@ const isStylesheet = (node: Node) =>
 
 const isStyle = (node: Node) => node.nodeName.toLowerCase() === 'style'
 
-const isSupportedCSSRule = (rule: CSSRule) =>
-  // CSSRule.STYLE_RULE (1)
-  rule.type === 1 ||
-  // CSSRule.MEDIA_RULE (4)
-  rule.type === 4 ||
-  // CSSRule.PAGE_RULE (6)
-  rule.type === 6 ||
-  // CSSRule.KEYFRAME_RULE (8)
-  rule.type === 8 ||
-  // CSSRule.SUPPORTS_RULE (12)
-  rule.type === 12
+const isSupportedCSSRule = (rule: CSSRule): boolean => {
+  const name = rule.constructor.name
+
+  return (
+    name === 'CSSStyleRule' ||
+    name === 'CSSMediaRule' ||
+    name === 'CSSPageRule' ||
+    name === 'CSSKeyframesRule' ||
+    name === 'CSSSupportsRule'
+  )
+}
 
 const reg = /var\(---([a-zA-Z0-9]+)-([a-zA-Z-0-9]+)\)/gm
 
