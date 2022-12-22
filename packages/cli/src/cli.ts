@@ -27,6 +27,7 @@ ${chalk.bold('Options:')}
                   Advanced Perception of Color Algorithm (APCA).
   --output        Write output palette model to file.
   --color-space   Ensure that colors are inside the color space gamut. [default: p3]
+  --hue-angle     Hue angle for each sampling step. [default: 30]
   --prng          Pseudorandom number generator. [default: xoshiro128++]
   --levels        Number of uniform sampling steps along each square axis. [default: ${DEFAULT_N_DIVISOR}]
   --terations     Number of iterations. [default: ${DEFAULT_ITERATIONS}]
@@ -51,6 +52,7 @@ const run = async () => {
       '--output': String,
       '--color-space': String,
       '--prng': String,
+      '--hue-angle': Number,
       '--levels': Number,
       '--iterations': Number,
       '--save': String,
@@ -90,6 +92,7 @@ const run = async () => {
   const randomSeed = args['--seed']
   const iterations = args['--iterations']
   const output = args['--output']
+  const hueAngle = args['--hue-angle']
 
   // required
 
@@ -150,6 +153,14 @@ const run = async () => {
     process.exit(1)
   }
 
+  if (hueAngle !== undefined && !(isInteger(hueAngle) && hueAngle >= 1)) {
+    console.log(HELP)
+    console.error(
+      `Option '--hue-angle' must be an integer greater or equal to 1.`
+    )
+    process.exit(1)
+  }
+
   if (args._.length !== 0) {
     console.log(HELP)
     process.exit(1)
@@ -166,6 +177,7 @@ const run = async () => {
   const spinner = ora({ text: 'Preparing' }).start()
 
   const instance = cepheus({
+    hueAngle,
     background,
     colorSpace,
     colors,
