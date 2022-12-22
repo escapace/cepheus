@@ -95,6 +95,7 @@ export interface OptimizeOptions {
     coolingRate: number
     cutoff: number
   }
+  hueAngle?: number
   weights?: {
     chroma: number
     contrast: number
