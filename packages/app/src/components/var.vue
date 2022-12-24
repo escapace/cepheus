@@ -4,7 +4,7 @@ import { onMounted, ref, watch } from 'vue'
 import { createPlugin } from '../drafts'
 import slider from './slider.vue'
 import model from '../models/model.json'
-import { createEngine } from '../engine'
+import { cassiopeia } from '../engine'
 
 function setup() {
   // let br = document.getElementById('sliderBrightness')
@@ -242,7 +242,10 @@ onMounted(() => {
   createEvent(col4, 'event120', 'Backlog', 'UT-112', 'catPrimary', 8)
 
   const interpolator = createInterpolator(model)
-  createEngine([createPlugin(interpolator)])
+  cassiopeia({
+    id: 'tes',
+    plugins: [createPlugin(interpolator)]
+  })
 
   watch([chroma.value.range()], ([value]) => {
     interpolator.updateChroma(value)

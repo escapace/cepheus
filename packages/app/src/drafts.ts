@@ -11,7 +11,7 @@ import {
   type Color
 } from '@cepheus/color'
 import { normalize, type Interpolator, type Unsubscribe } from '@cepheus/core'
-import type { Plugin, PluginIterator } from './engine'
+import type { Plugin, Iterator } from './engine'
 
 const templateSRGB = (values: string[]) => `:root { ${values.join(' ')} }`
 const templateP3 = (values: string[]) =>
@@ -45,7 +45,7 @@ export interface Options {
 function* colorIterator(
   interpolator: Interpolator,
   p3support: boolean
-): PluginIterator {
+): Iterator {
   const srgb: string[] = []
   const p3: string[] = []
 
@@ -112,7 +112,7 @@ export const createPlugin = (
     let unsubscribe: Unsubscribe | undefined
 
     const register = (
-      plugins: Map<string, () => PluginIterator>,
+      plugins: Map<string, () => Iterator>,
       update: () => void
     ) => {
       unsubscribe = interpolator.subscribe(update)
