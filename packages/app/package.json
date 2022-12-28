@@ -31,7 +31,7 @@
     "sass": "1.56.1",
     "typescript": "4.9.4",
     "unocss": "0.47.5",
-    "vite": "3.2.4",
+    "vite": "4.0.3",
     "vite-plugin-glsl": "0.5.4",
     "vue": "3.2.45",
     "vue-router": "4",
