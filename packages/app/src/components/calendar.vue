@@ -2,8 +2,13 @@
 import { Temporal, Intl } from '@js-temporal/polyfill'
 import { useTimeoutPoll } from '@vueuse/core'
 import { range } from 'lodash-es'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import Event from './event.vue'
+import slider from './slider.vue'
+import model from '../models/model.json'
+import { cassiopeia } from 'cassiopeia'
+import { createInterpolator } from 'cepheus'
+import { createCepheusPlugin } from '@cepheus/plugin'
 
 const calendar = new Temporal.Calendar('iso8601')
 const timeZone = Temporal.Now.timeZone()
@@ -26,20 +31,48 @@ interface Data {
   time: { row: number; hour: number }
   month: string
   week: string
+  events: Array<InstanceType<typeof Event>['$props']>
 }
 
 const data = ref<Data>()
 
-// const createEvents = () => {
-//
-// }
+function random(min: number, max: number) {
+  min = Math.ceil(min)
+  max = Math.floor(max)
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+const createEvents = (): Data['events'] => {
+  const titles = [
+    'Soft landing 2023?',
+    'Sustaining support to Ukraine',
+    '2023 Global Energy Forum',
+    'Freedom and Prosperity Research Conference',
+    'The future of US-Africa trade',
+    'Dog Walk',
+    'Book Club'
+  ]
+
+  return titles.map((title) => ({
+    dayOfWeek: random(0, 6),
+    hour: random(4, 19),
+    minute: random(0, 40),
+    duration: random(60, 120),
+    backgroundColor: `var(---color-3-20-50-0)`,
+    textColor: 'black',
+    borderColor: 'black',
+    title
+  }))
+}
 
 const update = () => {
   const now = Temporal.Now.plainDateTime(calendar)
   const time = Temporal.PlainTime.from(now)
   const date = Temporal.PlainDate.from(now)
+  const events = createEvents()
 
   data.value = {
+    events,
     days: range(1, 8).map((dayOfWeek) => {
       const days = dayOfWeek - now.dayOfWeek
       const sign = Math.sign(days)
@@ -65,10 +98,34 @@ const update = () => {
 }
 
 update()
-const { pause, resume } = useTimeoutPoll(update, 1000)
+const { pause, resume } = useTimeoutPoll(update, 15000 * 1000)
+
+const lightness = ref()
+const chroma = ref()
+const darkMode = ref(false)
 
 onMounted(() => {
   resume()
+
+  const interpolator = createInterpolator(model)
+  const instance = cassiopeia({
+    id: 'tes',
+    plugins: [createCepheusPlugin(interpolator)]
+  })
+
+  watch([chroma.value.range()], ([value]) => {
+    interpolator.updateChroma(value)
+  })
+
+  watch([lightness.value.range()], ([value]) => {
+    interpolator.updateLightness(value)
+  })
+
+  watch([darkMode], ([value]) => {
+    interpolator.updateDarkMode(value)
+  })
+
+  instance.start()
 })
 
 onUnmounted(() => {
@@ -78,12 +135,33 @@ onUnmounted(() => {
 
 <template>
   <div>
+    <div>
+      <div class="flex mb10 justify-center flex-row">
+        <slider ref="lightness"></slider>
+        <div class="m5"></div>
+        <slider ref="chroma"></slider>
+        <div class="m5"></div>
+        <!-- <div class="form-item"> -->
+        <div class="form-control">
+          <input
+            id="darkMode"
+            v-model="darkMode"
+            name="darkMode"
+            type="checkbox"
+          />
+          <label for="darkMode" style="color: var(---color-0-100-0-0)"
+            >Dark Mode</label
+          >
+        </div>
+        <!-- </div> -->
+      </div>
+    </div>
     <div class="container">
       <div class="header">
         <div class="week">{{ data?.week }}</div>
         <div class="month">{{ data?.month }}</div>
       </div>
-      <div class="days">
+      <div class="subheader">
         <div class="filler"></div>
         <div class="filler"></div>
         <div
@@ -151,13 +229,16 @@ onUnmounted(() => {
         <div class="row" style="grid-row: 22"></div>
         <div class="row" style="grid-row: 23"></div>
         <Event
-          :day-of-week="0"
-          :hour="1"
-          :duration="120"
-          :minute="45"
-          background-color="black"
-          border-color="white"
-          title="Event Bla"
+          v-for="(event, index) in data?.events"
+          :key="index"
+          :day-of-week="event.dayOfWeek"
+          :hour="event.hour"
+          :minute="event.minute"
+          :duration="event.duration"
+          :background-color="event.backgroundColor"
+          :text-color="event.textColor"
+          :border-color="event.backgroundColor"
+          :title="event.title"
         />
         <div
           class="current-time"
@@ -176,9 +257,15 @@ $title-height: 3rem;
 $days-height: 3rem;
 $time-width: 3rem;
 $time-height: 3rem;
-$grid-color: #dadce0;
 $calendar-template: $time-width 0.625rem repeat(7, 1fr);
-$current-time-color: #ea4335;
+$current-time-color: var(---color-1-0-30-10);
+$grid-color: var(---color-2-2-0-10);
+$background-weekday: var(---color-1-0-0-40);
+$background-weekend: var(---color-0-1-0-20);
+
+* {
+  transition: background-color 200ms linear;
+}
 
 .container {
   width: 100%;
@@ -190,8 +277,7 @@ $current-time-color: #ea4335;
   /* position: absolute; */
 }
 
-.days {
-  background: #f3f2f1;
+.subheader {
   display: grid;
   place-content: center;
   text-align: center;
@@ -199,6 +285,8 @@ $current-time-color: #ea4335;
   top: $title-height;
   z-index: 10;
   border-bottom: 0.125rem solid $grid-color;
+  background-color: var(---color-1-0-0-30);
+  color: var(---color-2-50-1-0);
 }
 
 .day {
@@ -209,6 +297,7 @@ $current-time-color: #ea4335;
   display: grid;
   grid-template-columns: $calendar-template;
   grid-template-rows: repeat(24, $time-height);
+  background-color: $background-weekday;
 }
 
 .time {
@@ -240,7 +329,7 @@ $current-time-color: #ea4335;
 }
 
 .weekend {
-  background-color: #f1f3f4;
+  background-color: $background-weekend;
 }
 
 .current-time {
@@ -264,20 +353,19 @@ $current-time-color: #ea4335;
   grid-template-rows: 1fr;
   align-content: center;
   align-items: center;
-  background: #217346;
+  background-color: var(---color-3-50-50-0);
+  color: var(---color-3-1-1-50);
 }
 
 .month {
   text-align: center;
   display: grid;
   place-content: center;
-  color: #fff;
   /* top: 0; */
   /* z-index: 10; */
 }
 
 .week {
-  color: #fff;
   font-weight: 500;
   grid-column: 1;
   grid-row: 1;
