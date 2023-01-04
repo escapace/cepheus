@@ -6,7 +6,7 @@ import {
   type ModelUnparsed,
   type Point,
   type Triangle
-} from '@cepheus/core'
+} from 'cepheus'
 import { onMounted, ref, watch } from 'vue'
 import _model from '../models/model.json'
 import slider from './slider.vue'

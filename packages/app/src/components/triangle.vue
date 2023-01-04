@@ -8,7 +8,7 @@ import {
   type ModelUnparsed,
   type Point,
   type Triangle
-} from '@cepheus/core'
+} from 'cepheus'
 import _model from '../models/model.json'
 
 ColorSpace.register(LCH)
