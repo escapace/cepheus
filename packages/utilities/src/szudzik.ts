@@ -1,4 +1,4 @@
-import { szudzik as szudzik2 } from '@cepheus/core'
+import { szudzik as szudzik2 } from 'cepheus'
 
 export { szudzik2 }
 

@@ -1,12 +1,12 @@
 {
-  "name": "@cepheus/utilities",
+  "name": "@cepheus/plugin",
   "description": "",
   "version": "0.0.0",
   "author": "escapace <opensource@escapace.com>",
   "bugs": "https://github.com/escapace/cepheus/issues",
   "dependencies": {
-    "cepheus": "workspace:*",
-    "lodash-es": "4.17.21"
+    "@cepheus/color": "workspace:*",
+    "cepheus": "workspace:*"
   },
   "devDependencies": {
     "@types/chai": "4.3.4",
@@ -39,6 +39,9 @@
   "homepage": "https://github.com/escapace/cepheus",
   "license": "MPL-2.0",
   "module": "lib/esm/index.mjs",
+  "peerDependencies": {
+    "cassiopeia": "1.1.1"
+  },
   "private": false,
   "publishConfig": {
     "access": "public"

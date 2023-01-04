@@ -14,8 +14,12 @@
         backgroundColor: `${props.backgroundColor}`
       }"
     >
-      <div class="event-time">{{ time }}</div>
-      <div class="event-title">{{ props.title }}</div>
+      <div class="event-time" :style="{ color: props.textColor }">
+        {{ time }}
+      </div>
+      <div class="event-title" :style="{ color: props.textColor }">
+        {{ props.title }}
+      </div>
     </div>
   </div>
 </template>
@@ -49,6 +53,10 @@ const props = defineProps({
     required: true,
     validator: (value: number) => isInteger(value) && value >= 10
   },
+  textColor: {
+    type: String,
+    required: true
+  },
   borderColor: {
     type: String,
     required: true
@@ -77,6 +85,7 @@ const time = computed(
   height: 100%;
   margin-right: 0.1875rem;
   margin-left: 0.125rem;
+  overflow: hidden;
 }
 
 .event-container {
@@ -88,7 +97,8 @@ const time = computed(
 }
 
 .event-time {
-  font-size: 70%;
+  font-size: 60%;
+  margin-bottom: 0.5ex;
 }
 
 .event-title {

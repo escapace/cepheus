@@ -3,11 +3,7 @@
 import { ColorSpace, convert, LCH, OKLCH, P3, sRGB } from '@cepheus/color'
 import { onMounted } from 'vue'
 import _model from '../models/model.json'
-import {
-  createInterpolator,
-  parseModel,
-  type ModelUnparsed
-} from '@cepheus/core'
+import { createInterpolator, parseModel, type ModelUnparsed } from 'cepheus'
 
 ColorSpace.register(LCH)
 ColorSpace.register(sRGB)

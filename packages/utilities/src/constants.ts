@@ -1,1 +1,1 @@
-export { LENGTH as N } from '@cepheus/core'
+export { LENGTH as N } from 'cepheus'

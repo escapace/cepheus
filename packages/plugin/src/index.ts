@@ -1,5 +1,3 @@
-// const qwe = document.styleSheets
-
 import {
   ColorSpace,
   convert,
@@ -10,21 +8,14 @@ import {
   sRGB,
   type Color
 } from '@cepheus/color'
-import { normalize, type Interpolator, type Unsubscribe } from '@cepheus/core'
-import type { Plugin, Iterator } from './engine'
+import { normalize, type Interpolator, type Unsubscribe } from 'cepheus'
+import type { Iterator, Plugin } from 'cassiopeia'
 
 const templateSRGB = (values: string[]) => `:root { ${values.join(' ')} }`
 const templateP3 = (values: string[]) =>
   `@supports (color: color(display-p3 1 1 1)) { :root { ${values.join(' ')} } }`
 
-// on a new request it starts with default options
-// on return requests it starts with options hydrated from cookies
-// when settings change it saves them with http request
-// the hydration logic is better left to userland
-
-const REGEX = /^([0-9]+)-([0-9]+)-([0-9]+)-([0-9]+)(-([0-1]|0[0-9]+))?$/i
-
-// const interpolator = createInterpolator(model as ModelUnparsed)
+const COLOR_REGEX = /^([0-9]+)-([0-9]+)-([0-9]+)-([0-9]+)(-([0-1]|0[0-9]+))?$/i
 
 const parseAlpha = (value: string | undefined): number => {
   if (value === undefined) {
@@ -38,10 +29,6 @@ const parseAlpha = (value: string | undefined): number => {
   return parseFloat('0.' + value.slice(1))
 }
 
-export interface Options {
-  p3?: boolean
-}
-
 function* colorIterator(
   interpolator: Interpolator,
   p3support: boolean
@@ -52,7 +39,7 @@ function* colorIterator(
   let cursor: true | string
 
   while ((cursor = yield) !== true) {
-    const string = cursor.match(REGEX)
+    const string = cursor.match(COLOR_REGEX)
 
     if (string === null) {
       continue
@@ -94,11 +81,18 @@ function* colorIterator(
     : templateSRGB(srgb)
 }
 
-export const createPlugin = (
+export interface Options {
+  p3?: boolean
+}
+
+export const createCepheusPlugin = (
   interpolator: Interpolator,
   options: Options = {}
 ): Plugin => {
-  const p3support = options.p3 ?? window.matchMedia('(color-gamut: p3)').matches
+  const p3support =
+    options.p3 ?? typeof globalThis.matchMedia === 'function'
+      ? globalThis.matchMedia('(color-gamut: p3)').matches
+      : true
 
   ColorSpace.register(LCH)
   ColorSpace.register(sRGB)
@@ -108,16 +102,13 @@ export const createPlugin = (
     ColorSpace.register(P3)
   }
 
-  return () => {
+  return (iterators: Map<string, () => Iterator>) => {
     let unsubscribe: Unsubscribe | undefined
 
-    const register = (
-      plugins: Map<string, () => Iterator>,
-      update: () => void
-    ) => {
+    const register = (update: () => void) => {
       unsubscribe = interpolator.subscribe(update)
 
-      plugins.set('color', () => colorIterator(interpolator, p3support))
+      iterators.set('color', () => colorIterator(interpolator, p3support))
     }
 
     const deregister = () => {
