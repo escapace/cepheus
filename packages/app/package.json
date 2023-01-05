@@ -9,7 +9,7 @@
     "@cepheus/plugin": "workspace:*",
     "@cepheus/utilities": "workspace:*",
     "@js-temporal/polyfill": "0.4.3",
-    "cassiopeia": "1.1.1",
+    "cassiopeia": "1.1.2",
     "cepheus": "workspace:*",
     "lodash-es": "4.17.21"
   },

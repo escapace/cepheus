@@ -12,3 +12,4 @@ export type {
   Triangle,
   Unsubscribe
 } from './types'
+export { normalizeAngle } from './normalize-angle'

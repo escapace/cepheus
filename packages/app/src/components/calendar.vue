@@ -50,19 +50,35 @@ const createEvents = (): Data['events'] => {
     'Freedom and Prosperity Research Conference',
     'The future of US-Africa trade',
     'Dog Walk',
+    'Book Club',
+    'Soft landing 2023?',
+    'Sustaining support to Ukraine',
+    '2023 Global Energy Forum',
+    'Freedom and Prosperity Research Conference',
+    'The future of US-Africa trade',
+    'Dog Walk',
     'Book Club'
   ]
 
-  return titles.map((title) => ({
-    dayOfWeek: random(0, 6),
-    hour: random(4, 19),
-    minute: random(0, 40),
-    duration: random(60, 120),
-    backgroundColor: `var(---color-3-20-50-0)`,
-    textColor: 'black',
-    borderColor: 'black',
-    title
-  }))
+  return titles.map((title) => {
+    const colorIndex = random(0, 3)
+    const chroma = random(10, 20)
+    const darkness = random(0, 10)
+
+    return {
+      dayOfWeek: random(0, 6),
+      hour: random(4, 19),
+      minute: random(0, 40),
+      duration: random(60, 120),
+      backgroundColor: `var(---color-${colorIndex}-${darkness}-${chroma}-50, transparent)`,
+      // textColor: `var(---color-${colorIndex}-1-0-0, transparent)`,
+      textColor: `var(---invert-${colorIndex}-${darkness}-${chroma}-50, transparent)`,
+      borderColor: `var(---hue-${colorIndex}-${darkness + 15}-${
+        chroma - 5
+      }-20--30-05, transparent)`,
+      title
+    }
+  })
 }
 
 const update = () => {
@@ -98,7 +114,7 @@ const update = () => {
 }
 
 update()
-const { pause, resume } = useTimeoutPoll(update, 15000 * 1000)
+const { pause, resume } = useTimeoutPoll(update, 15 * 1000)
 
 const lightness = ref()
 const chroma = ref()
@@ -135,14 +151,14 @@ onUnmounted(() => {
 
 <template>
   <div>
-    <div>
+    <div class="control pt3">
       <div class="flex mb10 justify-center flex-row">
         <slider ref="lightness"></slider>
         <div class="m5"></div>
         <slider ref="chroma"></slider>
         <div class="m5"></div>
         <!-- <div class="form-item"> -->
-        <div class="form-control">
+        <div class="form-control mt5">
           <input
             id="darkMode"
             v-model="darkMode"
@@ -237,7 +253,7 @@ onUnmounted(() => {
           :duration="event.duration"
           :background-color="event.backgroundColor"
           :text-color="event.textColor"
-          :border-color="event.backgroundColor"
+          :border-color="event.borderColor"
           :title="event.title"
         />
         <div
@@ -265,6 +281,10 @@ $background-weekend: var(---color-0-1-0-20);
 
 * {
   transition: background-color 200ms linear;
+}
+
+.control {
+  background-color: $background-weekday;
 }
 
 .container {
