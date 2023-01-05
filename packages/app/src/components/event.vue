@@ -78,6 +78,10 @@ const time = computed(
 </script>
 
 <style scoped>
+* {
+  transition: background-color 300ms linear;
+}
+
 .event {
   border-radius: 0.3125rem;
   padding: 0.3125rem;
