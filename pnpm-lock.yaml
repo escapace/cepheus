@@ -75,7 +75,7 @@ importers:
       '@unocss/reset': 0.48.0
       '@vitejs/plugin-vue': 4.0.0
       '@vueuse/core': 9.10.0
-      cassiopeia: 1.1.1
+      cassiopeia: 1.1.2
       cepheus: workspace:*
       eslint: 8.31.0
       eslint-config-escapace: 3.16.0
@@ -100,7 +100,7 @@ importers:
       '@cepheus/plugin': link:../plugin
       '@cepheus/utilities': link:../utilities
       '@js-temporal/polyfill': 0.4.3
-      cassiopeia: 1.1.1
+      cassiopeia: 1.1.2
       cepheus: link:../core
       lodash-es: 4.17.21
     devDependencies:
@@ -275,7 +275,7 @@ importers:
       '@typescript-eslint/eslint-plugin': 5.48.0
       '@typescript-eslint/parser': 5.48.0
       c8: 7.12.0
-      cassiopeia: 1.1.1
+      cassiopeia: 1.1.2
       cepheus: workspace:*
       chai: 4.3.7
       eslint: 8.31.0
@@ -289,7 +289,7 @@ importers:
       typescript: 4.9.4
     dependencies:
       '@cepheus/color': link:../color
-      cassiopeia: 1.1.1
+      cassiopeia: 1.1.2
       cepheus: link:../core
     devDependencies:
       '@types/chai': 4.3.4
@@ -1855,8 +1855,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /cassiopeia/1.1.1:
-    resolution: {integrity: sha512-1PBM1f5YcZVyaxknyKV/y04W5vsvH/QtuGrl4nAGZElaz8ANBx0uCdKyRYp2OfjX1LC8RzZUsKASRgM5705jAg==}
+  /cassiopeia/1.1.2:
+    resolution: {integrity: sha512-0T/gFd/lA1aUhOd+34GUiw52zJ93pZS3meu4XOer4oMpqy7tRUFB+e2dn7OMrxJZIXWCL6nmDUrmJ/fdnG7/NA==}
     engines: {node: '>= 18.2.0', pnpm: '>= 7.14.0'}
     dev: false
 
