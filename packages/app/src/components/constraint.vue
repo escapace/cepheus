@@ -254,8 +254,8 @@ onMounted(() => {
         context!.canvas.height,
         { colorSpace: supportsDisplayP3 ? 'display-p3' : 'srgb' }
       )
-      instance.updateChroma([0, 1])
-      instance.updateLightness([0, 1])
+      instance.updateChroma(0, 1)
+      instance.updateLightness(0, 1)
       context!.clearRect(0, 0, canvas.width, canvas.height)
 
       const modelTriangle = model.triangle.map(([x, y]) => [

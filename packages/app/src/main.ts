@@ -5,14 +5,14 @@ import { createApp, watch } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 import App from './components/app.vue'
-// import HomeA from './components/home.vue'
-// import HomeB from './components/home2.vue'
-// import Canvas from './components/canvas.vue'
-// import Triangle from './components/triangle.vue'
+import Canvas from './components/canvas.vue'
+import HomeA from './components/home.vue'
+import HomeB from './components/home2.vue'
+import Triangle from './components/triangle.vue'
 // import Constraint from './components/constraint.vue'
 import Calendar from './components/calendar.vue'
 
-import '@unocss/reset/antfu.css'
+import '@unocss/reset/normalize.css'
 import 'uno.css'
 
 type State = Record<string, StateTree>
@@ -29,11 +29,11 @@ watch(pinia.state, () => {
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', component: Calendar }
-    // { path: '/b', component: HomeA },
-    // { path: '/c', component: HomeB },
-    // { path: '/d', component: Canvas },
-    // { path: '/e', component: Triangle },
+    { path: '/', component: Calendar },
+    { path: '/blocks', component: HomeA },
+    { path: '/c', component: HomeB },
+    { path: '/d', component: Canvas },
+    { path: '/e', component: Triangle }
     // { path: '/f', component: Constraint }
   ]
 })

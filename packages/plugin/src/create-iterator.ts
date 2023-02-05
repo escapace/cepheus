@@ -1,12 +1,11 @@
 import { convert, OKLCH, P3, serialize, sRGB, type Color } from '@cepheus/color'
 import type { Iterator } from 'cassiopeia'
-import { normalize, normalizeAngle, type Interpolator } from 'cepheus'
+import { normalizeAngle, type Interpolator } from 'cepheus'
 import { parseAlpha } from './parse-alpha'
 import { templateP3, templateSRGB } from './template'
 
-const HUE_REGEX =
-  /^([0-9]+)-([0-9]+)-([0-9]+)-([0-9]+)-(-?[0-9]+)(-([0-1]|0[0-9]+))?$/i
-const COLOR_REGEX = /^([0-9]+)-([0-9]+)-([0-9]+)-([0-9]+)(-([0-1]|0[0-9]+))?$/i
+const HUE_REGEX = /^([0-9]+)-([0-9]+)-([0-9]+)-(-?[0-9]+)(-([0-1]|0[0-9]+))?$/i
+const COLOR_REGEX = /^([0-9]+)-([0-9]+)-([0-9]+)(-([0-1]|0[0-9]+))?$/i
 
 export const createIterator = (type: 'color' | 'hue' | 'invert') => {
   const regex = {
@@ -32,15 +31,16 @@ export const createIterator = (type: 'color' | 'hue' | 'invert') => {
       }
 
       const color = parseInt(string[1], 10)
-      const barycentric = normalize(
-        string.slice(2, 5).map((value) => parseInt(value, 10))
-      ) as [number, number, number]
+      const [chroma, lightness] = string
+        .slice(2, 4)
+        .map((value) => parseInt(value, 10)) as [number, number]
 
-      if (type === 'invert') {
-        barycentric.reverse()
-      }
-
-      const coords = interpolator.barycentric(color, ...barycentric)
+      const coords = interpolator.get(
+        color,
+        chroma,
+        lightness,
+        type === 'invert'
+      )
 
       if (coords === undefined) {
         continue
@@ -49,13 +49,13 @@ export const createIterator = (type: 'color' | 'hue' | 'invert') => {
       let alpha: number
 
       if (type === 'color') {
-        alpha = parseAlpha(string[6])
+        alpha = parseAlpha(string[5])
       } else if (type === 'hue') {
-        coords[2] = normalizeAngle(coords[2] + parseInt(string[5]))
-        alpha = parseAlpha(string[7])
+        coords[2] = normalizeAngle(coords[2] + parseInt(string[4]))
+        alpha = parseAlpha(string[6])
       } else {
         coords[1] = 0.4 - coords[1]
-        alpha = parseAlpha(string[6])
+        alpha = parseAlpha(string[5])
       }
 
       const colorOKLCH: Color = {

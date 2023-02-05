@@ -2,7 +2,7 @@ import arg from 'arg'
 import chalk from 'chalk'
 import { readFileSync } from 'fs'
 import { readFile, writeFile } from 'fs/promises'
-import { isError, isInteger, isString, repeat, throttle } from 'lodash-es'
+import { isError, isInteger, isString, map, repeat, throttle } from 'lodash-es'
 import ora from 'ora'
 import path, { resolve } from 'path'
 import { promisify } from 'util'
@@ -13,7 +13,7 @@ import { OptimizeTask, TypeCepheusState } from './types'
 const compress = promisify(gzip)
 
 const HELP = `${chalk.bold('Usage:')}
-  cepheus --seed <string> (--background <color>)... (--color <color>)...
+  cepheus --seed <string> (--color <color>)...
         [--color-space p3|srgb] [--prng xoshiro128++|xorwow|xorshift128|sfc32]
         [--iterations <number>] [--levels ${N_DIVISORS.join('|')}]
         [--restore <file>] [--save <file>]
@@ -23,14 +23,12 @@ const HELP = `${chalk.bold('Usage:')}
 ${chalk.bold('Options:')}
   --seed          Pseudorandom number generator seed.
   --color         Foreground color.
-  --background    Background color for contrast calculation value using
-                  Advanced Perception of Color Algorithm (APCA).
   --output        Write output palette model to file.
   --color-space   Ensure that colors are inside the color space gamut. [default: p3]
   --hue-angle     Hue angle for each sampling step. [default: 30]
   --prng          Pseudorandom number generator. [default: xoshiro128++]
   --levels        Number of uniform sampling steps along each square axis. [default: ${DEFAULT_N_DIVISOR}]
-  --terations     Number of iterations. [default: ${DEFAULT_ITERATIONS}]
+  --iterations    Number of iterations. [default: ${DEFAULT_ITERATIONS}]
   --save          Save session to file.
   --restore       Restore session from file.
   -v, --version   Show version.
@@ -38,7 +36,6 @@ ${chalk.bold('Options:')}
 
 ${chalk.bold('Example:')}
   cepheus --seed 'f7d4a9b6-1ea8-476d-9440-fb29251d5d73' \\
-    --background '#ffffff' --background '#000000' \\
     --color '#1473e6' --color '#d7373f' --color '#da7b11' --color '#268e6c' \\
     --output palette.json
 `
@@ -48,7 +45,6 @@ const run = async () => {
     {
       '--seed': String,
       '--color': [String],
-      '--background': [String],
       '--output': String,
       '--color-space': String,
       '--prng': String,
@@ -79,7 +75,6 @@ const run = async () => {
     process.exit(0)
   }
 
-  const background = args['--background']
   const colorSpace = args['--color-space'] as 'p3' | 'srgb' | undefined
   const colors = args['--color']
   const levels = args['--levels']
@@ -99,12 +94,6 @@ const run = async () => {
   if (randomSeed === undefined) {
     console.log(HELP)
     console.error(`Option '--seed' must be defined.`)
-    process.exit(1)
-  }
-
-  if (background === undefined || background.length < 1) {
-    console.log(HELP)
-    console.error(`At least one '--background' option must be defined.`)
     process.exit(1)
   }
 
@@ -145,10 +134,10 @@ const run = async () => {
     process.exit(1)
   }
 
-  if (iterations !== undefined && !(isInteger(iterations) && iterations >= 2)) {
+  if (iterations !== undefined && !(isInteger(iterations) && iterations >= 1)) {
     console.log(HELP)
     console.error(
-      `Option '--iterations' must be an integer greater or equal to 2.`
+      `Option '--iterations' must be an integer greater or equal to 1.`
     )
     process.exit(1)
   }
@@ -178,9 +167,10 @@ const run = async () => {
 
   const instance = cepheus({
     hueAngle,
-    background,
     colorSpace,
-    colors,
+    colors: map(colors, (colors) =>
+      colors.split(',').map((value) => value.trim())
+    ),
     initialState,
     levels,
     randomSeed,

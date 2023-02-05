@@ -50,7 +50,7 @@ const squares = tile(interval)
 const toStyle = (xy: [number, number], colorIndex: number) => {
   const [x, y] = xy
 
-  const coords = instance.cartesian(x, y, colorIndex)
+  const coords = instance.cartesian(colorIndex, x, y)
   //
   if (coords === undefined) {
     return undefined

@@ -43,7 +43,7 @@ onMounted(() => {
   )
 
   const interpolator = (x: number, y: number) => {
-    const coords = instance.cartesian(x, y, 2, true)
+    const coords = instance.cartesian(2, x, y, true)
 
     if (coords === undefined) {
       return [255, 255, 255]
@@ -87,7 +87,7 @@ onMounted(() => {
   // [ [ 0, 0 ], [ 79.6875, 69.53125 ], [ 99.21875, 0 ] ]
   // [ [ 0, 0 ], [ 71.875, 69.53125 ], [ 99.21875, 0 ] ]
 
-  // context.strokeStyle = 'black'
+  context.strokeStyle = 'red'
   context.beginPath()
   context.moveTo(0, 0)
   context.lineTo(toX(model.triangle[0][0]), toY(model.triangle[0][1]))

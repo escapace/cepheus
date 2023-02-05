@@ -23,16 +23,16 @@ import {
   OptimizationState,
   OptimizationStateFulfilled,
   OptimizationStatePending,
+  OptimizeTask,
+  OptimizeTaskOptions,
   RequiredStoreOptions,
   Square,
   StoreOptions,
-  OptimizeTask,
-  OptimizeTaskOptions,
-  TypeCepheusState,
-  TypeOptimizationState,
-  TriangleTaskResult,
   Triangle,
-  TriangleOptions
+  TriangleOptions,
+  TriangleTaskResult,
+  TypeCepheusState,
+  TypeOptimizationState
 } from './types'
 import { hash } from './utilities/hash'
 import { objectHash } from './utilities/object-hash'
@@ -50,7 +50,7 @@ const rangeFrom = (square: Square, interval: number) => {
       number
     ]
 
-    const target = mean(range)
+    const target = range[1]
 
     return {
       range,
@@ -65,16 +65,18 @@ const rangeFrom = (square: Square, interval: number) => {
 }
 
 const normalizeOptions = (options: StoreOptions): RequiredStoreOptions => {
-  const colors = options.colors.map(
-    (value) =>
-      fixNaN(
-        convert(isString(value) ? parse(value) : value, OKLCH, {
-          inGamut: true
-        })
-      ).coords
+  const colors = options.colors.map((colors) =>
+    colors.map(
+      (value) =>
+        fixNaN(
+          convert(isString(value) ? parse(value) : value, OKLCH, {
+            inGamut: true
+          })
+        ).coords
+    )
   )
 
-  const background = options.background.map(
+  const background = ['#000000', '#030202'].map(
     (value) =>
       fixNaN(
         convert(isString(value) ? parse(value) : value, OKLCH, {
@@ -90,8 +92,8 @@ const normalizeOptions = (options: StoreOptions): RequiredStoreOptions => {
     throw new Error(`'levels' must be one of ${N_DIVISORS.join(', ')}`)
   }
 
-  if (!(isInteger(iterations) && iterations >= 2)) {
-    throw new Error(`'iterations' must be an integer greater or equal to 2`)
+  if (!(isInteger(iterations) && iterations >= 1)) {
+    throw new Error(`'iterations' must be an integer greater or equal to 1`)
   }
 
   return {

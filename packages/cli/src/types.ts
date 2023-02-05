@@ -66,15 +66,15 @@ export interface StoreOptions
     OptimizeOptions,
     'colors' | 'background' | 'lightness' | 'chroma'
   > {
-  colors: Color[] | string[]
-  background: Color[] | string[]
+  colors: Array<Color[] | string[]>
+  // background: Color[] | string[]
   levels?: number
   iterations?: number
 }
 
 export interface RequiredStoreOptions
   extends Omit<StoreOptions, 'colors' | 'background' | 'levels'> {
-  colors: Array<[number, number, number]>
+  colors: Array<Array<[number, number, number]>>
   background: Array<[number, number, number]>
   interval: number
   iterations: number
@@ -87,7 +87,7 @@ export interface OptimizeTaskOptions extends OptimizeOptions {
 export interface OptimizeOptions {
   randomSeed: string
   randomSource?: PRNGName
-  colors: Array<[number, number, number]>
+  colors: Array<Array<[number, number, number]>>
   background: Array<[number, number, number]>
   colorSpace?: ColorSpaceId
   hyperparameters?: {
@@ -136,7 +136,7 @@ export type RequiredOptimizeOptions = DeepRequired<
 > & {
   prng: PRNG
   colorSpace: ColorSpace
-  colors: Color[]
+  colors: Color[][]
   background: Color[]
 }
 

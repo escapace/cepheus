@@ -15,5 +15,6 @@ describe('./src/utilities/relative-difference.spec.ts', () => {
     assert.equal(relativeDifference(0, 50, 0, 100), 0.5)
 
     assert.equal(relativeDifference(0, 0, 0, 100), 0)
+    assert.equal(relativeDifference(100, 100, 100, 100), 0)
   })
 })
