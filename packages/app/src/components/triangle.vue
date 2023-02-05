@@ -53,7 +53,7 @@ onMounted(() => {
   )
 
   const interpolator = (alpha: number, beta: number, gamma: number) => {
-    const coords = instance.barycentric(alpha, beta, gamma, 2)
+    const coords = instance.barycentric(0, alpha, beta, gamma)
 
     if (coords === undefined) {
       return [255, 255, 255]
@@ -149,7 +149,7 @@ onMounted(() => {
   context.putImageData(img, 0, 0)
 
   context!.lineWidth = 2
-  context!.strokeStyle = 'black'
+  context!.strokeStyle = 'red'
 
   context.beginPath()
   context.moveTo(0, 0)

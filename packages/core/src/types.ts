@@ -31,8 +31,8 @@ export interface Interpolator {
   lightness: () => Readonly<State['lightness']>
   chroma: () => Readonly<State['chroma']>
   darkMode: () => Readonly<State['darkMode']>
-  updateLightness: (value: [number, number]) => void
-  updateChroma: (value: [number, number]) => void
+  updateLightness: (a?: number, b?: number) => void
+  updateChroma: (a?: number, b?: number) => void
   updateDarkMode: (value: boolean) => void
   subscribe: (cb: Subscription) => Unsubscribe
   cartesian: (
@@ -45,6 +45,13 @@ export interface Interpolator {
     color: number,
     alpha: number,
     beta: number,
-    gamma: number
+    gamma: number,
+    invert?: boolean
+  ) => [number, number, number] | undefined
+  get: (
+    color: number,
+    chroma: number,
+    lightness: number,
+    invert?: boolean
   ) => [number, number, number] | undefined
 }

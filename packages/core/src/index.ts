@@ -4,6 +4,7 @@ export { normalize } from './normalize'
 export { parseModel } from './parse-model'
 export { szudzik } from './szudzik'
 export type {
+  State,
   Interpolator,
   ModelParsed,
   ModelUnparsed,

@@ -5,7 +5,7 @@ import {
   ColorSpace,
   contrastAPCA,
   convert,
-  deltaEOK,
+  deltaEJz,
   fixNaN,
   inGamut,
   LCH,
@@ -13,7 +13,8 @@ import {
   P3,
   sRGB
 } from '@cepheus/color'
-import { map, mapValues } from 'lodash-es'
+import { N } from '@cepheus/utilities'
+import { flatMap, map, mapValues } from 'lodash-es'
 import {
   errorFunction,
   mean,
@@ -33,7 +34,6 @@ import { isWithin } from '../utilities/is-within'
 import { percentile } from '../utilities/percentile'
 import { randomWithin } from '../utilities/random-within'
 import { relativeDifference } from '../utilities/relative-difference'
-import { N } from '@cepheus/utilities'
 
 class IterationError extends Error {
   constructor(message: string) {
@@ -125,7 +125,7 @@ function randomColor(
     }
   }
 
-  let iterations = 10000
+  let iterations = 15000
 
   while (iterations !== 0) {
     const value = next()
@@ -169,7 +169,7 @@ function randomColor(
   throw new IterationError('Iteration limit exceeded.')
 }
 
-const distance = (a: Color, b: Color) => deltaEOK(a, b)
+const distance = (a: Color, b: Color) => deltaEJz(a, b)
 
 // const getClosestColor = (color, colorArray) => {
 //   const distances = colorArray.map((c) => distance(color, c))
@@ -230,7 +230,15 @@ const distances = (colors: Color[], deficiency?: Deficiency) => {
 const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
   // reward the decrease in central tendency of distances from initial colors
   const differenceScore = mean(
-    map(state, (c, index) => distance(c, options.colors[index]))
+    flatMap(state, (c, index) => {
+      return map(options.colors[index], (color) => {
+        const modifiedColor = clone(color)
+
+        modifiedColor.coords[0] = c.coords[0]
+
+        return distance(c, modifiedColor)
+      })
+    })
   )
 
   // reward the decrease in relative distance to lightness target
@@ -240,6 +248,17 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
     options.lightness.range[0],
     options.lightness.range[1]
   )
+
+  if (isNaN(lightnessScore)) {
+    const data = [
+      mean(map(state, (value) => value.coords[0])),
+      options.lightness.target,
+      options.lightness.range[0],
+      options.lightness.range[1]
+    ]
+
+    throw new Error(`NAN ${JSON.stringify(data)}`)
+  }
 
   // reward the decrease in relative distance to chroma target
   const chromaScore = relativeDifference(
@@ -299,7 +318,10 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
     normalScore,
     protanopiaScore,
     tritanopiaScore
-  }).filter(([_, value]) => value > 1 || value < 0 || isNaN(value))
+  }).filter(([_, value]) => {
+    const v = Math.fround(value)
+    return v > 1 || v < 0 || isNaN(v)
+  })
 
   if (issues.length !== 0) {
     throw new Error(
@@ -308,19 +330,6 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
       )}.`
     )
   }
-
-  // console.log({
-  //   chromaScore,
-  //   contrastScore,
-  //   deuteranopiaScore,
-  //   differenceScore,
-  //   dispersionScore,
-  //   lightnessScore,
-  //   normalScore,
-  //   protanopiaScore,
-  //   tritanopiaScore,
-  //   surroundingColorsScore
-  // })
 
   return (
     options.weights.chroma * chromaScore +
@@ -343,11 +352,15 @@ const normalizeWeights = (
   return mapValues(weights, (value) => value / total)
 }
 
+const lerp = (v0: number, v1: number, t: number) => v0 * (1 - t) + v1 * t
+
+const bias = (value: number) => lerp(0.05, 1, Math.min(value * 1.05, 1))
+
 const normalizeLightness = (
   value: Required<Exclude<OptimizeOptions['lightness'], undefined>>
 ): Required<Exclude<OptimizeOptions['lightness'], undefined>> => ({
-  range: map(value.range, (v) => v / N) as [number, number],
-  target: value.target / N
+  range: map(value.range, (v) => bias(v / N)) as [number, number],
+  target: bias(value.target / N)
 })
 
 const normalizeChroma = (
@@ -360,14 +373,16 @@ const normalizeChroma = (
 const normalizeOptions = (
   options: OptimizeOptions
 ): RequiredOptimizeOptions => {
-  const colors = map(
-    options.colors,
-    (coords): Color =>
-      fixNaN({
-        space: OKLCH,
-        coords,
-        alpha: 1
-      })
+  const colors = map(options.colors, (colors) =>
+    map(
+      colors,
+      (coords): Color =>
+        fixNaN({
+          space: OKLCH,
+          coords,
+          alpha: 1
+        })
+    )
   )
 
   const background = map(
@@ -399,7 +414,7 @@ const normalizeOptions = (
     background,
     prng,
     hyperparameters: {
-      temperature: 6000,
+      temperature: 8000,
       coolingRate: 0.99,
       cutoff: 0.0001,
       ...options.hyperparameters
@@ -407,19 +422,19 @@ const normalizeOptions = (
     hueAngle,
     weights: normalizeWeights({
       // pushes color to initial value
-      difference: 47.5,
-      // pushes color to the lightness center
+      difference: 25,
+      // pushes color to the lightness edge
       lightness: 8.75,
-      // pushes color to the chroma center
-      chroma: 8.75,
+      // pushes color to the chroma edge
+      chroma: 12,
       // pushes color away from background
       contrast: 6.25,
       // pushes color away from pallete colors
       dispersion: 10,
-      normal: 7.5,
-      protanopia: 3.75,
-      tritanopia: 3.75,
-      deuteranopia: 3.75,
+      normal: 6.5,
+      protanopia: 2.75,
+      tritanopia: 2.75,
+      deuteranopia: 2.75,
       ...options.weights
     }),
     colorSpace,
@@ -447,13 +462,14 @@ const normalizeOptions = (
 }
 
 const iterate = (options: RequiredOptimizeOptions) => {
-  const initialColors: Color[] = options.colors
+  const colors: Color[] = map(options.colors, (colors) => {
+    return randomColor(
+      options,
+      sample(colors, 1, () => options.prng.float())[0]
+    )
+  })
 
-  const colors: Color[] = map(initialColors, (color) =>
-    randomColor(options, color)
-  )
-
-  const startColors = Array.from(colors)
+  const startColors: Color[] = colors.map((value) => clone(value))
   const startCost = cost(options, startColors)
 
   // intialize hyperparameters
@@ -461,28 +477,31 @@ const iterate = (options: RequiredOptimizeOptions) => {
 
   let bestCost: number = startCost
   let bestColors: Color[] = startColors
+  let changed = false
 
   // iteration loop
   while (temperature > options.hyperparameters.cutoff) {
     // for each color
     for (let index = 0; index < colors.length; index++) {
-      // copy old colors
-      const newColors = [...colors]
-      // move the current color randomly
-      newColors[index] = randomColor(
-        options,
-        newColors[index],
-        options.colors[index],
-        temperature
-      )
-      // choose between the current state and the new state
-      // based on the difference between the two, the temperature
-      // of the algorithm, and some random chance
-      const delta = cost(options, newColors) - cost(options, colors)
-      const probability = Math.exp(-delta / temperature)
-      if (options.prng.float() < probability) {
-        colors[index] = newColors[index]
-      }
+      try {
+        // copy old colors
+        const newColors = [...colors]
+        // move the current color randomly
+        newColors[index] = randomColor(
+          options,
+          newColors[index],
+          sample(options.colors[index], 1, () => options.prng.float())[0],
+          temperature
+        )
+        // choose between the current state and the new state
+        // based on the difference between the two, the temperature
+        // of the algorithm, and some random chance
+        const delta = cost(options, newColors) - cost(options, colors)
+        const probability = Math.exp(-delta / temperature)
+        if (options.prng.float() < probability) {
+          colors[index] = newColors[index]
+        }
+      } catch (e) {}
     }
 
     const current = cost(options, colors)
@@ -490,10 +509,15 @@ const iterate = (options: RequiredOptimizeOptions) => {
     if (current < bestCost) {
       bestCost = current
       bestColors = colors
+      changed = true
     }
 
     // decrease temperature
     temperature *= options.hyperparameters.coolingRate
+  }
+
+  if (!changed) {
+    throw new IterationError('No Changes')
   }
 
   return {
@@ -502,15 +526,18 @@ const iterate = (options: RequiredOptimizeOptions) => {
   }
 }
 
-export const optimize = (options: OptimizeOptions): OptimizationState => {
+export const optimize = async (
+  options: OptimizeOptions
+  // eslint-disable-next-line @typescript-eslint/require-await
+): Promise<OptimizationState> => {
   ColorSpace.register(LCH)
   ColorSpace.register(OKLCH)
   ColorSpace.register(sRGB)
   ColorSpace.register(P3)
 
-  const normalizedOptions = normalizeOptions(options)
-
   try {
+    const normalizedOptions = normalizeOptions(options)
+
     return {
       type: TypeOptimizationState.Fulfilled,
       ...iterate(normalizedOptions)
@@ -520,7 +547,7 @@ export const optimize = (options: OptimizeOptions): OptimizationState => {
       return { type: TypeOptimizationState.Rejected }
     }
 
-    // console.error(options)
+    console.error(e)
 
     throw e
   }

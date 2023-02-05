@@ -4,6 +4,10 @@ export const relativeDifference = (
   min: number,
   max: number
 ) => {
+  if (a === b && b === min && min === max) {
+    return 0
+  }
+
   const _a = Math.min(a, b)
   const _b = Math.max(a, b)
 
@@ -11,5 +15,7 @@ export const relativeDifference = (
     return 0
   }
 
-  return (Math.abs(_a - _b) / _b) * (_b / (max - min))
+  const maxmin = max - min
+
+  return (Math.abs(_a - _b) / _b) * (_b / maxmin)
 }

@@ -9,13 +9,21 @@ import { normalize } from './normalize'
 import { parseModel } from './parse-model'
 import { szudzik } from './szudzik'
 import type {
-  State,
+  Interpolator,
   Line,
   Point,
-  Interpolator,
-  Unsubscribe,
-  Subscription
+  State,
+  Subscription,
+  Unsubscribe
 } from './types'
+
+const xor = (a: boolean, b: boolean) => !a !== !b
+
+// Two characters in 32 radix
+const MAX = 1024 - 1
+
+// const MAX = 512
+// const MAX = 1024 - 1
 
 export const createInterpolator = (
   model: unknown,
@@ -179,16 +187,29 @@ export const createInterpolator = (
     color: number,
     alpha: number,
     beta: number,
-    gamma: number
+    gamma: number,
+    invert = false
   ) => {
-    const _alpha = state.darkMode ? gamma : alpha
-    const _gamma = state.darkMode ? alpha : gamma
+    const swap = xor(state.darkMode, invert)
 
-    const x = _alpha * t0[0] + beta * t1[0] + _gamma * t2[0]
-    const y = _alpha * t0[1] + beta * t1[1] + _gamma * t2[1]
+    const aa = swap ? gamma : alpha
+    const gg = swap ? alpha : gamma
 
-    // TODO: this should be false or an arg
+    const [a, b, g] = normalize([aa, beta, gg])
+
+    const x = a * t0[0] + b * t1[0] + g * t2[0]
+    const y = a * t0[1] + b * t1[1] + g * t2[1]
+
     return cartesian(color, x, y, true)
+  }
+
+  const get = (
+    color: number,
+    chroma: number,
+    lightness: number,
+    invert = false
+  ) => {
+    return barycentric(color, MAX - lightness, chroma, lightness, invert)
   }
 
   chroma0()
@@ -203,6 +224,7 @@ export const createInterpolator = (
   }
 
   return {
+    get,
     cartesian,
     barycentric,
     subscribe: (value: () => void): Unsubscribe => {
@@ -219,18 +241,18 @@ export const createInterpolator = (
         notify()
       }
     },
-    updateLightness: (value: [number, number]) => {
+    updateLightness: (a?: number, b?: number) => {
       let change = false
 
-      if (value[0] !== state.lightness[0]) {
-        state.lightness[0] = value[0]
-        lightness0()
+      if (b !== undefined && b !== state.lightness[1]) {
+        state.lightness[1] = b
+        lightness1()
         change = true
       }
 
-      if (value[1] !== state.lightness[1]) {
-        state.lightness[1] = value[1]
-        lightness1()
+      if (a !== undefined && a !== state.lightness[0]) {
+        state.lightness[0] = a
+        lightness0()
         change = true
       }
 
@@ -238,17 +260,17 @@ export const createInterpolator = (
         notify()
       }
     },
-    updateChroma: (value: [number, number]) => {
+    updateChroma: (a?: number, b?: number) => {
       let change = false
 
-      if (value[0] !== state.chroma[0]) {
-        state.chroma[0] = value[0]
+      if (a !== undefined && a !== state.chroma[0]) {
+        state.chroma[0] = a
         chroma0()
         change = true
       }
 
-      if (value[1] !== state.chroma[1]) {
-        state.chroma[1] = value[1]
+      if (b !== undefined && b !== state.chroma[1]) {
+        state.chroma[1] = b
         chroma1()
         change = true
       }
