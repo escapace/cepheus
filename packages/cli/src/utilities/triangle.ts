@@ -7,8 +7,8 @@ import { distance } from './distance'
 
 // export const TRIANGLE_CANVAS_HEIGHT = 64 + 64
 // export const TRIANGLE_CANVAS_WIDTH = 64 + 64
-export const TRIANGLE_CANVAS_HEIGHT = 320
-export const TRIANGLE_CANVAS_WIDTH = 320
+export const TRIANGLE_CANVAS_HEIGHT = 420
+export const TRIANGLE_CANVAS_WIDTH = 420
 export const TRIANGLE_TASK_BATCH_SIZE = 100000
 
 const CORNER_RATIO_A = 5 / N

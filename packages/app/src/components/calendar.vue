@@ -2,13 +2,17 @@
 import { Temporal, Intl } from '@js-temporal/polyfill'
 import { useTimeoutPoll } from '@vueuse/core'
 import { range } from 'lodash-es'
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import Event from './event.vue'
-import slider from './slider.vue'
 import model from '../models/model.json'
 import { cassiopeia } from 'cassiopeia'
 import { createInterpolator } from 'cepheus'
 import { createCepheusPlugin } from '@cepheus/plugin'
+import { Pane } from 'tweakpane'
+
+import { createSourceDOM } from '@cassiopeia/source-dom'
+
+const lerp = (v0: number, v1: number, t: number) => v0 * (1 - t) + v1 * t
 
 const calendar = new Temporal.Calendar('iso8601')
 const timeZone = Temporal.Now.timeZone()
@@ -61,21 +65,24 @@ const createEvents = (): Data['events'] => {
   ]
 
   return titles.map((title) => {
-    const colorIndex = random(0, 3)
-    const chroma = random(10, 20)
-    const darkness = random(0, 10)
-
+    const bc = random(0, 3)
     return {
       dayOfWeek: random(0, 6),
       hour: random(4, 19),
       minute: random(0, 40),
       duration: random(60, 120),
-      backgroundColor: `var(---color-${colorIndex}-${darkness}-${chroma}-50, transparent)`,
-      // textColor: `var(---color-${colorIndex}-1-0-0, transparent)`,
-      textColor: `var(---invert-${colorIndex}-${darkness}-${chroma}-50, transparent)`,
-      borderColor: `var(---hue-${colorIndex}-${darkness + 15}-${
-        chroma - 5
-      }-20--30-05, transparent)`,
+      backgroundColor: `var(---color-${bc}-${random(200, 350)}-${random(
+        100,
+        200
+      )}, transparent)`,
+      textColor: `var(---color-${random(0, 3)}-${random(20, 100)}-${random(
+        1000,
+        1023
+      )}, transparent)`,
+      borderColor: `var(---hue-${bc}-${random(900, 1023)}-${random(
+        600,
+        900
+      )}--15-09, transparent)`,
       title
     }
   })
@@ -116,30 +123,84 @@ const update = () => {
 update()
 const { pause, resume } = useTimeoutPoll(update, 15 * 1000)
 
-const lightness = ref()
-const chroma = ref()
-const darkMode = ref(false)
-
 onMounted(() => {
+  const pane = new Pane()
+
+  const state = reactive({
+    lightness: 1,
+    // lightness1: 1,
+    // chroma0: 0,
+    chroma: 1,
+    darkMode: false
+  })
+
+  pane.addInput(state, 'lightness', { min: 0, max: 1, step: 0.01 })
+  // pane.addInput(state, 'lightness1', {min: 0, max: 1, step: 0.01})
+
+  // pane.addInput(state, 'chroma0', {min: 0, max: 1, step: 0.01})
+  pane.addInput(state, 'chroma', { min: 0, max: 1, step: 0.01 })
+  pane.addInput(state, 'darkMode')
+
+  pane.on('change', (event) => {
+    // console.log('here', event.presetKey === 'darkMode', (!state.darkMode && state.lightness >= 0.7), !state.darkMode, state.lightness)
+    if (
+      event.presetKey === 'darkMode' &&
+      ((!state.darkMode && state.lightness <= 0.3) ||
+        (state.darkMode && state.lightness >= 0.7))
+    ) {
+      state.lightness = 1 - state.lightness
+      pane.refresh()
+    }
+
+    interpolator.updateChroma(undefined, state.chroma)
+
+    const max = 0.3
+
+    if (state.darkMode) {
+      interpolator.updateLightness(lerp(0, max, state.lightness), 1)
+    } else {
+      interpolator.updateLightness(0, lerp(1 - max, 1, state.lightness))
+    }
+
+    interpolator.updateDarkMode(state.darkMode)
+  })
+
+  // pane.on()
+
   resume()
 
   const interpolator = createInterpolator(model)
   const instance = cassiopeia({
-    id: 'tes',
+    source: createSourceDOM(),
     plugins: [createCepheusPlugin(interpolator)]
   })
 
-  watch([chroma.value.range()], ([value]) => {
-    interpolator.updateChroma(value)
+  instance.subscribe((value) => {
+    let styleElement =
+      (document.querySelector(`style[cassiopeia=true]`) as
+        | HTMLStyleElement
+        | undefined) ?? undefined
+
+    if (styleElement === undefined) {
+      styleElement = document.createElement('style')
+      styleElement.setAttribute('cassiopeia', 'true')
+
+      document.head.insertBefore(styleElement, null)
+    }
+
+    styleElement.innerHTML = value
   })
 
-  watch([lightness.value.range()], ([value]) => {
-    interpolator.updateLightness(value)
-  })
-
-  watch([darkMode], ([value]) => {
-    interpolator.updateDarkMode(value)
-  })
+  // watch(state, (value) => {
+  // })
+  //
+  // watch([lightness.value.range()], ([value]) => {
+  //   interpolator.updateLightness(...value)
+  // })
+  //
+  // watch([darkMode], ([value]) => {
+  //   interpolator.updateDarkMode(value)
+  // })
 
   instance.start()
 })
@@ -151,27 +212,6 @@ onUnmounted(() => {
 
 <template>
   <div>
-    <div class="control pt3">
-      <div class="flex mb10 justify-center flex-row">
-        <slider ref="lightness"></slider>
-        <div class="m5"></div>
-        <slider ref="chroma"></slider>
-        <div class="m5"></div>
-        <!-- <div class="form-item"> -->
-        <div class="form-control mt5">
-          <input
-            id="darkMode"
-            v-model="darkMode"
-            name="darkMode"
-            type="checkbox"
-          />
-          <label for="darkMode" style="color: var(---color-0-100-0-0)"
-            >Dark Mode</label
-          >
-        </div>
-        <!-- </div> -->
-      </div>
-    </div>
     <div class="container">
       <div class="header">
         <div class="week">{{ data?.week }}</div>
@@ -274,10 +314,13 @@ $days-height: 3rem;
 $time-width: 3rem;
 $time-height: 3rem;
 $calendar-template: $time-width 0.625rem repeat(7, 1fr);
-$current-time-color: var(---color-1-0-30-10);
-$grid-color: var(---color-2-2-0-10);
-$background-weekday: var(---color-1-0-0-40);
-$background-weekend: var(---color-0-1-0-20);
+$current-time-color: var(---color-3-1023-1023);
+$grid-color: var(---color-2-0-900);
+$background-weekday: var(---color-2-20-1020);
+$background-weekend: var(---color-1-65-1000);
+
+$header-color: var(---color-0-25-900);
+$subheader-color: var(---color-0-20-900);
 
 * {
   transition: background-color 200ms linear;
@@ -303,10 +346,10 @@ $background-weekend: var(---color-0-1-0-20);
   text-align: center;
   grid-template-columns: $calendar-template;
   top: $title-height;
-  z-index: 10;
-  border-bottom: 0.125rem solid $grid-color;
-  background-color: var(---color-1-0-0-30);
-  color: var(---color-2-50-1-0);
+  /* z-index: 10; */
+  border-bottom: 0.125rem solid $header-color;
+  background-color: $subheader-color;
+  color: var(---color-2-100-2);
 }
 
 .day {
@@ -327,7 +370,7 @@ $background-weekend: var(---color-0-1-0-20);
   font-size: 80%;
   position: relative;
   bottom: -1ex;
-  color: #70757a;
+  color: var(---color-3-1-100);
   padding-right: 0.125rem;
 }
 
@@ -373,8 +416,8 @@ $background-weekend: var(---color-0-1-0-20);
   grid-template-rows: 1fr;
   align-content: center;
   align-items: center;
-  background-color: var(---color-3-50-50-0);
-  color: var(---color-3-1-1-50);
+  background-color: $header-color;
+  color: var(---color-3-1-1);
 }
 
 .month {
