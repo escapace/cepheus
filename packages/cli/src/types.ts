@@ -102,6 +102,7 @@ export interface OptimizeOptions {
     deuteranopia: number
     difference: number
     dispersion: number
+    hue: number
     lightness: number
     normal: number
     protanopia: number
