@@ -260,6 +260,16 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
     throw new Error(`NAN ${JSON.stringify(data)}`)
   }
 
+  // reward the decrease in relative distance to mean hue
+  const hueScore = mean(
+    flatMap(state, ({ coords: a }, index) =>
+      map(
+        options.colors[index],
+        ({ coords: b }) => constrainAngle(a[2] - b[2]) / 360
+      )
+    )
+  )
+
   // reward the decrease in relative distance to chroma target
   const chromaScore = relativeDifference(
     mean(map(state, (value) => value.coords[1])),
@@ -314,6 +324,7 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
     deuteranopiaScore,
     differenceScore,
     dispersionScore,
+    hueScore,
     lightnessScore,
     normalScore,
     protanopiaScore,
@@ -337,6 +348,7 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
     options.weights.deuteranopia * deuteranopiaScore +
     options.weights.difference * differenceScore +
     options.weights.dispersion * dispersionScore +
+    options.weights.hue * hueScore +
     options.weights.lightness * lightnessScore +
     options.weights.normal * normalScore +
     options.weights.protanopia * protanopiaScore +
@@ -430,6 +442,7 @@ const normalizeOptions = (
       // pushes color away from background
       contrast: 6.25,
       // pushes color away from pallete colors
+      hue: 10,
       dispersion: 10,
       normal: 6.5,
       protanopia: 2.75,
