@@ -12,19 +12,19 @@
     "@types/chai": "4.3.4",
     "@types/lodash-es": "4.17.6",
     "@types/mocha": "10.0.1",
-    "@types/node": "18.11.18",
-    "@typescript-eslint/eslint-plugin": "5.50.0",
-    "@typescript-eslint/parser": "5.50.0",
+    "@types/node": "18.13.0",
+    "@typescript-eslint/eslint-plugin": "5.52.0",
+    "@typescript-eslint/parser": "5.52.0",
     "c8": "7.12.0",
-    "cassiopeia": "2.0.1",
+    "cassiopeia": "2.1.0",
     "chai": "4.3.7",
-    "eslint": "8.33.0",
+    "eslint": "8.34.0",
     "eslint-config-escapace": "3.16.0",
     "eslint-config-prettier": "8.6.0",
     "eslint-plugin-editorconfig": "4.0.2",
     "eslint-plugin-no-null": "1.0.2",
     "mocha": "10.2.0",
-    "prettier": "2.8.3",
+    "prettier": "2.8.4",
     "prettier-config-escapace": "1.0.4",
     "typescript": "4.9.5"
   },
@@ -41,7 +41,7 @@
   "license": "MPL-2.0",
   "module": "lib/esm/index.mjs",
   "peerDependencies": {
-    "cassiopeia": "2.0.1"
+    "cassiopeia": "2.1.0"
   },
   "private": false,
   "publishConfig": {

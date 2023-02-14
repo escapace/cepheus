@@ -16,8 +16,7 @@ import type {
   Subscription,
   Unsubscribe
 } from './types'
-
-const xor = (a: boolean, b: boolean) => !a !== !b
+import { xor } from './xor'
 
 // Two characters in 32 radix
 const MAX = 1024 - 1

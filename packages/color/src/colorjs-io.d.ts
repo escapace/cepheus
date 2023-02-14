@@ -134,4 +134,9 @@ declare module 'colorjs.io/fn' {
   ) => string
 
   export const inGamut: (color: Color, space?: ColorSpace) => boolean
+
+  export const toGamut: (
+    color: Color,
+    options?: { method?: 'clip' | 'lch.c'; space?: ColorSpace }
+  ) => Color
 }
