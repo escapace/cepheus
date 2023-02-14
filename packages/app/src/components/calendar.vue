@@ -2,15 +2,29 @@
 import { Temporal, Intl } from '@js-temporal/polyfill'
 import { useTimeoutPoll } from '@vueuse/core'
 import { range } from 'lodash-es'
-import { onMounted, onUnmounted, reactive, ref } from 'vue'
+import { onBeforeUpdate, onMounted, onUnmounted, reactive, ref } from 'vue'
 import Event from './event.vue'
-import model from '../models/model.json'
-import { cassiopeia } from 'cassiopeia'
-import { createInterpolator } from 'cepheus'
-import { createCepheusPlugin } from '@cepheus/plugin'
 import { Pane } from 'tweakpane'
+import { useCepheus } from '../cepheus'
+import { useCassiopeia } from '../plugin'
 
-import { createSourceDOM } from '@cassiopeia/source-dom'
+const interpolator = useCepheus()
+const cassiopeia = useCassiopeia()
+const cassiopeia2 = useCassiopeia()
+
+cassiopeia.add([
+  '---color-3-1023-1023',
+  '---color-3-1023-1023',
+  '---color-2-0-900',
+  '---color-2-20-1020',
+  '---color-1-65-1000',
+  '---color-0-25-900',
+  '---color-0-20-900',
+  '---color-2-100-2',
+  '---color-3-1-1',
+  '---color-3-1-100',
+  '---color-2-100-2'
+])
 
 const lerp = (v0: number, v1: number, t: number) => v0 * (1 - t) + v1 * t
 
@@ -64,25 +78,31 @@ const createEvents = (): Data['events'] => {
     'Book Club'
   ]
 
+  cassiopeia2.clear()
+
   return titles.map((title) => {
     const bc = random(0, 3)
+
+    const bg = cassiopeia2.add(
+      `---color-${bc}-${random(200, 350)}-${random(100, 200)}`
+    )
+
+    const textColor = cassiopeia2.add(
+      `---color-${random(0, 3)}-${random(20, 100)}-${random(1000, 1023)}`
+    )
+
+    const borderColor = cassiopeia2.add(
+      `---hue-${bc}-${random(900, 1023)}-${random(600, 900)}--15-07`
+    )
+
     return {
       dayOfWeek: random(0, 6),
       hour: random(4, 19),
       minute: random(0, 40),
       duration: random(60, 120),
-      backgroundColor: `var(---color-${bc}-${random(200, 350)}-${random(
-        100,
-        200
-      )}, transparent)`,
-      textColor: `var(---color-${random(0, 3)}-${random(20, 100)}-${random(
-        1000,
-        1023
-      )}, transparent)`,
-      borderColor: `var(---hue-${bc}-${random(900, 1023)}-${random(
-        600,
-        900
-      )}--15-09, transparent)`,
+      backgroundColor: `var(${bg}, black)`,
+      textColor: `var(${textColor}, black)`,
+      borderColor: `var(${borderColor}, black)`,
       title
     }
   })
@@ -116,12 +136,19 @@ const update = () => {
     }),
     month: dateFormatter.format(date),
     time: { row: time.hour + 1, hour: (time.minute / 60) * 100 },
-    week: `W${date.weekOfYear}`
+    week: `W${date.weekOfYear} `
   }
 }
 
+onBeforeUpdate(() => {
+  cassiopeia2.update(false)
+})
+
 update()
-const { pause, resume } = useTimeoutPoll(update, 15 * 1000)
+const { pause, resume } = useTimeoutPoll(update, 3 * 1000)
+
+cassiopeia.update(false)
+cassiopeia2.update(false)
 
 onMounted(() => {
   const pane = new Pane()
@@ -165,44 +192,7 @@ onMounted(() => {
     interpolator.updateDarkMode(state.darkMode)
   })
 
-  // pane.on()
-
   resume()
-
-  const interpolator = createInterpolator(model)
-  const instance = cassiopeia({
-    source: createSourceDOM(),
-    plugins: [createCepheusPlugin(interpolator)]
-  })
-
-  instance.subscribe((value) => {
-    let styleElement =
-      (document.querySelector(`style[cassiopeia=true]`) as
-        | HTMLStyleElement
-        | undefined) ?? undefined
-
-    if (styleElement === undefined) {
-      styleElement = document.createElement('style')
-      styleElement.setAttribute('cassiopeia', 'true')
-
-      document.head.insertBefore(styleElement, null)
-    }
-
-    styleElement.innerHTML = value
-  })
-
-  // watch(state, (value) => {
-  // })
-  //
-  // watch([lightness.value.range()], ([value]) => {
-  //   interpolator.updateLightness(...value)
-  // })
-  //
-  // watch([darkMode], ([value]) => {
-  //   interpolator.updateDarkMode(value)
-  // })
-
-  instance.start()
 })
 
 onUnmounted(() => {
