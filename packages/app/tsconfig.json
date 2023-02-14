@@ -26,7 +26,7 @@
     "strict": true,
     "target": "esnext",
     "typeRoots": ["node_modules/@types"],
-    "types": ["vite/client"],
+    "types": ["vue", "vite/client"],
     "useDefineForClassFields": true
   },
   "exclude": ["lib", "node_modules"]
