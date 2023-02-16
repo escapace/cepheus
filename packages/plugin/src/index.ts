@@ -38,7 +38,7 @@ const getColorFormat = (
 }
 
 const isParsed = (value: Options | OptionsParsed): value is Options =>
-  Array.isArray(value.flags)
+  !Array.isArray(value.flags)
 
 const createCepheusOptions = (
   options: Options | OptionsParsed = {}
@@ -75,7 +75,7 @@ const createCepheusOptions = (
     )
   })
 
-  const darkMode = options.darkMode ?? 'class'
+  const darkMode = options.darkMode ?? 'media'
 
   return {
     darkMode,
@@ -86,7 +86,7 @@ const createCepheusOptions = (
 export const createCepheusPlugin = (
   interpolator: Interpolator,
   options: Options | OptionsParsed = {}
-): Plugin => {
+): Plugin & { options: OptionsParsed } => {
   const opts = createCepheusOptions(options)
 
   ColorSpace.register(LCH)
@@ -101,23 +101,26 @@ export const createCepheusPlugin = (
   const iteratorHue = createIterator('hue', opts)
   const iteratorInvert = createIterator('invert', opts)
 
-  return (iterators: Map<string, () => Iterator>) => {
-    let unsubscribe: Unsubscribe | undefined
+  return {
+    options: opts,
+    plugin: (iterators: Map<string, () => Iterator>) => {
+      let unsubscribe: Unsubscribe | undefined
 
-    const register = (update: () => void) => {
-      unsubscribe = interpolator.subscribe(update)
+      const register = (update: () => void) => {
+        unsubscribe = interpolator.subscribe(update)
 
-      iterators.set('color', () => iteratorColor(interpolator))
-      iterators.set('hue', () => iteratorHue(interpolator))
-      iterators.set('invert', () => iteratorInvert(interpolator))
-    }
-
-    const deregister = () => {
-      if (unsubscribe !== undefined) {
-        unsubscribe()
+        iterators.set('color', () => iteratorColor(interpolator))
+        iterators.set('hue', () => iteratorHue(interpolator))
+        iterators.set('invert', () => iteratorInvert(interpolator))
       }
-    }
 
-    return { register, deregister }
+      const deregister = () => {
+        if (unsubscribe !== undefined) {
+          unsubscribe()
+        }
+      }
+
+      return { register, deregister }
+    }
   }
 }
