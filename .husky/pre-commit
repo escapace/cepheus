@@ -2,16 +2,14 @@
 . "$(dirname "$0")/_/husky.sh"
 
 pnpm exec syncpack set-semver-ranges \
-  --prod \
-  --dev \
+  --types=prod,dev \
   --source 'package.json' \
   --source 'packages/*/package.json' \
+  --filter 'vue' \
   --filter '(?!cepheus).*$'  || exit 1
 
 pnpm exec syncpack fix-mismatches \
-  --dev \
-  --prod \
-  --peer \
+  --types prod,dev,peer \
   --source 'package.json' \
   --source 'packages/*/package.json' \
   --filter '(?!cepheus).*$'  || exit 1
