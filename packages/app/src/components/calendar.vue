@@ -5,8 +5,8 @@ import { range } from 'lodash-es'
 import { onBeforeUpdate, onMounted, onUnmounted, reactive, ref } from 'vue'
 import Event from './event.vue'
 import { Pane } from 'tweakpane'
-import { useCepheus } from '../cepheus'
-import { useCassiopeia } from '../plugin'
+import { useCepheus } from '@cepheus/vue'
+import { useCassiopeia } from '@cassiopeia/vue'
 
 const interpolator = useCepheus()
 const cassiopeia = useCassiopeia()
