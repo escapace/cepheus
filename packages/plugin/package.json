@@ -16,10 +16,10 @@
     "@typescript-eslint/eslint-plugin": "5.52.0",
     "@typescript-eslint/parser": "5.52.0",
     "c8": "7.12.0",
-    "cassiopeia": "2.1.0",
+    "cassiopeia": "3.0.4",
     "chai": "4.3.7",
     "eslint": "8.34.0",
-    "eslint-config-escapace": "3.16.0",
+    "eslint-config-escapace": "3.16.1",
     "eslint-config-prettier": "8.6.0",
     "eslint-plugin-editorconfig": "4.0.2",
     "eslint-plugin-no-null": "1.0.2",
@@ -41,7 +41,7 @@
   "license": "MPL-2.0",
   "module": "lib/esm/index.mjs",
   "peerDependencies": {
-    "cassiopeia": "2.1.0"
+    "cassiopeia": "3.0.4"
   },
   "private": false,
   "publishConfig": {
