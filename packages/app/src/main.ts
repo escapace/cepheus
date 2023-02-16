@@ -12,12 +12,11 @@ import Triangle from './components/triangle.vue'
 // import Constraint from './components/constraint.vue'
 import Calendar from './components/calendar.vue'
 
-import { createCepheusPlugin } from '@cepheus/plugin'
 import '@unocss/reset/normalize.css'
 import 'uno.css'
-import { cassiopeia } from './plugin'
 
-import { createCepheus } from './cepheus'
+import { browserSubscription, createCassiopeia } from '@cassiopeia/vue'
+import { createCepheus } from '@cepheus/vue'
 import model from './models/model.json'
 
 type State = Record<string, StateTree>
@@ -43,20 +42,16 @@ const router = createRouter({
   ]
 })
 
-const cepheus = createCepheus(model)
+const cepheus = createCepheus({
+  model,
+  darkMode: 'media',
+  flags: { colorScheme: ['dark', 'light'] }
+})
 
-createApp(App)
-  .use(router)
-  .use(pinia)
-  .use(cepheus)
-  .use(
-    cassiopeia({
-      plugins: [
-        createCepheusPlugin(cepheus.interpolator, {
-          darkMode: 'media',
-          flags: { colorScheme: ['dark', 'light'] }
-        })
-      ]
-    })
-  )
-  .mount('#app')
+const cassiopeia = createCassiopeia({
+  plugins: [cepheus]
+})
+
+cassiopeia.subscribe(browserSubscription)
+
+createApp(App).use(router).use(pinia).use(cepheus).use(cassiopeia).mount('#app')

@@ -83,10 +83,12 @@ const createCepheusOptions = (
   }
 }
 
+export type CepheusCassiopeiaPlugin = Plugin & { options: OptionsParsed }
+
 export const createCepheusPlugin = (
   interpolator: Interpolator,
   options: Options | OptionsParsed = {}
-): Plugin & { options: OptionsParsed } => {
+): CepheusCassiopeiaPlugin => {
   const opts = createCepheusOptions(options)
 
   ColorSpace.register(LCH)
@@ -124,3 +126,5 @@ export const createCepheusPlugin = (
     }
   }
 }
+
+export type { Options, OptionsParsed }
