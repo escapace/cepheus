@@ -56,7 +56,15 @@ await Promise.all(
 
     await build({
       bundle: true,
-      external,
+      external: [
+        'cepheus',
+        '@cepheus/*',
+        'cassiopeia',
+        '@cassiopeia/*',
+        'vue',
+        '@vue/*',
+        ...external
+      ],
       define: {
         VERSION: JSON.stringify(version)
       },
