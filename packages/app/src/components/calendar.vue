@@ -84,15 +84,15 @@ const createEvents = (): Data['events'] => {
     const bc = random(0, 3)
 
     const bg = cassiopeia2.add(
-      `---color-${bc}-${random(200, 350)}-${random(100, 200)}`
+      `---color-${bc}-${random(200, 350)}-${random(0, 200)}`
     )
 
     const textColor = cassiopeia2.add(
-      `---color-${random(0, 3)}-${random(20, 100)}-${random(1000, 1023)}`
+      `---invert-${random(0, 3)}-${random(0, 100)}-${random(0, 23)}`
     )
 
     const borderColor = cassiopeia2.add(
-      `---hue-${bc}-${random(900, 1023)}-${random(600, 900)}--15-07`
+      `---hue-${bc}-${random(900, 1023)}-${random(900, 100)}--15-099`
     )
 
     return {

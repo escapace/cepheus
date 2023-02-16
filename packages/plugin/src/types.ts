@@ -1,12 +1,18 @@
 export interface Options {
-  colorSpaces?: Array<'p3' | 'srgb' | 'oklch'>
-  colorGamut?: 'srgb' | 'p3'
-  prefersColorScheme?: boolean
+  darkMode?: 'class' | 'media'
+  flags?: {
+    colorFormat?: Array<'p3' | 'srgb' | 'oklch'>
+    colorGamut?: Array<'srgb' | 'p3'>
+    colorScheme?: Array<'light' | 'dark' | 'none'>
+  }
 }
 
-export interface IteratorOptions
-  extends Required<Pick<Options, 'prefersColorScheme' | 'colorGamut'>> {
-  p3: boolean
-  srgb: boolean
-  oklch: boolean
+export interface Flags {
+  colorFormat: 'p3' | 'srgb' | 'oklch'
+  colorGamut: 'srgb' | 'p3'
+  colorScheme: 'light' | 'dark' | 'none'
+}
+
+export interface OptionsParsed extends Pick<Required<Options>, 'darkMode'> {
+  flags: Flags[]
 }
