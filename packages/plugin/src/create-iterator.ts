@@ -8,6 +8,7 @@ import {
   type Color
 } from '@cepheus/color'
 import type { Iterator } from 'cassiopeia'
+import { StyleSheetPartial } from 'cassiopeia/lib/types/types'
 import { normalizeAngle, type Interpolator } from 'cepheus'
 import { parseAlpha } from './parse-alpha'
 import { Flags, OptionsParsed } from './types'
@@ -19,7 +20,7 @@ const template = (
   values: string[],
   flags: Flags,
   options: Omit<OptionsParsed, 'flags'>
-) => {
+): StyleSheetPartial | undefined => {
   if (values.length === 0) {
     return undefined
   }
@@ -48,15 +49,19 @@ const template = (
     supports.push('(color: color(display-p3 0 0 0))')
   }
 
-  return [
-    media.length === 0 ? undefined : `@media ${media.join(' and ')} {`,
+  const mediaString = media.length === 0 ? undefined : media.join(' and ')
+
+  const content = [
+    mediaString === undefined ? undefined : `@media ${mediaString} {`,
     supports.length === 0 ? undefined : `@supports ${supports.join(' and ')} {`,
     `${selector} { ${values.join(' ')} }`,
     supports.length === 0 ? undefined : `}`,
-    media.length === 0 ? undefined : `}`
+    mediaString === undefined ? undefined : `}`
   ]
     .filter((value): value is string => value !== undefined)
     .join(' ')
+
+  return { content, media: mediaString }
 }
 
 export const createIterator = (
@@ -165,18 +170,17 @@ export const createIterator = (
           }
         }
 
-        let accumulator = ''
+        const accumulator: StyleSheetPartial[] = []
 
-        for (const iterator of iterators) {
+        for (const [index, iterator] of iterators.entries()) {
           const { done, value } = iterator.next(true)
 
           if (done === true && value !== undefined) {
-            accumulator += value
+            accumulator.push({
+              ...(value as StyleSheetPartial),
+              key: `${type}-${index}`
+            })
           }
-        }
-
-        if (accumulator.length === 0) {
-          return undefined
         }
 
         return accumulator

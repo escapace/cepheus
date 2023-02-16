@@ -92,20 +92,36 @@ export const cassiopeia = (options: Omit<Options, 'source'>): Plugin => {
     return { add, clear, delete: del, dispose }
   }
 
-  instance.subscribe((value) => {
-    let styleElement =
-      (document.querySelector(`style[cassiopeia=true]`) as
-        | HTMLStyleElement
-        | undefined) ?? undefined
+  instance.subscribe((values) => {
+    values.forEach((value) => {
+      let element =
+        (document.querySelector(`head > [cassiopeia="${value.key}"]`) as
+          | HTMLStyleElement
+          | HTMLLinkElement
+          | undefined) ?? undefined
 
-    if (styleElement === undefined) {
-      styleElement = document.createElement('style')
-      styleElement.setAttribute('cassiopeia', 'true')
+      const deleteElement =
+        element !== undefined && element.nodeName !== 'STYLE'
+          ? element
+          : undefined
 
-      document.head.insertBefore(styleElement, null)
-    }
+      if (element === undefined) {
+        element = document.createElement('style')
+        element.setAttribute('cassiopeia', value.key)
 
-    styleElement.innerHTML = value
+        if (value.media === 'string') {
+          element.setAttribute('media', value.media)
+        }
+
+        document.head.insertBefore(element, null)
+      }
+
+      if (deleteElement !== undefined) {
+        deleteElement.remove()
+      }
+
+      element.innerHTML = value.content
+    })
   })
 
   return {
