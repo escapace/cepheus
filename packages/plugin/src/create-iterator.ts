@@ -10,92 +10,76 @@ import {
 import type { Iterator } from 'cassiopeia'
 import { normalizeAngle, type Interpolator } from 'cepheus'
 import { parseAlpha } from './parse-alpha'
-import { IteratorOptions } from './types'
+import { Flags, OptionsParsed } from './types'
 
 const HUE_REGEX = /^([0-9]+)-([0-9]+)-([0-9]+)-(-?[0-9]+)(-([0-1]|0[0-9]+))?$/i
 const COLOR_REGEX = /^([0-9]+)-([0-9]+)-([0-9]+)(-([0-1]|0[0-9]+))?$/i
 
-const templateSRGB = (values: string[], key?: 'light' | 'dark') =>
-  values.length === 0
-    ? undefined
-    : key === undefined
-    ? `:root { ${values.join(' ')} }`
-    : `@media (prefers-color-scheme: ${key}) { :root { ${values.join(' ')} } }`
-
-const templateP3 = (values: string[], key?: 'light' | 'dark') =>
-  values.length === 0
-    ? undefined
-    : key === undefined
-    ? `@supports (color: color(display-p3 1 1 1)) { :root { ${values.join(
-        ' '
-      )} } }`
-    : `@media (prefers-color-scheme: ${key}) { @supports (color: color(display-p3 1 1 1)) { :root { ${values.join(
-        ' '
-      )} } } }`
-
-const templateOKLCH = (values: string[], key?: 'light' | 'dark') =>
-  values.length === 0
-    ? undefined
-    : key === undefined
-    ? `@supports (color: oklch(0% 0 0)) { :root { ${values.join(' ')} } }`
-    : `@media (prefers-color-scheme: ${key}) { @supports (color: oklch(0% 0 0)) { :root { ${values.join(
-        ' '
-      )} } } }`
-
-const getRegex = (type: 'color' | 'hue' | 'invert') =>
-  ({
-    color: COLOR_REGEX,
-    invert: COLOR_REGEX,
-    hue: HUE_REGEX
-  }[type])
-
-const isEven = (value: number) => value % 2 === 0
-
-interface Acc {
-  light: string[]
-  dark: string[]
-}
-
-const product = (values: Array<string | undefined>) => {
-  values.filter((value): value is string => value !== undefined)
-
-  return values.length === 0 ? undefined : values.join(' ')
-}
-
-const toColor = (
-  string: string[],
-  coords: [number, number, number],
-  type: 'color' | 'hue' | 'invert'
-): Color => {
-  let alpha: number
-
-  if (type === 'color') {
-    alpha = parseAlpha(string[5])
-  } else if (type === 'hue') {
-    coords[2] = normalizeAngle(coords[2] + parseInt(string[4]))
-    alpha = parseAlpha(string[6])
-  } else {
-    coords[1] = 0.4 - coords[1]
-    alpha = parseAlpha(string[5])
+const template = (
+  values: string[],
+  flags: Flags,
+  options: Omit<OptionsParsed, 'flags'>
+) => {
+  if (values.length === 0) {
+    return undefined
   }
 
-  return {
-    space: OKLCH,
-    coords,
-    alpha
+  let selector = ':root'
+  const media: string[] = []
+  const supports: string[] = []
+
+  if (flags.colorScheme !== 'none') {
+    if (options.darkMode === 'media') {
+      media.push(`(prefers-color-scheme: ${flags.colorScheme})`)
+    } else {
+      selector = `:root.${flags.colorScheme}`
+    }
   }
+
+  if (flags.colorGamut !== 'srgb') {
+    media.push(`(color-gamut: ${flags.colorGamut})`)
+  }
+
+  if (flags.colorFormat === 'oklch') {
+    supports.push('(color: oklch(0% 0 0))')
+  }
+
+  if (flags.colorFormat === 'p3') {
+    supports.push('(color: color(display-p3 0 0 0))')
+  }
+
+  return [
+    media.length === 0 ? undefined : `@media ${media.join(' and ')} {`,
+    supports.length === 0 ? undefined : `@supports ${supports.join(' and ')} {`,
+    `${selector} { ${values.join(' ')} }`,
+    supports.length === 0 ? undefined : `}`,
+    media.length === 0 ? undefined : `}`
+  ]
+    .filter((value): value is string => value !== undefined)
+    .join(' ')
 }
 
 export const createIterator = (
   type: 'color' | 'hue' | 'invert',
-  options: IteratorOptions
+  options: OptionsParsed
 ) => {
-  const regex = getRegex(type)
+  const regex = {
+    color: COLOR_REGEX,
+    invert: COLOR_REGEX,
+    hue: HUE_REGEX
+  }[type]
 
-  return function* iteratorColor(interpolator: Interpolator): Iterator {
-    const srgb: string[] = []
-    const p3: string[] = []
-    const oklch: string[] = []
+  const props = { darkMode: options.darkMode }
+
+  function* iteratorColor(
+    interpolator: Interpolator,
+    flags: Flags = options.flags[0]
+  ): Iterator {
+    const state: string[] = []
+
+    const mode =
+      flags.colorScheme === 'none' ||
+      (flags.colorScheme === 'dark') === interpolator.darkMode()
 
     let cursor: true | string
 
@@ -106,118 +90,95 @@ export const createIterator = (
         continue
       }
 
-      const color = parseInt(string[1], 10)
+      const colorN = parseInt(string[1], 10)
       const [chroma, lightness] = string
         .slice(2, 4)
         .map((value) => parseInt(value, 10)) as [number, number]
 
       const coords = interpolator.get(
-        color,
+        colorN,
         chroma,
         lightness,
-        type === 'invert'
+        mode ? type === 'invert' : type !== 'invert'
       )
 
       if (coords === undefined) {
         continue
       }
 
-      const colorOKLCH = toColor(string, coords, type)
+      let alpha: number
 
-      if (options.oklch) {
-        oklch.push(
-          `---${type}-${cursor}: ${serialize(
-            toGamut(colorOKLCH, {
-              space: options.colorGamut === 'p3' ? P3 : sRGB
-            })
-          )};`
-        )
+      if (type === 'color') {
+        alpha = parseAlpha(string[5])
+      } else if (type === 'hue') {
+        coords[2] = normalizeAngle(coords[2] + parseInt(string[4]))
+        alpha = parseAlpha(string[6])
+      } else {
+        const chroma = 0.4 - coords[1]
+        coords[1] = chroma
+        alpha = parseAlpha(string[5])
       }
 
-      if (options.srgb) {
-        srgb.push(
-          `---${type}-${cursor}: ${serialize(
-            convert(colorOKLCH, sRGB, { inGamut: true })
-          )};`
-        )
+      const color: Color = {
+        space: OKLCH,
+        coords,
+        alpha
       }
 
-      if (options.p3) {
-        const colorP3 = convert(colorOKLCH, P3, { inGamut: true })
-        p3.push(`---${type}-${cursor}: ${serialize(colorP3)};`)
-      }
-
-      if (options.prefersColorScheme) {
-        const _coords = interpolator.get(
-          color,
-          chroma,
-          lightness,
-          type !== 'invert'
-        )
-
-        if (_coords === undefined) {
-          continue
-        }
-
-        const _colorOKLCH = toColor(string, _coords, type)
-
-        if (options.oklch) {
-          oklch.push(
-            `---${type}-${cursor}: ${serialize(
-              toGamut(_colorOKLCH, {
-                space: options.colorGamut === 'p3' ? P3 : sRGB
+      const name = `---${type}-${cursor}`
+      const value =
+        flags.colorFormat === 'oklch'
+          ? serialize(
+              // TODO: only do this when inputGamut is something else
+              toGamut(color, {
+                space: flags.colorGamut === 'p3' ? P3 : sRGB
               })
-            )};`
-          )
-        }
+            )
+          : serialize(
+              convert(color, flags.colorFormat === 'p3' ? P3 : sRGB, {
+                // TODO: only do this when inputGamut is something else
+                inGamut: true
+              })
+            )
 
-        if (options.srgb) {
-          srgb.push(
-            `---${type}-${cursor}: ${serialize(
-              convert(_colorOKLCH, sRGB, { inGamut: true })
-            )};`
-          )
-        }
-
-        if (options.p3) {
-          p3.push(
-            `---${type}-${cursor}: ${serialize(
-              convert(_colorOKLCH, P3, { inGamut: true })
-            )};`
-          )
-        }
-      }
+      state.push(`${name}: ${value};`)
     }
 
-    if (options.prefersColorScheme) {
-      const mode = interpolator.darkMode() ? 'dark' : 'light'
+    return template(state, flags, props)
+  }
 
-      const reducer = (accumulator: Acc, value: string, index: number) => {
-        const key = (mode === 'light' ? isEven(index) : !isEven(index))
-          ? 'light'
-          : 'dark'
+  return options.flags.length === 1
+    ? iteratorColor
+    : function* wrapper(interpolator: Interpolator): Iterator {
+        const iterators = options.flags.map((value) => {
+          const iterator = iteratorColor(interpolator, value)
+          // A value passed to the first invocation of next() is always ignored.
+          iterator.next()
+          return iterator
+        })
 
-        accumulator[key].push(value)
+        let cursor: true | string
+
+        while ((cursor = yield) !== true) {
+          for (const iterator of iterators) {
+            iterator.next(cursor)
+          }
+        }
+
+        let accumulator = ''
+
+        for (const iterator of iterators) {
+          const { done, value } = iterator.next(true)
+
+          if (done === true && value !== undefined) {
+            accumulator += value
+          }
+        }
+
+        if (accumulator.length === 0) {
+          return undefined
+        }
 
         return accumulator
       }
-
-      const srgbAccumulator = srgb.reduce<Acc>(reducer, { light: [], dark: [] })
-      const p3Accumulator = p3.reduce<Acc>(reducer, { light: [], dark: [] })
-      const oklchAccumulator = oklch.reduce<Acc>(reducer, {
-        light: [],
-        dark: []
-      })
-
-      return product(
-        (['light', 'dark'] as const).flatMap((key) => [
-          templateSRGB(srgbAccumulator[key], key),
-          templateP3(p3Accumulator[key], key),
-          templateOKLCH(oklchAccumulator[key], key)
-        ])
-      )
-    } else {
-      return product([templateSRGB(srgb), templateP3(p3), templateOKLCH(oklch)])
-    }
-  }
 }

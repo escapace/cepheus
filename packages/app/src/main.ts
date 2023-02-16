@@ -53,8 +53,7 @@ createApp(App)
     cassiopeia({
       plugins: [
         createCepheusPlugin(cepheus.interpolator, {
-          colorSpaces: ['srgb'],
-          prefersColorScheme: true
+          flags: { colorScheme: ['dark', 'light'] }
         })
       ]
     })
