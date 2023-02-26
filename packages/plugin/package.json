@@ -41,7 +41,7 @@
   "license": "MPL-2.0",
   "module": "lib/esm/index.mjs",
   "peerDependencies": {
-    "cassiopeia": "4.0.0"
+    "cassiopeia": ">=4.0.0"
   },
   "private": false,
   "publishConfig": {
