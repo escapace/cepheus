@@ -1,14 +1,13 @@
-import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import unocss from 'unocss/vite'
-import glsl from 'vite-plugin-glsl'
+import { defineConfig } from 'vite'
+import { cassiopeia } from '@cassiopeia/vite'
 
 export default defineConfig({
   build: {
     outDir: 'lib/vite'
   },
   plugins: [
-    glsl(),
     vue({
       template: {
         compilerOptions: {
@@ -16,6 +15,7 @@ export default defineConfig({
         }
       }
     }),
+    cassiopeia(),
     unocss()
   ]
 })

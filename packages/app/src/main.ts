@@ -1,7 +1,7 @@
 import { useLocalStorage } from '@vueuse/core'
 import type { StateTree } from 'pinia'
 import { createPinia } from 'pinia'
-import { createApp, watch } from 'vue'
+import { createApp, defineComponent, h, watch } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 import App from './components/app.vue'
@@ -33,7 +33,8 @@ watch(pinia.state, () => {
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', component: Calendar },
+    { path: '/', component: defineComponent(() => () => h('div')) },
+    { path: '/calendar', component: Calendar },
     { path: '/blocks', component: HomeA },
     { path: '/c', component: HomeB },
     { path: '/d', component: Canvas },
@@ -44,8 +45,8 @@ const router = createRouter({
 
 const cepheus = createCepheus({
   model,
-  darkMode: 'media',
-  flags: { colorScheme: ['dark', 'light'] }
+  darkMode: 'media'
+  // flags: { colorScheme: ['dark', 'light'] }
 })
 
 const cassiopeia = createCassiopeia({

@@ -119,8 +119,8 @@ export const createIterator = (
         coords[2] = normalizeAngle(coords[2] + parseInt(string[4]))
         alpha = parseAlpha(string[6])
       } else {
-        const chroma = 0.4 - coords[1]
-        coords[1] = chroma
+        // const chroma = 0.4 - coords[1]
+        // coords[1] = chroma
         alpha = parseAlpha(string[5])
       }
 
@@ -178,7 +178,7 @@ export const createIterator = (
           if (done === true && value !== undefined) {
             accumulator.push({
               ...(value as StyleSheetPartial),
-              key: `${type}-${index}`
+              index
             })
           }
         }
