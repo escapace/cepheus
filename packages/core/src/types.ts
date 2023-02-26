@@ -23,8 +23,8 @@ export interface State {
   darkMode: boolean
 }
 
-export type Unsubscribe = () => void
-export type Subscription = () => void
+export type Unsubscribe = () => unknown
+export type Subscription = () => unknown
 
 export interface Interpolator {
   triangle: () => Readonly<Triangle>

@@ -1,40 +1,32 @@
 import { ColorSpace, LCH, OKLCH, P3, sRGB } from '@cepheus/color'
 import type { Iterator, Plugin } from 'cassiopeia'
-import { type Interpolator, type Unsubscribe } from 'cepheus'
+import { type Interpolator } from 'cepheus'
 import { createIterator } from './create-iterator'
 import { permutations } from './permutations'
 import { Options, OptionsParsed } from './types'
 
-const getColorFormat = (
-  options: Options,
-  colorGamut: Array<'srgb' | 'p3'>
-): Array<'srgb' | 'p3' | 'oklch'> => {
+const getColorFormat = (): Array<'srgb' | 'p3' | 'oklch'> => {
+  // TODO: replace with __BROWSER__
   const hasCSS = typeof globalThis.CSS === 'object'
 
   if (!hasCSS) {
-    return ['srgb', 'p3']
+    return ['oklch', 'p3', 'srgb']
   }
 
-  const oklch =
-    options.flags?.colorFormat?.includes('oklch') ??
-    (hasCSS && CSS.supports('(color: oklch(0% 0 0))'))
+  const oklch = hasCSS && CSS.supports('(color: oklch(0% 0 0))')
 
   const p3 =
-    colorGamut.includes('p3') &&
-    (options.flags?.colorFormat?.includes('p3') ??
-      (!oklch && hasCSS && CSS.supports('(color: color(display-p3 0 0 0))')))
+    !oklch && hasCSS && CSS.supports('(color: color(display-p3 0 0 0))')
 
-  const srgb =
-    colorGamut.includes('srgb') &&
-    (options.flags?.colorFormat?.includes('srgb') ?? (!p3 && !oklch))
+  const srgb = true
 
   const map = { oklch, p3, srgb }
 
-  const key = (['oklch', 'p3', 'srgb'] as const).find((key) => map[key])
+  const colorFormat = (['oklch', 'p3', 'srgb'] as const).filter(
+    (key) => map[key]
+  )
 
-  console.assert(key !== undefined)
-
-  return [key as 'srgb' | 'p3' | 'oklch']
+  return colorFormat
 }
 
 const isParsed = (value: Options | OptionsParsed): value is Options =>
@@ -47,22 +39,37 @@ const createCepheusOptions = (
     return options
   }
 
+  // TODO: replace with __BROWSER__
   const hasMatchMedia = typeof globalThis.matchMedia === 'function'
-
-  const colorGamut: Array<'srgb' | 'p3'> =
-    options.flags?.colorGamut ??
-    (hasMatchMedia
-      ? globalThis.matchMedia('(color-gamut: p3)').matches
-        ? ['p3']
-        : ['srgb']
-      : ['srgb', 'p3'])
 
   // TODO: subscribe to changes
   const colorScheme: Array<'dark' | 'light' | 'none'> =
     options.flags?.colorScheme ?? (hasMatchMedia ? ['none'] : ['light', 'dark'])
 
-  const colorFormat: Array<'srgb' | 'p3' | 'oklch'> =
-    options.flags?.colorFormat ?? getColorFormat(options, colorGamut)
+  // TODO: subscribe to changes
+  let colorGamut: Array<'srgb' | 'p3'> =
+    options.flags?.colorGamut ??
+    (hasMatchMedia
+      ? globalThis.matchMedia('(color-gamut: p3)').matches
+        ? ['p3', 'srgb']
+        : ['srgb']
+      : ['p3', 'srgb'])
+
+  let colorFormat: Array<'srgb' | 'p3' | 'oklch'> =
+    options.flags?.colorFormat ?? getColorFormat()
+
+  if (hasMatchMedia) {
+    if (colorFormat.includes('oklch')) {
+      colorGamut = [colorGamut.includes('p3') ? 'p3' : 'srgb']
+      colorFormat = ['oklch']
+    } else if (colorGamut.includes('p3') && colorFormat.includes('p3')) {
+      colorGamut = ['p3']
+      colorFormat = ['p3']
+    } else {
+      colorGamut = ['srgb']
+      colorFormat = ['srgb']
+    }
+  }
 
   const flags = permutations({
     colorFormat,
@@ -105,24 +112,12 @@ export const createCepheusPlugin = (
 
   return {
     options: opts,
-    plugin: (iterators: Map<string, () => Iterator>) => {
-      let unsubscribe: Unsubscribe | undefined
+    plugin: (iterators: Map<string, () => Iterator>, update) => {
+      interpolator.subscribe(update)
 
-      const register = (update: () => void) => {
-        unsubscribe = interpolator.subscribe(update)
-
-        iterators.set('color', () => iteratorColor(interpolator))
-        iterators.set('hue', () => iteratorHue(interpolator))
-        iterators.set('invert', () => iteratorInvert(interpolator))
-      }
-
-      const deregister = () => {
-        if (unsubscribe !== undefined) {
-          unsubscribe()
-        }
-      }
-
-      return { register, deregister }
+      iterators.set('color', () => iteratorColor(interpolator))
+      iterators.set('hue', () => iteratorHue(interpolator))
+      iterators.set('invert', () => iteratorInvert(interpolator))
     }
   }
 }

@@ -10,21 +10,6 @@ import { useCassiopeia } from '@cassiopeia/vue'
 
 const interpolator = useCepheus()
 const cassiopeia = useCassiopeia()
-const cassiopeia2 = useCassiopeia()
-
-cassiopeia.add([
-  '---color-3-1023-1023',
-  '---color-3-1023-1023',
-  '---color-2-0-900',
-  '---color-2-20-1020',
-  '---color-1-65-1000',
-  '---color-0-25-900',
-  '---color-0-20-900',
-  '---color-2-100-2',
-  '---color-3-1-1',
-  '---color-3-1-100',
-  '---color-2-100-2'
-])
 
 const lerp = (v0: number, v1: number, t: number) => v0 * (1 - t) + v1 * t
 
@@ -78,20 +63,20 @@ const createEvents = (): Data['events'] => {
     'Book Club'
   ]
 
-  cassiopeia2.clear()
+  cassiopeia.clear()
 
   return titles.map((title) => {
     const bc = random(0, 3)
 
-    const bg = cassiopeia2.add(
+    const bg = cassiopeia.add(
       `---color-${bc}-${random(200, 350)}-${random(0, 200)}`
     )
 
-    const textColor = cassiopeia2.add(
-      `---invert-${random(0, 3)}-${random(0, 100)}-${random(0, 23)}`
+    const textColor = cassiopeia.add(
+      `---invert-${random(0, 3)}-${random(100, 200)}-${random(0, 23)}`
     )
 
-    const borderColor = cassiopeia2.add(
+    const borderColor = cassiopeia.add(
       `---hue-${bc}-${random(900, 1023)}-${random(900, 100)}--15-099`
     )
 
@@ -141,14 +126,14 @@ const update = () => {
 }
 
 onBeforeUpdate(() => {
-  cassiopeia2.update(false)
+  cassiopeia.update(false)
 })
 
 update()
-const { pause, resume } = useTimeoutPoll(update, 3 * 1000)
+const { pause, resume } = useTimeoutPoll(update, 1000)
 
+// cassiopeia.update(false)
 cassiopeia.update(false)
-cassiopeia2.update(false)
 
 onMounted(() => {
   const pane = new Pane()
@@ -191,6 +176,8 @@ onMounted(() => {
 
     interpolator.updateDarkMode(state.darkMode)
   })
+
+  onUnmounted(() => pane.dispose())
 
   resume()
 })
@@ -306,11 +293,11 @@ $time-height: 3rem;
 $calendar-template: $time-width 0.625rem repeat(7, 1fr);
 $current-time-color: var(---color-3-1023-1023);
 $grid-color: var(---color-2-0-900);
-$background-weekday: var(---color-2-20-1020);
+$background-weekday: var(---color-1-20-1020);
 $background-weekend: var(---color-1-65-1000);
 
-$header-color: var(---color-0-25-900);
-$subheader-color: var(---color-0-20-900);
+$header-color: var(---color-1-25-900);
+$subheader-color: var(---color-1-20-900);
 
 * {
   transition: background-color 200ms linear;
