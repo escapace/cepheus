@@ -1,22 +1,16 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-pnpm exec syncpack set-semver-ranges \
-  --types=prod,dev \
-  --source 'package.json' \
-  --source 'packages/*/package.json' \
-  --filter 'vue' \
-  --filter '(?!cepheus).*$'  || exit 1
-
 pnpm exec syncpack fix-mismatches \
-  --types prod,dev,peer \
-  --source 'package.json' \
-  --source 'packages/*/package.json' \
-  --filter '(?!cepheus).*$'  || exit 1
+  --types dev,prod,peer,engines \
+  --filter '^(?!cassiopeia).*$'  || exit 1
 
-pnpm exec syncpack format \
-  --source 'package.json' \
-  --source 'packages/*/package.json' || exit 1
+pnpm exec syncpack set-semver-ranges \
+  --types dev,prod,peer,engines \
+  --filter '^(?!cassiopeia).*$'  || exit 1
+
+pnpm exec syncpack format || exit 1
+
 
 pnpm install
 git add package.json pnpm-lock.yaml packages/*/package.json
