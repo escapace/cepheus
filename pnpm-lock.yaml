@@ -143,7 +143,7 @@ importers:
       '@cepheus/color': workspace:*
       '@cepheus/utilities': workspace:*
       '@sindresorhus/fnv1a': 3.0.0
-      '@thi.ng/random': 3.3.24
+      '@thi.ng/random': 3.3.25
       '@types/chai': 4.3.4
       '@types/lodash-es': 4.17.6
       '@types/mocha': 10.0.1
@@ -178,7 +178,7 @@ importers:
       '@cepheus/color': link:../color
       '@cepheus/utilities': link:../utilities
       '@sindresorhus/fnv1a': 3.0.0
-      '@thi.ng/random': 3.3.24
+      '@thi.ng/random': 3.3.25
       arg: 5.0.2
       big-cartesian: 4.7.0
       bignumber.js: 9.1.1
@@ -1261,8 +1261,8 @@ packages:
     engines: {node: '>=12.7'}
     dev: false
 
-  /@thi.ng/random/3.3.24:
-    resolution: {integrity: sha512-66l9r93Mj5dyBQovqzG+fXsA5F4CaVfY+YpBTdO/SsXopYQlepxH6Pjvr0kFHSug70eSXrRDfHrn11Newqq91A==}
+  /@thi.ng/random/3.3.25:
+    resolution: {integrity: sha512-Scs2hW2Ney7KGxTfifUIXyNLJ/rL2ScSa803dfBg6BPHWCqNPdYV0l7RvCcVsJopPqseQb7F4b2e3a2AQD5lUA==}
     engines: {node: '>=12.7'}
     dependencies:
       '@thi.ng/api': 8.7.2

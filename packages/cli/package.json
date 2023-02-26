@@ -9,7 +9,7 @@
     "@cepheus/color": "workspace:*",
     "@cepheus/utilities": "workspace:*",
     "@sindresorhus/fnv1a": "3.0.0",
-    "@thi.ng/random": "3.3.24",
+    "@thi.ng/random": "3.3.25",
     "arg": "5.0.2",
     "big-cartesian": "4.7.0",
     "bignumber.js": "9.1.1",
