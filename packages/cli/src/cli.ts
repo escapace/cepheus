@@ -8,6 +8,14 @@ import path, { resolve } from 'path'
 import { promisify } from 'util'
 import { gzip } from 'zlib'
 import { DEFAULT_ITERATIONS, DEFAULT_N_DIVISOR, N_DIVISORS } from './constants'
+import { selectorModel } from './store/selector-model'
+import {
+  selectorOptimizeTasksCount,
+  selectorOptimizeTasksNotPending
+} from './store/selector-optimize-tasks'
+import { selectorState } from './store/selector-state'
+import { selectorStatistics } from './store/selector-statistics'
+import { selectorTriangleTasksCount } from './store/wip'
 import { OptimizeTask, TypeCepheusState } from './types'
 
 const compress = promisify(gzip)
@@ -187,14 +195,16 @@ const run = async () => {
   const updateSpinner = throttle(
     (type: TypeCepheusState) => {
       if (type === TypeCepheusState.Optimization) {
-        const { total, rejected, fulfilled } =
-          instance.store.optimizeTasksCount()
+        const { total, rejected, fulfilled } = selectorOptimizeTasksCount(
+          instance.store
+        )
         const done = rejected + fulfilled
 
         spinner.text = `Palette optimization \t${ns(done, total)} / ${total}`
       } else if (type === TypeCepheusState.OptimizationDone) {
-        const { total, rejected, fulfilled } =
-          instance.store.optimizeTasksCount()
+        const { total, rejected, fulfilled } = selectorOptimizeTasksCount(
+          instance.store
+        )
         const done = rejected + fulfilled
 
         spinner.succeed(`Palette optimization \t${ns(done, total)} / ${total}`)
@@ -203,8 +213,9 @@ const run = async () => {
           spinner.start('Triangle fitting …')
         }
 
-        const { total, rejected, fulfilled } =
-          instance.store.triangleTasksCount()
+        const { total, rejected, fulfilled } = selectorTriangleTasksCount(
+          instance.store
+        )
         const done = rejected + fulfilled
 
         if (total === 0) {
@@ -213,8 +224,9 @@ const run = async () => {
           spinner.text = `Triangle fitting     \t${ns(done, total)} / ${total}`
         }
       } else if (type === TypeCepheusState.TriangleFittingDone) {
-        const { total, rejected, fulfilled } =
-          instance.store.triangleTasksCount()
+        const { total, rejected, fulfilled } = selectorTriangleTasksCount(
+          instance.store
+        )
         const done = rejected + fulfilled
 
         spinner.succeed(`Triangle fitting     \t${ns(done, total)} / ${total}`)
@@ -232,7 +244,7 @@ const run = async () => {
     if (args['--save'] !== undefined) {
       await writeFile(
         path.resolve(process.cwd(), args['--save']),
-        JSON.stringify(instance.store.optimizeTasksNotPending()),
+        JSON.stringify(selectorOptimizeTasksNotPending(instance.store)),
         'utf8'
       )
     }
@@ -254,16 +266,16 @@ const run = async () => {
     instance.store.clearListeners()
     spinner.stop()
 
-    const state = instance.store.state()
+    const state = selectorState(instance.store)
 
     if (state.type === TypeCepheusState.Done) {
-      const content = JSON.stringify(instance.store.model())
+      const content = JSON.stringify(selectorModel(instance.store))
       const filePath = path.resolve(process.cwd(), output)
       const relativeFilePath = path.relative(process.cwd(), output)
 
       await writeFile(filePath, content, 'utf8')
 
-      const stats = instance.store.stats()
+      const statistics = selectorStatistics(instance.store)
 
       const kibs = content.length / 1024
       const compressedSize = await getCompressedSize(content)
@@ -281,19 +293,23 @@ const run = async () => {
       console.log(
         `${prefix}${chalk.grey(
           `${(
-            stats.colors * stats.squaresRemaining
-          ).toString()} (${stats.colors.toString()} * ${stats.squaresRemaining.toString()}) colors`
+            statistics.colors * statistics.squaresRemaining
+          ).toString()} (${statistics.colors.toString()} * ${statistics.squaresRemaining.toString()}) colors`
         )}`
       )
       console.log(
         `${prefix}${chalk.grey(
-          `∧ ${stats.costMin.toFixed(5)}  ∨ ${stats.costMax.toFixed(5)}`
+          `∧ ${statistics.costMin.toFixed(5)}  ∨ ${statistics.costMax.toFixed(
+            5
+          )}`
         )}`
       )
 
       console.log(
         `${prefix}${chalk.grey(
-          `μ ${stats.costMean.toFixed(5)}  σ ${stats.costSd.toFixed(5)}`
+          `μ ${statistics.costMean.toFixed(5)}  σ ${statistics.costSd.toFixed(
+            5
+          )}`
         )}`
       )
 

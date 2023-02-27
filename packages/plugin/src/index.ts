@@ -6,27 +6,19 @@ import { permutations } from './permutations'
 import { Options, OptionsParsed } from './types'
 
 const getColorFormat = (): Array<'srgb' | 'p3' | 'oklch'> => {
-  // TODO: replace with __BROWSER__
-  const hasCSS = typeof globalThis.CSS === 'object'
-
-  if (!hasCSS) {
+  if (!__BROWSER__) {
     return ['oklch', 'p3', 'srgb']
   }
 
-  const oklch = hasCSS && CSS.supports('(color: oklch(0% 0 0))')
+  const oklch = CSS.supports('(color: oklch(0% 0 0))')
 
-  const p3 =
-    !oklch && hasCSS && CSS.supports('(color: color(display-p3 0 0 0))')
+  const p3 = !oklch && CSS.supports('(color: color(display-p3 0 0 0))')
 
   const srgb = true
 
   const map = { oklch, p3, srgb }
 
-  const colorFormat = (['oklch', 'p3', 'srgb'] as const).filter(
-    (key) => map[key]
-  )
-
-  return colorFormat
+  return (['oklch', 'p3', 'srgb'] as const).filter((key) => map[key])
 }
 
 const isParsed = (value: Options | OptionsParsed): value is Options =>
@@ -39,17 +31,14 @@ const createCepheusOptions = (
     return options
   }
 
-  // TODO: replace with __BROWSER__
-  const hasMatchMedia = typeof globalThis.matchMedia === 'function'
-
   // TODO: subscribe to changes
   const colorScheme: Array<'dark' | 'light' | 'none'> =
-    options.flags?.colorScheme ?? (hasMatchMedia ? ['none'] : ['light', 'dark'])
+    options.flags?.colorScheme ?? (__BROWSER__ ? ['none'] : ['light', 'dark'])
 
   // TODO: subscribe to changes
   let colorGamut: Array<'srgb' | 'p3'> =
     options.flags?.colorGamut ??
-    (hasMatchMedia
+    (__BROWSER__
       ? globalThis.matchMedia('(color-gamut: p3)').matches
         ? ['p3', 'srgb']
         : ['srgb']
@@ -58,7 +47,7 @@ const createCepheusOptions = (
   let colorFormat: Array<'srgb' | 'p3' | 'oklch'> =
     options.flags?.colorFormat ?? getColorFormat()
 
-  if (hasMatchMedia) {
+  if (__BROWSER__) {
     if (colorFormat.includes('oklch')) {
       colorGamut = [colorGamut.includes('p3') ? 'p3' : 'srgb']
       colorFormat = ['oklch']
@@ -98,8 +87,10 @@ export const createCepheusPlugin = (
 ): CepheusCassiopeiaPlugin => {
   const opts = createCepheusOptions(options)
 
+  // TODO: make this safe
   ColorSpace.register(LCH)
   ColorSpace.register(sRGB)
+  ColorSpace.register(OKLCH)
   ColorSpace.register(OKLCH)
 
   if (opts.flags.some((value) => value.colorFormat.includes('p3'))) {
