@@ -1,9 +1,10 @@
 import { build } from 'esbuild'
 import { execa } from 'execa'
 import fse from 'fs-extra'
+import { cloneDeep, merge } from 'lodash-es'
 import path from 'path'
 import process from 'process'
-import { cwd, external, name, version } from './constants.mjs'
+import { cwd, external, name, version, target } from './constants.mjs'
 
 const tsconfig = fse.existsSync(path.join(cwd, 'tsconfig-build.json'))
   ? path.join(cwd, 'tsconfig-build.json')
@@ -40,9 +41,10 @@ const buildOptions = {
   },
   mainFields: ['module'],
   entryPoints: ['src/index.ts'],
-  external: ['cassiopeia', '@cassiopeia/*', 'vue', ...external],
+  external,
   format: 'esm',
   logLevel: 'info',
+  target,
   outExtension: { '.js': '.mjs' },
   outdir: path.join(cwd, `lib/esm`),
   platform: 'neutral',
@@ -51,8 +53,34 @@ const buildOptions = {
   tsconfig
 }
 
-if (name === '@cepheus/cli') {
-  await build({ ...buildOptions, platform: 'node' })
+if (name === '@cepheus/plugin') {
+  await build(
+    merge(cloneDeep(buildOptions), {
+      outdir: path.join(cwd, `lib/server`),
+      define: {
+        __BROWSER__: JSON.stringify(false)
+      },
+      target,
+      platform: 'node'
+    })
+  )
+
+  await build(
+    merge(cloneDeep(buildOptions), {
+      outdir: path.join(cwd, `lib/browser`),
+      define: {
+        __BROWSER__: JSON.stringify(true)
+      },
+      target: 'esnext',
+      platform: 'browser'
+    })
+  )
+} else if (name === '@cepheus/cli') {
+  await build({
+    ...buildOptions,
+    platform: 'node',
+    entryPoints: ['src/cli.ts', 'src/index.ts', 'src/worker.ts']
+  })
 } else {
   await build(buildOptions)
 }
