@@ -12,8 +12,19 @@ import { setMaxListeners } from 'events'
 import { assign, isError, map, omit, range } from 'lodash-es'
 // import Piscina from 'piscina'
 import Tinypool from 'tinypool'
+import { actionCreateOptimizeTasks } from './store/action-create-optimize-tasks'
+import { actionUpdateOptimizeTask } from './store/action-update-optimize-task'
 
-import { createStore } from './store'
+import { actionUpdateStage } from './store/action-update-stage'
+import { createStore } from './store/create-store'
+import { selectorOptimizeTasksPending } from './store/selector-optimize-tasks'
+import { selectorSquares } from './store/selector-squares'
+import { selectorState } from './store/selector-state'
+import {
+  actionUpdateTriangleTask,
+  selectorTriangle,
+  selectorTriangleOptions
+} from './store/wip'
 import {
   CepheusState,
   OptimizationState,
@@ -65,15 +76,17 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
   const abortController = new AbortController()
   setMaxListeners(0, abortController.signal)
 
-  const promise = store
-    .actionUpdateStage({ type: TypeCepheusState.Optimization })
+  const promise = actionUpdateStage(store, {
+    type: TypeCepheusState.Optimization
+  })
     .then(async () => {
       const iterations = range(store.options.iterations)
 
+      // try {
       for (const iteration of iterations) {
-        store.actionCreateOptimizeTasks(iteration)
+        actionCreateOptimizeTasks(store, iteration)
 
-        const tasks = store.optimizeTasksPending()
+        const tasks = selectorOptimizeTasksPending(store)
 
         await Promise.all(
           map(Object.entries(tasks), async ([key, task]) => {
@@ -84,25 +97,25 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
               signal: abortController.signal
             })) as OptimizationState
 
-            await store.actionUpdateOptimizeTask(key, state)
+            await actionUpdateOptimizeTask(store, key, state)
           })
         )
       }
+      // } catch (e) {}
 
-      if (Array.from(store.squares()).length > 0) {
-        return await store.actionUpdateStage({
-          type: TypeCepheusState.OptimizationDone
-        })
+      if (Array.from(selectorSquares(store)).length === 0) {
+        throw new Error('No squares available.')
       }
 
-      throw new Error('No squares available.')
-    })
-    .then(async () => {
-      await store.actionUpdateStage({
+      await actionUpdateStage(store, {
+        type: TypeCepheusState.OptimizationDone
+      })
+
+      await actionUpdateStage(store, {
         type: TypeCepheusState.TriangleFitting
       })
 
-      const { factors, pixels } = store.triangleOptions()
+      const { factors, pixels } = selectorTriangleOptions(store)
 
       const iterator = createTriangleTaskIterator(factors)
 
@@ -118,7 +131,7 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
             signal: abortController.signal
           })) as TriangleTaskResult
 
-          await store.actionUpdateTriangleTask(value)
+          await actionUpdateTriangleTask(store, value)
         }
       }
 
@@ -126,21 +139,21 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
         range(pool.options.minThreads).map(async () => await next())
       )
 
-      if (store.triangle() === undefined) {
-        throw new Error('Triangle fitting failed.')
+      if (selectorTriangle(store) === undefined) {
+        throw new Error('Triangle fitting failed!')
       }
 
-      await store.actionUpdateStage({
+      await actionUpdateStage(store, {
         type: TypeCepheusState.TriangleFittingDone
       })
     })
     .catch(async (error) => {
       if (isError(error) && error.name === 'AbortError') {
-        return await store.actionUpdateStage({
+        return await actionUpdateStage(store, {
           type: TypeCepheusState.Abort
         })
       } else {
-        return await store.actionUpdateStage({
+        return await actionUpdateStage(store, {
           type: TypeCepheusState.Error,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           error
@@ -149,16 +162,20 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
     })
     .then(async () => await pool.destroy())
     .then(async () => {
+      const state = selectorState(store)
+
       if (
-        store.state().type !== TypeCepheusState.Abort ||
-        store.state().type !== TypeCepheusState.Error
+        !(
+          state.type === TypeCepheusState.Abort ||
+          state.type === TypeCepheusState.Error
+        )
       ) {
-        return await store.actionUpdateStage({
+        return await actionUpdateStage(store, {
           type: TypeCepheusState.Done
         })
       }
     })
-    .then(() => store.state())
+    .then(() => selectorState(store))
 
   return assign(promise, {
     abort: () => abortController.abort(),

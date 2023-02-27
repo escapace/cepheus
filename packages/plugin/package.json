@@ -12,7 +12,7 @@
     "@types/chai": "4.3.4",
     "@types/lodash-es": "4.17.6",
     "@types/mocha": "10.0.1",
-    "@types/node": "18.14.1",
+    "@types/node": "18.14.2",
     "@typescript-eslint/eslint-plugin": "5.53.0",
     "@typescript-eslint/parser": "5.53.0",
     "c8": "7.13.0",
@@ -30,12 +30,24 @@
   },
   "exports": {
     ".": {
-      "import": "./lib/esm/index.mjs"
+      "node": {
+        "import": {
+          "types": "./lib/types/index.d.ts",
+          "default": "./lib/server/index.mjs"
+        }
+      },
+      "default": {
+        "import": {
+          "types": "./lib/types/index.d.ts",
+          "default": "./lib/browser/index.mjs"
+        }
+      }
     }
   },
   "files": [
-    "lib/esm",
-    "lib/types"
+    "lib/types",
+    "lib/browser",
+    "lib/server"
   ],
   "homepage": "https://github.com/escapace/cepheus",
   "license": "MPL-2.0",
