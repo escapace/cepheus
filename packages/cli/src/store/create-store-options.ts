@@ -1,7 +1,12 @@
 import { convert, fixNaN, OKLCH, parse } from '@cepheus/color'
-import { N } from '@cepheus/utilities'
+import { ColorSpace, LENGTH as N } from 'cepheus'
 import { isInteger, isString, omit } from 'lodash-es'
-import { DEFAULT_ITERATIONS, DEFAULT_N_DIVISOR, N_DIVISORS } from '../constants'
+import {
+  DEFAULT_ITERATIONS,
+  DEFAULT_N_DIVISOR,
+  DEFAULT_WEIGHTS,
+  N_DIVISORS
+} from '../constants'
 import { RequiredStoreOptions, StoreOptions } from '../types'
 
 export function createStoreOptions(
@@ -38,8 +43,13 @@ export function createStoreOptions(
     throw new Error(`'iterations' must be an integer greater or equal to 1`)
   }
 
+  const colorSpace =
+    (options.colorSpace ?? 'p3') === 'p3' ? ColorSpace.p3 : ColorSpace.srgb
+
   return {
     ...omit(options, ['levels']),
+    weights: DEFAULT_WEIGHTS,
+    colorSpace,
     background,
     colors,
     interval,

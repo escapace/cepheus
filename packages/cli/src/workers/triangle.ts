@@ -1,6 +1,7 @@
-import { N, szudzik2 } from '@cepheus/utilities'
+import { szudzik2 } from '@cepheus/utilities'
+import { LENGTH as N } from 'cepheus'
 import {
-  Pixel,
+  Point,
   Triangle,
   TriangleTaskOptions,
   TriangleTaskResult
@@ -24,7 +25,7 @@ export const triangle = async (
   let bestArea = 0
   let best: Triangle | undefined
 
-  const isLine = (A: Pixel, B: Pixel): false | number => {
+  const isLine = (A: Point, B: Point): false | number => {
     for (let t = 0; t <= 1; t += 0.025) {
       if (
         !pixels.has(

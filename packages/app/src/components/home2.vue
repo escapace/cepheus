@@ -9,8 +9,12 @@ import {
   serialize,
   sRGB
 } from '@cepheus/color'
-import { createInterpolator, parseModel, type ModelUnparsed } from 'cepheus'
-import { N } from '@cepheus/utilities'
+import {
+  createInterpolator,
+  LENGTH as N,
+  parseModel,
+  type ModelUnparsed
+} from 'cepheus'
 import { range } from 'lodash-es'
 import _model from '../models/model.json'
 

@@ -11,6 +11,7 @@
     "@cepheus/plugin": "workspace:*",
     "@cepheus/utilities": "workspace:*",
     "@cepheus/vue": "workspace:*",
+    "@escapace/minimum-perimeter-triangle": "0.1.0",
     "@js-temporal/polyfill": "0.4.3",
     "cassiopeia": "4.0.0",
     "cepheus": "workspace:*",
