@@ -1,4 +1,4 @@
-import { N } from '@cepheus/utilities'
+import { LENGTH as N } from 'cepheus'
 import { compact, groupBy, map, memoize, uniq } from 'lodash-es'
 import {
   OptimizationStateFulfilled,

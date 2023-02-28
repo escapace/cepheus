@@ -70,6 +70,7 @@ importers:
       '@cepheus/plugin': workspace:*
       '@cepheus/utilities': workspace:*
       '@cepheus/vue': workspace:*
+      '@escapace/minimum-perimeter-triangle': 0.1.0
       '@escapace/unocss-preset-escapace': 0.1.1
       '@js-temporal/polyfill': 0.4.3
       '@tweakpane/core': 1.1.4
@@ -106,6 +107,7 @@ importers:
       '@cepheus/plugin': link:../plugin
       '@cepheus/utilities': link:../utilities
       '@cepheus/vue': link:../vue
+      '@escapace/minimum-perimeter-triangle': 0.1.0
       '@js-temporal/polyfill': 0.4.3
       cassiopeia: 4.0.0
       cepheus: link:../core
@@ -155,6 +157,7 @@ importers:
       big-cartesian: 4.7.0
       bignumber.js: 9.1.1
       c8: 7.13.0
+      cepheus: workspace:*
       chai: 4.3.7
       chalk: 5.2.0
       emittery: 1.0.1
@@ -182,6 +185,7 @@ importers:
       arg: 5.0.2
       big-cartesian: 4.7.0
       bignumber.js: 9.1.1
+      cepheus: link:../core
       chalk: 5.2.0
       emittery: 1.0.1
       lodash-es: 4.17.21
@@ -1070,6 +1074,11 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
+
+  /@escapace/minimum-perimeter-triangle/0.1.0:
+    resolution: {integrity: sha512-1CyO4w71x6yfvagDvZ1BrWEaNe42wvoq0GiZPZtZBCWq/HM3NT9yeybDcwwUBYe76QPu+xFYdoLLDEaDgUSsvg==}
+    engines: {node: '>= 18.2.0', pnpm: '>= 7.14.0'}
+    dev: false
 
   /@escapace/unocss-preset-escapace/0.1.1:
     resolution: {integrity: sha512-mmJ5TLdxw0L381qJwMY18P+28uegruCQoPl6AUbTSXbDdSbjnm7bppsm4xyjt5JuLBsmw22RLQmhyTNMdMP/1g==}

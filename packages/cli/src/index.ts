@@ -10,11 +10,9 @@ import {
 } from '@cepheus/color'
 import { setMaxListeners } from 'events'
 import { assign, isError, map, omit, range } from 'lodash-es'
-// import Piscina from 'piscina'
 import Tinypool from 'tinypool'
 import { actionCreateOptimizeTasks } from './store/action-create-optimize-tasks'
 import { actionUpdateOptimizeTask } from './store/action-update-optimize-task'
-
 import { actionUpdateStage } from './store/action-update-stage'
 import { createStore } from './store/create-store'
 import { selectorOptimizeTasksPending } from './store/selector-optimize-tasks'

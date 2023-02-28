@@ -1,13 +1,13 @@
 import { chunk } from './chunk'
-import { ModelUnparsed, ModelParsed, Triangle } from './types'
+import { ColorSpace, ModelParsed, ModelUnparsed, Triangle } from './types'
 
-// TODO: accept unknown
 export const parseModel = (model: unknown): ModelParsed => {
   if (!Array.isArray(model)) {
     return model as ModelParsed
   }
 
-  const [interval, length, _triangle, squares, data] = model as ModelUnparsed
+  const [_space, interval, length, _triangle, squares, data] =
+    model as ModelUnparsed
   const step = length * 3
   const triangle = [
     _triangle.slice(0, 2),
@@ -26,7 +26,10 @@ export const parseModel = (model: unknown): ModelParsed => {
     })
   )
 
+  const colorSpace = _space === 1 ? ColorSpace.p3 : ColorSpace.srgb
+
   return {
+    colorSpace,
     colors,
     interval,
     length,

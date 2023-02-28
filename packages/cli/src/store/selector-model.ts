@@ -1,11 +1,11 @@
 import { BigNumber } from 'bignumber.js'
+import { ModelUnparsed } from 'cepheus'
 import { flattenDeep, map } from 'lodash-es'
-import { Model } from '../types'
 import { Store } from './create-store'
 import { selectorSquares } from './selector-squares'
 import { selectorTriangle } from './wip'
 
-export const selectorModel = (store: Store, precision = 5): Model => {
+export const selectorModel = (store: Store, precision = 5): ModelUnparsed => {
   const values = new Map(
     Array.from(selectorSquares(store, store.allIterations).entries()).map(
       ([square, task]): [number, Array<[number, number, number]>] => {
@@ -28,8 +28,13 @@ export const selectorModel = (store: Store, precision = 5): Model => {
   const interval = store.options.interval
   const length = store.options.colors.length
   const squares = Array.from(values.keys())
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const colors = flattenDeep(squares.map((square) => values.get(square)!))
+
+  const colors = flattenDeep(
+    squares.map(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      (square): Array<[number, number, number]> => values.get(square)!
+    )
+  ) as number[]
   const triangle = selectorTriangle(store)
 
   if (triangle === undefined) {
@@ -45,5 +50,7 @@ export const selectorModel = (store: Store, precision = 5): Model => {
     number
   ]
 
-  return [interval, length, triangleF, squares, colors]
+  const space = store.options.colorSpace as number
+
+  return [space, interval, length, triangleF, squares, colors]
 }

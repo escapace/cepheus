@@ -1,6 +1,6 @@
 import { range } from 'lodash-es'
 import { cartesianProduct } from './cartesian-product'
-import { N } from './constants'
+import { LENGTH as N } from 'cepheus'
 import { toSquare } from './to-square'
 
 export const tile = (interval: number): number[] => {

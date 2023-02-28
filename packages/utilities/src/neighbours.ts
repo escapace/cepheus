@@ -1,4 +1,4 @@
-import { N } from './constants'
+import { LENGTH as N } from 'cepheus'
 import { toPosition } from './to-position'
 import { toSquare } from './to-square'
 

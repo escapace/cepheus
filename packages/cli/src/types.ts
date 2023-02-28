@@ -1,9 +1,7 @@
 import type { Color, ColorSpace } from '@cepheus/color'
-import type { ColorSpaceId } from 'colorjs.io/fn'
+import { ColorSpace as ColorSpaceId } from 'cepheus'
 import type { DeepRequired } from 'utility-types'
 import type { PRNG, PRNGName } from './utilities/create-prng'
-export type { Model } from '@cepheus/utilities'
-
 export { PRNG, PRNGName }
 
 export type Square = number
@@ -64,8 +62,10 @@ export type CepheusState =
 export interface StoreOptions
   extends Omit<
     OptimizeOptions,
-    'colors' | 'background' | 'lightness' | 'chroma'
+    'colors' | 'background' | 'lightness' | 'chroma' | 'colorSpace' | 'weights'
   > {
+  weights?: OptimizeOptions['weights']
+  colorSpace?: 'p3' | 'srgb'
   colors: Array<Color[] | string[]>
   // background: Color[] | string[]
   levels?: number
@@ -73,7 +73,12 @@ export interface StoreOptions
 }
 
 export interface RequiredStoreOptions
-  extends Omit<StoreOptions, 'colors' | 'background' | 'levels'> {
+  extends Omit<
+    StoreOptions,
+    'colors' | 'background' | 'levels' | 'colorSpace' | 'weights'
+  > {
+  weights: OptimizeOptions['weights']
+  colorSpace: ColorSpaceId
   colors: Array<Array<[number, number, number]>>
   background: Array<[number, number, number]>
   interval: number
@@ -89,14 +94,14 @@ export interface OptimizeOptions {
   randomSource?: PRNGName
   colors: Array<Array<[number, number, number]>>
   background: Array<[number, number, number]>
-  colorSpace?: ColorSpaceId
+  colorSpace: ColorSpaceId
   hyperparameters?: {
     temperature: number
     coolingRate: number
     cutoff: number
   }
   hueAngle?: number
-  weights?: {
+  weights: {
     chroma: number
     contrast: number
     deuteranopia: number
@@ -170,8 +175,8 @@ export type OptimizationState =
   | OptimizationStateRejected
   | OptimizationStatePending
 
-export type Pixel = [number, number]
-export type Triangle = [Pixel, Pixel, Pixel]
+export type Point = [number, number]
+export type Triangle = [Point, Point, Point]
 export type TriangleTaskResult = undefined | [triangle: Triangle, area: number]
 
 export interface TriangleTaskOptions {
@@ -180,6 +185,6 @@ export interface TriangleTaskOptions {
 }
 
 export interface TriangleOptions {
-  factors: [Pixel[], Pixel[], Pixel[]]
+  factors: [Point[], Point[], Point[]]
   pixels: number[]
 }
