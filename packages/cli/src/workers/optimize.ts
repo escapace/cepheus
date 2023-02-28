@@ -13,14 +13,17 @@ import {
   P3,
   sRGB
 } from '@cepheus/color'
-import { N } from '@cepheus/utilities'
-import { flatMap, map, mapValues } from 'lodash-es'
+import {
+  ColorSpace as ColorSpaceId,
+  LENGTH as N,
+  normalizeAngle
+} from 'cepheus'
+import { flatMap, map } from 'lodash-es'
 import {
   errorFunction,
   mean,
   sample,
-  standardDeviation,
-  sum
+  standardDeviation
 } from 'simple-statistics'
 import {
   OptimizationState,
@@ -28,7 +31,6 @@ import {
   RequiredOptimizeOptions,
   TypeOptimizationState
 } from '../types'
-import { constrainAngle } from '../utilities/constrain-angle'
 import { createPRNG } from '../utilities/create-prng'
 import { isWithin } from '../utilities/is-within'
 import { percentile } from '../utilities/percentile'
@@ -69,7 +71,7 @@ function randomColor(
             options.chroma.range[1],
             options.prng
           ),
-          constrainAngle(
+          normalizeAngle(
             randomWithin(
               selectedColor.coords[2] - options.hueAngle / 2,
               selectedColor.coords[2] + options.hueAngle / 2,
@@ -108,7 +110,7 @@ function randomColor(
 
           break
         case 2:
-          selectedColor.coords[index] = constrainAngle(
+          selectedColor.coords[index] = normalizeAngle(
             percentile(
               hue,
               percentage,
@@ -265,7 +267,7 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
     flatMap(state, ({ coords: a }, index) =>
       map(
         options.colors[index],
-        ({ coords: b }) => constrainAngle(a[2] - b[2]) / 360
+        ({ coords: b }) => normalizeAngle(a[2] - b[2]) / 360
       )
     )
   )
@@ -356,14 +358,6 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
   )
 }
 
-const normalizeWeights = (
-  weights: Required<Exclude<OptimizeOptions['weights'], undefined>>
-): Required<Exclude<OptimizeOptions['weights'], undefined>> => {
-  const total = sum(Object.values(weights))
-
-  return mapValues(weights, (value) => value / total)
-}
-
 const lerp = (v0: number, v1: number, t: number) => v0 * (1 - t) + v1 * t
 
 const bias = (value: number) => lerp(0.05, 1, Math.min(value * 1.05, 1))
@@ -414,14 +408,14 @@ const normalizeOptions = (
 
   const prng = createPRNG(options.randomSeed, options.randomSource)
 
-  const colorSpace =
-    options.colorSpace !== undefined ? ColorSpace.get(options.colorSpace) : P3
+  const colorSpace = options.colorSpace === ColorSpaceId.p3 ? P3 : sRGB
 
   const hueAngle =
-    options.hueAngle === undefined ? 30 : constrainAngle(options.hueAngle)
+    options.hueAngle === undefined ? 30 : normalizeAngle(options.hueAngle)
 
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const value = {
+    weights: options.weights,
     colors,
     background,
     prng,
@@ -432,24 +426,6 @@ const normalizeOptions = (
       ...options.hyperparameters
     },
     hueAngle,
-    weights: normalizeWeights({
-      // pushes color to initial value
-      difference: 25,
-      // pushes color to the lightness edge
-      lightness: 8.75,
-      // pushes color to the chroma edge
-      chroma: 12,
-      // pushes color away from background
-      contrast: 6.25,
-      // pushes color away from pallete colors
-      hue: 10,
-      dispersion: 10,
-      normal: 6.5,
-      protanopia: 2.75,
-      tritanopia: 2.75,
-      deuteranopia: 2.75,
-      ...options.weights
-    }),
     colorSpace,
     lightness: normalizeLightness({
       range: [0, N],

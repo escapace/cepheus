@@ -1,7 +1,14 @@
 export type Point = [x: number, y: number]
 export type Triangle = [Point, Point, Point]
 export type Line = [Point, Point]
+
+export enum ColorSpace {
+  srgb = 0,
+  p3 = 1
+}
+
 export type ModelUnparsed = [
+  colorSpace: number,
   interval: number,
   length: number,
   triangle: [...Point, ...Point, ...Point],
@@ -10,6 +17,7 @@ export type ModelUnparsed = [
 ]
 
 export interface ModelParsed {
+  colorSpace: ColorSpace
   colors: Map<number, Array<[number, number, number]>>
   interval: number
   length: number

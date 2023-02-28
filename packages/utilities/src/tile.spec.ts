@@ -1,5 +1,5 @@
 import { assert } from 'chai'
-import { N } from './constants'
+import { LENGTH as N } from 'cepheus'
 import { tile } from './tile'
 import { toPosition } from './to-position'
 

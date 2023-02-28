@@ -1,6 +1,7 @@
+import { LENGTH as N } from 'cepheus'
 import { median } from 'simple-statistics'
 import { divisors } from './utilities/divisors'
-import { N } from '@cepheus/utilities'
+import { normalizeWeights } from './utilities/normalize-weights'
 
 export const N_DIVISORS = divisors(N).filter((value) => value !== 1)
 export const DEFAULT_N_DIVISOR = median(
@@ -8,3 +9,21 @@ export const DEFAULT_N_DIVISOR = median(
 )
 
 export const DEFAULT_ITERATIONS = 4
+
+export const DEFAULT_WEIGHTS = normalizeWeights({
+  // pushes color to initial value
+  difference: 25,
+  // pushes color to the lightness edge
+  lightness: 8.75,
+  // pushes color to the chroma edge
+  chroma: 12,
+  // pushes color away from background
+  contrast: 6.25,
+  // pushes color away from pallete colors
+  hue: 10,
+  dispersion: 10,
+  normal: 6.5,
+  protanopia: 2.75,
+  tritanopia: 2.75,
+  deuteranopia: 2.75
+})

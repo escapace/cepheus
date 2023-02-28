@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
+import { normalizeAngle } from 'cepheus'
 import { assert } from 'chai'
-import { constrainAngle } from './constrain-angle'
 import { PRNG } from './create-prng'
 import { percentile } from './percentile'
 
@@ -38,9 +38,9 @@ describe('./src/utilities/percentlie.spec.ts', () => {
     assert.equal(percentile(0, 0.1, 0, 100, half), 0)
     assert.equal(percentile(0, 0.1, 0, 100, zero), 0)
 
-    assert.equal(constrainAngle(percentile(0, 0.1, -30, 30, one)), 6)
-    assert.equal(constrainAngle(percentile(0, 0.1, -30, 30, half)), 0)
-    assert.equal(constrainAngle(percentile(0, 0.1, -30, 30, zero)), 354)
+    assert.equal(normalizeAngle(percentile(0, 0.1, -30, 30, one)), 6)
+    assert.equal(normalizeAngle(percentile(0, 0.1, -30, 30, half)), 0)
+    assert.equal(normalizeAngle(percentile(0, 0.1, -30, 30, zero)), 354)
 
     // console.log(
     //   percentile(0.19607298879671345, 0.4713503938800034, 0, 0.1, one)

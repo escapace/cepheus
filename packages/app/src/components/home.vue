@@ -9,8 +9,8 @@ import {
   serialize,
   sRGB
 } from '@cepheus/color'
-import { parseModel, type ModelUnparsed } from 'cepheus'
-import { N, toSquare } from '@cepheus/utilities'
+import { LENGTH as N, parseModel, type ModelUnparsed } from 'cepheus'
+import { toSquare } from '@cepheus/utilities'
 import { range } from 'lodash-es'
 import _model from '../models/model.json'
 

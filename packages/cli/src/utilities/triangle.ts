@@ -1,8 +1,9 @@
-import { N, szudzik2 } from '@cepheus/utilities'
+import { LENGTH as N } from 'cepheus'
+import { szudzik2 } from '@cepheus/utilities'
 import cartesianProduct from 'big-cartesian'
 import { orderBy, uniqWith } from 'lodash-es'
 import { mean } from 'simple-statistics'
-import { Pixel, Triangle, TriangleOptions } from '../types'
+import { Point, Triangle, TriangleOptions } from '../types'
 import { distance } from './distance'
 
 // export const TRIANGLE_CANVAS_HEIGHT = 64 + 64
@@ -138,9 +139,9 @@ export const createTriangleOptions = (
 ): TriangleOptions => {
   const edges = edgeDetection(interval, squares)
   const corners = cornerDetection(edges)
-  const factorA: Pixel[] = []
-  const factorB: Pixel[] = []
-  const factorC: Pixel[] = []
+  const factorA: Point[] = []
+  const factorB: Point[] = []
+  const factorC: Point[] = []
 
   const meanD = mean([TRIANGLE_CANVAS_WIDTH, TRIANGLE_CANVAS_HEIGHT])
 
@@ -178,7 +179,7 @@ export const createTriangleOptions = (
 }
 
 export function* createTriangleTaskIterator(
-  factors: [Pixel[], Pixel[], Pixel[]]
+  factors: [Point[], Point[], Point[]]
 ) {
   const iterable = cartesianProduct(factors)
 
