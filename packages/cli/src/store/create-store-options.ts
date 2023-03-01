@@ -1,10 +1,12 @@
 import { convert, fixNaN, OKLCH, parse } from '@cepheus/color'
-import { ColorSpace, LENGTH as N } from 'cepheus'
+import { ColorSpace, normalizeAngle } from 'cepheus'
 import { isInteger, isString, omit } from 'lodash-es'
 import {
+  DEFAULT_HUE_ANGLE,
   DEFAULT_ITERATIONS,
   DEFAULT_N_DIVISOR,
   DEFAULT_WEIGHTS,
+  N,
   N_DIVISORS
 } from '../constants'
 import { RequiredStoreOptions, StoreOptions } from '../types'
@@ -46,8 +48,14 @@ export function createStoreOptions(
   const colorSpace =
     (options.colorSpace ?? 'p3') === 'p3' ? ColorSpace.p3 : ColorSpace.srgb
 
+  const hueAngle =
+    options.hueAngle === undefined
+      ? DEFAULT_HUE_ANGLE
+      : normalizeAngle(options.hueAngle)
+
   return {
     ...omit(options, ['levels']),
+    hueAngle,
     weights: DEFAULT_WEIGHTS,
     colorSpace,
     background,

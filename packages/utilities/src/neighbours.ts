@@ -21,6 +21,6 @@ export const neighbours = (
   const nw = [xs - i, ys + i]
 
   return (intercardinal ? [n, ne, e, se, s, sw, w, nw] : [n, e, s, w])
-    .filter(([x, y]) => x >= 0 && y >= 0 && x < N && y < N)
+    .filter(([x, y]) => x >= 0 && y >= 0 && x < N * 2 && y < N * 2)
     .map((position) => toSquare(position as [number, number], i))
 }

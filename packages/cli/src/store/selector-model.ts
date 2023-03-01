@@ -1,11 +1,11 @@
-import { BigNumber } from 'bignumber.js'
 import { ModelUnparsed } from 'cepheus'
 import { flattenDeep, map } from 'lodash-es'
+import { toPrecision } from '../utilities/to-precision'
 import { Store } from './create-store'
 import { selectorSquares } from './selector-squares'
-import { selectorTriangle } from './wip'
+import { selectorTriangle } from './selector-triangle'
 
-export const selectorModel = (store: Store, precision = 5): ModelUnparsed => {
+export const selectorModel = (store: Store, precision = 8): ModelUnparsed => {
   const values = new Map(
     Array.from(selectorSquares(store, store.allIterations).entries()).map(
       ([square, task]): [number, Array<[number, number, number]>] => {
@@ -14,11 +14,11 @@ export const selectorModel = (store: Store, precision = 5): ModelUnparsed => {
           map(
             task.state.colors,
             (value) =>
-              map(value, (value) =>
-                Number.isFinite(precision)
-                  ? parseFloat(new BigNumber(value).toPrecision(5))
-                  : value
-              ) as [number, number, number]
+              map(value, (value) => toPrecision(value, precision)) as [
+                number,
+                number,
+                number
+              ]
           )
         ]
       }
@@ -35,13 +35,10 @@ export const selectorModel = (store: Store, precision = 5): ModelUnparsed => {
       (square): Array<[number, number, number]> => values.get(square)!
     )
   ) as number[]
+
   const triangle = selectorTriangle(store)
-
-  if (triangle === undefined) {
-    throw new Error('Triangle fitting failed.')
-  }
-
-  const triangleF = triangle.flat() as [
+    .triangle.flat()
+    .map((value) => toPrecision(value, precision)) as [
     number,
     number,
     number,
@@ -52,5 +49,5 @@ export const selectorModel = (store: Store, precision = 5): ModelUnparsed => {
 
   const space = store.options.colorSpace as number
 
-  return [space, interval, length, triangleF, squares, colors]
+  return [space, interval, length, triangle, squares, colors]
 }

@@ -1,15 +1,19 @@
 import { toPosition } from '@cepheus/utilities'
 import { range } from 'lodash-es'
-import { Square } from '../types'
+import { N } from '../constants'
+import { OptimizeTaskOptions, Square } from '../types'
 
-export function createSquareOptions(square: Square, interval: number) {
+export function createSquareOptions(
+  square: Square,
+  interval: number
+): Required<Pick<OptimizeTaskOptions, 'lightness' | 'chroma'>> {
   const position = toPosition(square, interval)
 
   const [lightness, chroma] = range(2).map((_, index) => {
-    const range = [position[index], position[index] + interval] as [
-      number,
-      number
-    ]
+    const range = [
+      position[index] - N / 2,
+      position[index] - N / 2 + interval
+    ] as [number, number]
 
     const target = range[1]
 

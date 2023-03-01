@@ -13,11 +13,7 @@ import {
   P3,
   sRGB
 } from '@cepheus/color'
-import {
-  ColorSpace as ColorSpaceId,
-  LENGTH as N,
-  normalizeAngle
-} from 'cepheus'
+import { ColorSpace as ColorSpaceId, normalizeAngle } from 'cepheus'
 import { flatMap, map } from 'lodash-es'
 import {
   errorFunction,
@@ -25,6 +21,7 @@ import {
   sample,
   standardDeviation
 } from 'simple-statistics'
+import { N } from '../constants'
 import {
   OptimizationState,
   OptimizeOptions,
@@ -33,6 +30,7 @@ import {
 } from '../types'
 import { createPRNG } from '../utilities/create-prng'
 import { isWithin } from '../utilities/is-within'
+import { lightnessScalingFunction } from '../utilities/lightness-scaling-function'
 import { percentile } from '../utilities/percentile'
 import { randomWithin } from '../utilities/random-within'
 import { relativeDifference } from '../utilities/relative-difference'
@@ -149,7 +147,13 @@ function randomColor(
           options.lightness.range[1]
         )
       ) {
-        throw new Error('Lightness out of range!')
+        throw new Error(
+          `Lightness out of range! ${JSON.stringify([
+            value.coords[0],
+            options.lightness.range[0],
+            options.lightness.range[1]
+          ])}`
+        )
       }
 
       if (
@@ -358,15 +362,14 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
   )
 }
 
-const lerp = (v0: number, v1: number, t: number) => v0 * (1 - t) + v1 * t
-
-const bias = (value: number) => lerp(0.05, 1, Math.min(value * 1.05, 1))
-
 const normalizeLightness = (
   value: Required<Exclude<OptimizeOptions['lightness'], undefined>>
 ): Required<Exclude<OptimizeOptions['lightness'], undefined>> => ({
-  range: map(value.range, (v) => bias(v / N)) as [number, number],
-  target: bias(value.target / N)
+  range: map(value.range, (value) => lightnessScalingFunction(value)) as [
+    number,
+    number
+  ],
+  target: lightnessScalingFunction(value.target)
 })
 
 const normalizeChroma = (
@@ -410,8 +413,7 @@ const normalizeOptions = (
 
   const colorSpace = options.colorSpace === ColorSpaceId.p3 ? P3 : sRGB
 
-  const hueAngle =
-    options.hueAngle === undefined ? 30 : normalizeAngle(options.hueAngle)
+  const hueAngle = normalizeAngle(options.hueAngle)
 
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const value = {
@@ -443,7 +445,13 @@ const normalizeOptions = (
     if (
       !isWithin(value[key].target, value[key].range[0], value[key].range[1])
     ) {
-      throw new Error(`${key} out of range`)
+      throw new Error(
+        `${key} out of range: ${JSON.stringify([
+          value[key].target,
+          value[key].range[0],
+          value[key].range[1]
+        ])} ${JSON.stringify(options[key])}`
+      )
     }
   })
 

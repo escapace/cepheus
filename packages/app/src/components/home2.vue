@@ -24,8 +24,8 @@ ColorSpace.register(OKLCH)
 ColorSpace.register(P3)
 
 const model = parseModel(_model as ModelUnparsed)
-const levels = 100 // 120 / model.interval
-const interval = N / levels
+const levels = 40 // 120 / model.interval
+const interval = 240 / levels
 const numColors = model.length
 const colors = range(0, numColors)
 
@@ -39,7 +39,7 @@ const cartesianProduct = <T>(...sets: T[][]) =>
   )
 
 const tile = (interval: number) => {
-  const tuple = range(0, N, interval)
+  const tuple = range(0, N * 2, interval)
 
   return cartesianProduct([...tuple].reverse(), tuple) as Array<
     [number, number]
@@ -54,7 +54,7 @@ const squares = tile(interval)
 const toStyle = (xy: [number, number], colorIndex: number) => {
   const [x, y] = xy
 
-  const coords = instance.cartesian(colorIndex, x, y)
+  const coords = instance.cartesian(colorIndex, x, y, false)
   //
   if (coords === undefined) {
     return undefined

@@ -6,7 +6,6 @@ import {
   RequiredStoreOptions,
   Square,
   StoreOptions,
-  TriangleTaskResult,
   TypeCepheusState
 } from '../types'
 import { createStoreOptions } from './create-store-options'
@@ -21,13 +20,11 @@ export interface Store
   indexState: Map<string, OptimizeTask>
   log: CepheusState[]
   options: RequiredStoreOptions
-  triangleTaskResults: TriangleTaskResult[]
   allIterations: number[]
 }
 
 const createEmitter = () =>
   new Emittery<{
-    triangleTask: undefined
     optimizeTask: [string, OptimizeTask]
     state: CepheusState
   }>()
@@ -46,20 +43,17 @@ export const createStore = (
 
   const indexState: Map<string, OptimizeTask> = new Map()
 
-  const triangleTaskResults: TriangleTaskResult[] = []
-
   const indexInitialState: Map<string, OptimizeTask> = new Map(
     Object.entries(initialState)
   )
 
-  const allIterations = range(storeOptions.iterations)
+  const allIterations = range(Math.max(storeOptions.iterations * 2, 4))
 
   const store = {
     options: storeOptions,
     log,
     indexSquare,
     indexState,
-    triangleTaskResults,
     indexInitialState,
     allIterations
   }

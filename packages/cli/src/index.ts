@@ -9,7 +9,7 @@ import {
   sRGB
 } from '@cepheus/color'
 import { setMaxListeners } from 'events'
-import { assign, isError, map, omit, range } from 'lodash-es'
+import { assign, difference, isError, map, omit, range } from 'lodash-es'
 import Tinypool from 'tinypool'
 import { actionCreateOptimizeTasks } from './store/action-create-optimize-tasks'
 import { actionUpdateOptimizeTask } from './store/action-update-optimize-task'
@@ -18,22 +18,15 @@ import { createStore } from './store/create-store'
 import { selectorOptimizeTasksPending } from './store/selector-optimize-tasks'
 import { selectorSquares } from './store/selector-squares'
 import { selectorState } from './store/selector-state'
-import {
-  actionUpdateTriangleTask,
-  selectorTriangle,
-  selectorTriangleOptions
-} from './store/wip'
+import { selectorTriangle } from './store/selector-triangle'
 import {
   CepheusState,
   OptimizationState,
   OptimizeOptions,
   OptimizeTask,
   StoreOptions,
-  TriangleTaskOptions,
-  TriangleTaskResult,
   TypeCepheusState
 } from './types'
-import { createTriangleTaskIterator } from './utilities/triangle'
 
 export {
   TypeCepheusState,
@@ -42,9 +35,7 @@ export {
   type CepheusStateDone,
   type CepheusStateError,
   type CepheusStateOptimization,
-  type CepheusStateOptimizationDone,
-  type CepheusStateTriangleFitting,
-  type CepheusStateTriangleFittingDone
+  type CepheusStateOptimizationDone
 } from './types'
 
 export interface CepheusOptions extends StoreOptions {
@@ -78,10 +69,7 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
     type: TypeCepheusState.Optimization
   })
     .then(async () => {
-      const iterations = range(store.options.iterations)
-
-      // try {
-      for (const iteration of iterations) {
+      for (const iteration of range(store.options.iterations)) {
         actionCreateOptimizeTasks(store, iteration)
 
         const tasks = selectorOptimizeTasksPending(store)
@@ -99,50 +87,54 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
           })
         )
       }
-      // } catch (e) {}
 
       if (Array.from(selectorSquares(store)).length === 0) {
         throw new Error('No squares available.')
       }
 
-      await actionUpdateStage(store, {
-        type: TypeCepheusState.OptimizationDone
-      })
+      const { squares } = selectorTriangle(store)
 
-      await actionUpdateStage(store, {
-        type: TypeCepheusState.TriangleFitting
-      })
-
-      const { factors, pixels } = selectorTriangleOptions(store)
-
-      const iterator = createTriangleTaskIterator(factors)
-
-      const next = async () => {
-        for (const triangles of iterator) {
-          const options: TriangleTaskOptions = {
-            triangles,
-            pixels
+      for (const iteration of range(Math.max(store.options.iterations, 4))) {
+        actionCreateOptimizeTasks(store, iteration, {
+          squares,
+          hueAngle: store.options.hueAngle * 1.5,
+          weights: {
+            ...store.options.weights,
+            lightness: store.options.weights.lightness * 2,
+            chroma: store.options.weights.chroma * 2,
+            hue: store.options.weights.hue * 2
           }
+        })
 
-          const value = (await pool.run(options, {
-            name: 'triangle',
-            signal: abortController.signal
-          })) as TriangleTaskResult
+        const tasks = selectorOptimizeTasksPending(store)
 
-          await actionUpdateTriangleTask(store, value)
-        }
+        await Promise.all(
+          map(Object.entries(tasks), async ([key, task]) => {
+            const options: OptimizeOptions = omit(task.options, ['key'])
+
+            const state = (await pool.run(options, {
+              name: 'optimize',
+              signal: abortController.signal
+            })) as OptimizationState
+
+            await actionUpdateOptimizeTask(store, key, state)
+          })
+        )
       }
 
-      await Promise.all(
-        range(pool.options.minThreads).map(async () => await next())
+      const missing = difference(
+        Array.from(squares.keys()),
+        Array.from(selectorSquares(store).keys())
       )
 
-      if (selectorTriangle(store) === undefined) {
-        throw new Error('Triangle fitting failed!')
+      if (missing.length !== 0) {
+        throw new Error(
+          `Unable to fit triangle, squares ${missing.join(', ')} missing.`
+        )
       }
 
       await actionUpdateStage(store, {
-        type: TypeCepheusState.TriangleFittingDone
+        type: TypeCepheusState.OptimizationDone
       })
     })
     .catch(async (error) => {

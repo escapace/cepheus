@@ -1,11 +1,12 @@
-import { isolate } from '@cepheus/utilities'
-import { compact, difference } from 'lodash-es'
+// import { isolate as iso } from '@cepheus/utilities'
+import { compact } from 'lodash-es'
 import { OptimizationStateFulfilled, OptimizeTask } from '../types'
 import { Store } from './create-store'
 import { selectorOptimizeTasksFulfilled } from './selector-optimize-tasks'
 
 export const selectorSquares = (
   store: Store,
+  // isolate: boolean,
   iterations: number[] = store.allIterations
 ): Map<number, OptimizeTask<OptimizationStateFulfilled>> => {
   const bestTasks = new Map(
@@ -35,12 +36,12 @@ export const selectorSquares = (
     )
   )
 
-  const squares = Array.from(result.keys())
-
-  difference(
-    squares,
-    isolate(squares, store.options.interval, false)[0]
-  ).forEach((square) => result.delete(square))
+  // const squares = Array.from(result.keys())
+  //
+  // difference(
+  //   squares,
+  //   iso(squares, store.options.interval, false)[0]
+  // ).forEach((square) => result.delete(square))
 
   return result
 }
