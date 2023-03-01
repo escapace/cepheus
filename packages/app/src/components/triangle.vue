@@ -139,8 +139,8 @@ onMounted(() => {
     }
   }
 
-  const toX = (x: number) => Math.floor((x / 120) * img.width)
-  const toY = (y: number) => Math.floor((y / 120) * img.height)
+  const toX = (x: number) => Math.floor((x / 240) * img.width)
+  const toY = (y: number) => Math.floor((y / 240) * img.height)
 
   fillTriangle(
     img,
@@ -152,7 +152,6 @@ onMounted(() => {
   context!.strokeStyle = 'red'
 
   context.beginPath()
-  context.moveTo(0, 0)
   context.lineTo(toX(model.triangle[0][0]), toY(model.triangle[0][1]))
   context.lineTo(toX(model.triangle[1][0]), toY(model.triangle[1][1]))
   context.lineTo(toX(model.triangle[2][0]), toY(model.triangle[2][1]))

@@ -15,7 +15,6 @@ import {
 } from './store/selector-optimize-tasks'
 import { selectorState } from './store/selector-state'
 import { selectorStatistics } from './store/selector-statistics'
-import { selectorTriangleTasksCount } from './store/wip'
 import { OptimizeTask, TypeCepheusState } from './types'
 
 const compress = promisify(gzip)
@@ -195,41 +194,19 @@ const run = async () => {
   const updateSpinner = throttle(
     (type: TypeCepheusState) => {
       if (type === TypeCepheusState.Optimization) {
-        const { total, rejected, fulfilled } = selectorOptimizeTasksCount(
-          instance.store
-        )
+        const { minTotal, pending, rejected, fulfilled } =
+          selectorOptimizeTasksCount(instance.store)
         const done = rejected + fulfilled
+        const total = Math.max(pending + done, minTotal)
 
-        spinner.text = `Palette optimization \t${ns(done, total)} / ${total}`
+        spinner.text = `Palette optimization \t${ns(done, total)} / ~${total}`
       } else if (type === TypeCepheusState.OptimizationDone) {
-        const { total, rejected, fulfilled } = selectorOptimizeTasksCount(
-          instance.store
-        )
+        const { minTotal, pending, rejected, fulfilled } =
+          selectorOptimizeTasksCount(instance.store)
         const done = rejected + fulfilled
+        const total = Math.max(pending + done, minTotal)
 
-        spinner.succeed(`Palette optimization \t${ns(done, total)} / ${total}`)
-      } else if (type === TypeCepheusState.TriangleFitting) {
-        if (!spinner.isSpinning) {
-          spinner.start('Triangle fitting …')
-        }
-
-        const { total, rejected, fulfilled } = selectorTriangleTasksCount(
-          instance.store
-        )
-        const done = rejected + fulfilled
-
-        if (total === 0) {
-          spinner.text = 'Triangle fitting …'
-        } else {
-          spinner.text = `Triangle fitting     \t${ns(done, total)} / ${total}`
-        }
-      } else if (type === TypeCepheusState.TriangleFittingDone) {
-        const { total, rejected, fulfilled } = selectorTriangleTasksCount(
-          instance.store
-        )
-        const done = rejected + fulfilled
-
-        spinner.succeed(`Triangle fitting     \t${ns(done, total)} / ${total}`)
+        spinner.succeed(`Palette optimization \t${ns(done, total)} / ~${total}`)
       } else if (type === TypeCepheusState.Abort) {
         spinner.fail()
       } else if (type === TypeCepheusState.Error) {
@@ -250,10 +227,6 @@ const run = async () => {
     }
 
     updateSpinner(TypeCepheusState.Optimization)
-  })
-
-  instance.store.on('triangleTask', () => {
-    updateSpinner(TypeCepheusState.TriangleFitting)
   })
 
   instance.store.on(['state'], ({ type }) => {

@@ -1,5 +1,6 @@
 export { LENGTH } from './constants'
 export { createInterpolator } from './create-interpolator'
+export { lerp } from './lerp'
 export { normalize } from './normalize'
 export { normalizeAngle } from './normalize-angle'
 export { parseModel } from './parse-model'

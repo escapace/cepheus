@@ -1,5 +1,5 @@
-import { LENGTH as N } from 'cepheus'
 import { compact, groupBy, map, memoize, uniq } from 'lodash-es'
+import { N } from '../constants'
 import {
   OptimizationStateFulfilled,
   OptimizationStatePending,
@@ -97,7 +97,7 @@ export const selectorOptimizeTasksCount = (store: Store) => {
       return counts
     },
     {
-      total: selectorOptimizeTasksCountTotal(store),
+      minTotal: selectorOptimizeTasksCountTotal(store),
       pending: 0,
       rejected: 0,
       fulfilled: 0

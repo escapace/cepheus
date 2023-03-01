@@ -23,7 +23,7 @@ const MAX = 1024 - 1
 
 // const MAX = 512
 // const MAX = 1024 - 1
-
+//
 export const createInterpolator = (
   model: unknown,
   initialState?: State
@@ -62,13 +62,18 @@ export const createInterpolator = (
 
     const delta = x1[1] - x0[1]
 
-    const ab = [v0, v2].map(
-      (point): Point => [point[0], point[1] + delta]
-    ) as Line
+    if (delta === 0) {
+      p0 = [...v0]
+      p1 = [...v2]
+    } else {
+      const ab = [v0, v2].map(
+        (point): Point => [point[0], point[1] + delta]
+      ) as Line
 
-    // can this break?
-    p0 = intersection(ab, [v0, v1]) as Point
-    p1 = intersection(ab, [v1, v2]) as Point
+      // can this break?
+      p0 = intersection(ab, [v0, v1]) as Point
+      p1 = intersection(ab, [v1, v2]) as Point
+    }
 
     lightness0()
     lightness1()
@@ -135,7 +140,7 @@ export const createInterpolator = (
     ]
 
     order.forEach(([sx, sy]) => {
-      if (sx >= 0 && sy >= 0 && sx < N && sy < N) {
+      if (sx >= 0 && sy >= 0 && sx < N * 2 && sy < N * 2) {
         const square = szudzik(sx / interval, sy / interval)
         const coords = colors.get(square)?.[color]
 
