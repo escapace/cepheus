@@ -1,23 +1,62 @@
 import { tile } from '@cepheus/utilities'
-import { TypeOptimizationState } from '../types'
+import { normalizeAngle } from 'cepheus'
+import { OptimizeTaskOptions, TypeOptimizationState } from '../types'
+import { hash } from '../utilities/hash'
+import { normalizeWeights } from '../utilities/normalize-weights'
 import { objectHash } from '../utilities/object-hash'
-import { createOptimizeTaskOptions } from './create-optimize-task-options'
+import { createSquareOptions } from './create-square-options'
 import { Store } from './create-store'
 
-export function actionCreateOptimizeTasks(store: Store, iteration: number) {
-  const squares = tile(store.options.interval)
+interface Options {
+  squares?: Map<
+    number,
+    Required<Pick<OptimizeTaskOptions, 'lightness' | 'chroma'>>
+  >
+  weights?: OptimizeTaskOptions['weights']
+  hueAngle?: number
+}
+
+export function actionCreateOptimizeTasks(
+  store: Store,
+  iteration: number,
+  options: Options = {}
+) {
+  const squares =
+    options.squares === undefined
+      ? tile(store.options.interval)
+      : Array.from(options.squares.keys())
 
   squares.forEach((square) => {
     store.indexSquare.set(square, new Map<number, string>())
   })
 
   squares.forEach((square) => {
-    const optimizeTaskOptions = createOptimizeTaskOptions(
-      square,
-      store.options.interval,
-      iteration,
-      store.options
-    )
+    const squareOptions =
+      options.squares === undefined
+        ? createSquareOptions(square, store.options.interval)
+        : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          options.squares.get(square)!
+
+    const optimizeTaskOptions: OptimizeTaskOptions = {
+      key: hash(square, store.options.interval, store.options.randomSeed),
+      randomSeed: hash(
+        iteration,
+        square,
+        store.options.interval,
+        store.options.randomSeed
+      ),
+      randomSource: store.options.randomSource,
+      colors: store.options.colors,
+      background: store.options.background,
+      colorSpace: store.options.colorSpace,
+      hyperparameters: store.options.hyperparameters,
+      weights:
+        options?.weights === undefined
+          ? store.options.weights
+          : normalizeWeights(options.weights),
+      hueAngle: normalizeAngle(options.hueAngle ?? store.options.hueAngle),
+      ...squareOptions
+    }
 
     // const options = taskOptionsFrom(square, iteration, storeOptions)
     // @ts-expect-error unable to type JSONType

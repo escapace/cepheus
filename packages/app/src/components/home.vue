@@ -20,7 +20,7 @@ ColorSpace.register(OKLCH)
 ColorSpace.register(P3)
 
 const model = parseModel(_model as ModelUnparsed)
-const levels = N / model.interval
+const levels = (N * 2) / model.interval
 const numColors = model.length
 const colors = range(0, numColors)
 
@@ -32,7 +32,7 @@ const cartesianProduct = <T>(...sets: T[][]) =>
   )
 
 const tile = (interval: number): number[] => {
-  const tuple = range(0, N, interval)
+  const tuple = range(0, N * 2, interval)
 
   return cartesianProduct([...tuple].reverse(), tuple).map((value): number =>
     toSquare(value as [number, number], interval)

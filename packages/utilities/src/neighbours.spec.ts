@@ -1,5 +1,5 @@
-import { assert } from 'chai'
 import { LENGTH as N } from 'cepheus'
+import { assert } from 'chai'
 import { neighbours } from './neighbours'
 import { toPosition } from './to-position'
 import { toSquare } from './to-square'
@@ -8,7 +8,7 @@ describe('./src/neighbours.spec.ts', () => {
   it('.', () => {
     const interval = N / 3
 
-    assert.deepEqual(
+    assert.deepStrictEqual(
       neighbours(toSquare([40, 40], interval), interval, false)
         .filter((value): value is number => value !== undefined)
         .map((square) => toPosition(square, N / 3)),
@@ -20,7 +20,7 @@ describe('./src/neighbours.spec.ts', () => {
       ]
     )
 
-    assert.deepEqual(
+    assert.deepStrictEqual(
       neighbours(toSquare([40, 40], interval), interval, true)
         .filter((value): value is number => value !== undefined)
         .map((square) => toPosition(square, N / 3)),
@@ -36,7 +36,7 @@ describe('./src/neighbours.spec.ts', () => {
       ]
     )
 
-    assert.deepEqual(
+    assert.deepStrictEqual(
       neighbours(toSquare([0, 0], interval), interval, false)
         .filter((value): value is number => value !== undefined)
         .map((square) => toPosition(square, N / 3)),
@@ -51,6 +51,8 @@ describe('./src/neighbours.spec.ts', () => {
         .filter((value): value is number => value !== undefined)
         .map((square) => toPosition(square, N / 3)),
       [
+        [80, 120],
+        [120, 80],
         [80, 40],
         [40, 80]
       ]

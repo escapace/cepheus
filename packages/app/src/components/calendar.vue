@@ -77,7 +77,7 @@ const createEvents = (): Data['events'] => {
     )
 
     const borderColor = cassiopeia.add(
-      `---hue-${bc}-${random(900, 1023)}-${random(900, 100)}--15-099`
+      `---hue-${bc}-${random(900, 1023)}-${random(1000, 1023)}--20-099`
     )
 
     return {
@@ -130,7 +130,7 @@ onBeforeUpdate(() => {
 })
 
 update()
-const { pause, resume } = useTimeoutPoll(update, 1000)
+const { pause, resume } = useTimeoutPoll(update, 30 * 1000)
 
 // cassiopeia.update(false)
 cassiopeia.update(false)
@@ -153,12 +153,14 @@ onMounted(() => {
   pane.addInput(state, 'chroma', { min: 0, max: 1, step: 0.01 })
   pane.addInput(state, 'darkMode')
 
+  const MAX = 0.3
+
   pane.on('change', (event) => {
     // console.log('here', event.presetKey === 'darkMode', (!state.darkMode && state.lightness >= 0.7), !state.darkMode, state.lightness)
     if (
       event.presetKey === 'darkMode' &&
-      ((!state.darkMode && state.lightness <= 0.3) ||
-        (state.darkMode && state.lightness >= 0.7))
+      ((!state.darkMode && state.lightness <= MAX) ||
+        (state.darkMode && state.lightness >= 1 - MAX))
     ) {
       state.lightness = 1 - state.lightness
       pane.refresh()
@@ -166,12 +168,10 @@ onMounted(() => {
 
     interpolator.updateChroma(undefined, state.chroma)
 
-    const max = 0.3
-
     if (state.darkMode) {
-      interpolator.updateLightness(lerp(0, max, state.lightness), 1)
+      interpolator.updateLightness(lerp(0, MAX, state.lightness), 1)
     } else {
-      interpolator.updateLightness(0, lerp(1 - max, 1, state.lightness))
+      interpolator.updateLightness(0, lerp(1 - MAX, 1, state.lightness))
     }
 
     interpolator.updateDarkMode(state.darkMode)

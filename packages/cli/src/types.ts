@@ -16,9 +16,7 @@ export enum TypeCepheusState {
   Done,
   Error,
   Optimization,
-  OptimizationDone,
-  TriangleFitting,
-  TriangleFittingDone
+  OptimizationDone
 }
 
 export interface CepheusStateOptimization {
@@ -31,14 +29,6 @@ export interface CepheusStateOptimizationDone {
 
 export interface CepheusStateAbort {
   type: TypeCepheusState.Abort
-}
-
-export interface CepheusStateTriangleFitting {
-  type: TypeCepheusState.TriangleFitting
-}
-
-export interface CepheusStateTriangleFittingDone {
-  type: TypeCepheusState.TriangleFittingDone
 }
 
 export interface CepheusStateDone {
@@ -56,14 +46,19 @@ export type CepheusState =
   | CepheusStateError
   | CepheusStateOptimization
   | CepheusStateOptimizationDone
-  | CepheusStateTriangleFitting
-  | CepheusStateTriangleFittingDone
 
 export interface StoreOptions
   extends Omit<
     OptimizeOptions,
-    'colors' | 'background' | 'lightness' | 'chroma' | 'colorSpace' | 'weights'
+    | 'colors'
+    | 'background'
+    | 'lightness'
+    | 'chroma'
+    | 'colorSpace'
+    | 'weights'
+    | 'hueAngle'
   > {
+  hueAngle?: OptimizeOptions['hueAngle']
   weights?: OptimizeOptions['weights']
   colorSpace?: 'p3' | 'srgb'
   colors: Array<Color[] | string[]>
@@ -75,8 +70,9 @@ export interface StoreOptions
 export interface RequiredStoreOptions
   extends Omit<
     StoreOptions,
-    'colors' | 'background' | 'levels' | 'colorSpace' | 'weights'
+    'colors' | 'background' | 'levels' | 'colorSpace' | 'weights' | 'hueAngle'
   > {
+  hueAngle: OptimizeOptions['hueAngle']
   weights: OptimizeOptions['weights']
   colorSpace: ColorSpaceId
   colors: Array<Array<[number, number, number]>>
@@ -100,7 +96,7 @@ export interface OptimizeOptions {
     coolingRate: number
     cutoff: number
   }
-  hueAngle?: number
+  hueAngle: number
   weights: {
     chroma: number
     contrast: number
@@ -174,17 +170,3 @@ export type OptimizationState =
   | OptimizationStateFulfilled
   | OptimizationStateRejected
   | OptimizationStatePending
-
-export type Point = [number, number]
-export type Triangle = [Point, Point, Point]
-export type TriangleTaskResult = undefined | [triangle: Triangle, area: number]
-
-export interface TriangleTaskOptions {
-  triangles: Triangle[]
-  pixels: number[]
-}
-
-export interface TriangleOptions {
-  factors: [Point[], Point[], Point[]]
-  pixels: number[]
-}
