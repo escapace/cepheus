@@ -9,16 +9,18 @@ import {
   sRGB
 } from '@cepheus/color'
 import { setMaxListeners } from 'events'
-import { assign, difference, isError, map, omit, range } from 'lodash-es'
+import { assign, isError, map, omit, range } from 'lodash-es'
 import Tinypool from 'tinypool'
 import { actionCreateOptimizeTasks } from './store/action-create-optimize-tasks'
 import { actionUpdateOptimizeTask } from './store/action-update-optimize-task'
 import { actionUpdateStage } from './store/action-update-stage'
 import { createStore } from './store/create-store'
 import { selectorOptimizeTasksPending } from './store/selector-optimize-tasks'
-import { selectorSquares } from './store/selector-squares'
+import {
+  selectorRemainingSquares,
+  selectorSquares
+} from './store/selector-squares'
 import { selectorState } from './store/selector-state'
-import { selectorTriangle } from './store/selector-triangle'
 import {
   CepheusState,
   OptimizationState,
@@ -65,71 +67,69 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
   const abortController = new AbortController()
   setMaxListeners(0, abortController.signal)
 
+  const runTasks = async () => {
+    const tasks = selectorOptimizeTasksPending(store)
+
+    await Promise.all(
+      map(Object.entries(tasks), async ([key, task]) => {
+        const options: OptimizeOptions = omit(task.options, ['key'])
+
+        const state = (await pool.run(options, {
+          name: 'optimize',
+          signal: abortController.signal
+        })) as OptimizationState
+
+        await actionUpdateOptimizeTask(store, key, state)
+      })
+    )
+  }
+
   const promise = actionUpdateStage(store, {
     type: TypeCepheusState.Optimization
   })
     .then(async () => {
       for (const iteration of range(store.options.iterations)) {
         actionCreateOptimizeTasks(store, iteration)
-
-        const tasks = selectorOptimizeTasksPending(store)
-
-        await Promise.all(
-          map(Object.entries(tasks), async ([key, task]) => {
-            const options: OptimizeOptions = omit(task.options, ['key'])
-
-            const state = (await pool.run(options, {
-              name: 'optimize',
-              signal: abortController.signal
-            })) as OptimizationState
-
-            await actionUpdateOptimizeTask(store, key, state)
-          })
-        )
       }
+
+      await runTasks()
 
       if (Array.from(selectorSquares(store)).length === 0) {
         throw new Error('No squares available.')
       }
 
-      const { squares } = selectorTriangle(store)
+      const attempt = async (bias: number) => {
+        const squares = selectorRemainingSquares(store)
 
-      for (const iteration of range(Math.max(store.options.iterations, 4))) {
-        actionCreateOptimizeTasks(store, iteration, {
-          squares,
-          hueAngle: store.options.hueAngle * 1.5,
-          weights: {
-            ...store.options.weights,
-            lightness: store.options.weights.lightness * 2,
-            chroma: store.options.weights.chroma * 2,
-            hue: store.options.weights.hue * 2
+        if (squares.size !== 0) {
+          for (const iteration of range(store.options.iterations)) {
+            actionCreateOptimizeTasks(store, iteration, {
+              squares,
+              hueAngle: store.options.hueAngle * bias,
+              weights: {
+                ...store.options.weights,
+                lightness: store.options.weights.lightness * bias,
+                chroma: store.options.weights.chroma * bias,
+                hue: store.options.weights.hue * bias
+              }
+            })
           }
-        })
 
-        const tasks = selectorOptimizeTasksPending(store)
-
-        await Promise.all(
-          map(Object.entries(tasks), async ([key, task]) => {
-            const options: OptimizeOptions = omit(task.options, ['key'])
-
-            const state = (await pool.run(options, {
-              name: 'optimize',
-              signal: abortController.signal
-            })) as OptimizationState
-
-            await actionUpdateOptimizeTask(store, key, state)
-          })
-        )
+          await runTasks()
+        }
       }
 
-      const missing = difference(
-        Array.from(squares.keys()),
-        Array.from(selectorSquares(store).keys())
-      )
+      for (const bias of [1.5, 1.8, 2.4]) {
+        await attempt(bias)
+      }
 
-      if (missing.length !== 0) {
+      const missing = selectorRemainingSquares(store)
+
+      if (missing.size !== 0) {
         throw new Error(
-          `Unable to fit triangle, squares ${missing.join(', ')} missing.`
+          `Unable to fit triangle, squares ${Array.from(missing.keys()).join(
+            ', '
+          )} missing.`
         )
       }
 
