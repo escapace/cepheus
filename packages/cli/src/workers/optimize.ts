@@ -30,7 +30,6 @@ import {
 } from '../types'
 import { createPRNG } from '../utilities/create-prng'
 import { isWithin } from '../utilities/is-within'
-import { lightnessScalingFunction } from '../utilities/lightness-scaling-function'
 import { percentile } from '../utilities/percentile'
 import { randomWithin } from '../utilities/random-within'
 import { relativeDifference } from '../utilities/relative-difference'
@@ -365,11 +364,8 @@ const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
 const normalizeLightness = (
   value: Required<Exclude<OptimizeOptions['lightness'], undefined>>
 ): Required<Exclude<OptimizeOptions['lightness'], undefined>> => ({
-  range: map(value.range, (value) => lightnessScalingFunction(value)) as [
-    number,
-    number
-  ],
-  target: lightnessScalingFunction(value.target)
+  range: map(value.range, (value) => value / N) as [number, number],
+  target: value.target / N
 })
 
 const normalizeChroma = (

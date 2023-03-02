@@ -294,7 +294,7 @@ $calendar-template: $time-width 0.625rem repeat(7, 1fr);
 $current-time-color: var(---color-3-1023-1023);
 $grid-color: var(---color-2-0-900);
 $background-weekday: var(---color-1-20-1020);
-$background-weekend: var(---color-1-65-1000);
+$background-weekend: var(---color-1-75-1000);
 
 $header-color: var(---color-1-25-900);
 $subheader-color: var(---color-1-20-900);
