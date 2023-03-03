@@ -53,9 +53,12 @@ export function createStoreOptions(
       ? DEFAULT_HUE_ANGLE
       : normalizeAngle(options.hueAngle)
 
+  const precision = options.precision ?? 5
+
   return {
     ...omit(options, ['levels']),
     hueAngle,
+    precision,
     weights: DEFAULT_WEIGHTS,
     colorSpace,
     background,

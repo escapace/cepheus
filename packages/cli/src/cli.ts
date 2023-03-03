@@ -38,6 +38,8 @@ ${chalk.bold('Options:')}
   --iterations    Number of iterations. [default: ${DEFAULT_ITERATIONS}]
   --save          Save session to file.
   --restore       Restore session from file.
+  --precision     Number of significant digits to round to.
+
   -v, --version   Show version.
   -h, --help      Displays this message.
 
@@ -62,6 +64,7 @@ const run = async () => {
       '--restore': String,
       '--help': Boolean,
       '--version': Boolean,
+      '--precision': Number,
       '-v': '--version',
       '-h': '--help'
     },
@@ -95,6 +98,7 @@ const run = async () => {
   const iterations = args['--iterations']
   const output = args['--output']
   const hueAngle = args['--hue-angle']
+  const precision = args['--precision']
 
   // required
 
@@ -157,6 +161,17 @@ const run = async () => {
     process.exit(1)
   }
 
+  if (
+    precision !== undefined &&
+    !(isInteger(precision) && precision >= 2 && precision <= 10)
+  ) {
+    console.log(HELP)
+    console.error(
+      `Option '--precision' must be an integer greater or equal to 2, and smaller or equal to 10.`
+    )
+    process.exit(1)
+  }
+
   if (args._.length !== 0) {
     console.log(HELP)
     process.exit(1)
@@ -178,6 +193,7 @@ const run = async () => {
     colors: map(colors, (colors) =>
       colors.split(',').map((value) => value.trim())
     ),
+    precision,
     initialState,
     levels,
     randomSeed,
