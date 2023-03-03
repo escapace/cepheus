@@ -5,7 +5,7 @@ import { Store } from './create-store'
 import { selectorSquares } from './selector-squares'
 import { selectorTriangle } from './selector-triangle'
 
-export const selectorModel = (store: Store, precision = 8): ModelUnparsed => {
+export const selectorModel = (store: Store): ModelUnparsed => {
   const values = new Map(
     Array.from(selectorSquares(store, store.allIterations).entries()).map(
       ([square, task]): [number, Array<[number, number, number]>] => {
@@ -14,11 +14,9 @@ export const selectorModel = (store: Store, precision = 8): ModelUnparsed => {
           map(
             task.state.colors,
             (value) =>
-              map(value, (value) => toPrecision(value, precision)) as [
-                number,
-                number,
-                number
-              ]
+              map(value, (value) =>
+                toPrecision(value, store.options.precision)
+              ) as [number, number, number]
           )
         ]
       }
@@ -38,7 +36,7 @@ export const selectorModel = (store: Store, precision = 8): ModelUnparsed => {
 
   const triangle = selectorTriangle(store)
     .triangle.flat()
-    .map((value) => toPrecision(value, precision)) as [
+    .map((value) => toPrecision(value, store.options.precision)) as [
     number,
     number,
     number,

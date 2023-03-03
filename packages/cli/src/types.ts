@@ -58,6 +58,7 @@ export interface StoreOptions
     | 'weights'
     | 'hueAngle'
   > {
+  precision?: number
   hueAngle?: OptimizeOptions['hueAngle']
   weights?: OptimizeOptions['weights']
   colorSpace?: 'p3' | 'srgb'
@@ -70,8 +71,15 @@ export interface StoreOptions
 export interface RequiredStoreOptions
   extends Omit<
     StoreOptions,
-    'colors' | 'background' | 'levels' | 'colorSpace' | 'weights' | 'hueAngle'
+    | 'colors'
+    | 'background'
+    | 'levels'
+    | 'colorSpace'
+    | 'weights'
+    | 'hueAngle'
+    | 'precision'
   > {
+  precision: number
   hueAngle: OptimizeOptions['hueAngle']
   weights: OptimizeOptions['weights']
   colorSpace: ColorSpaceId
