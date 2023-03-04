@@ -16,15 +16,15 @@
     "cassiopeia": "4.0.0",
     "cepheus": "workspace:*",
     "lodash-es": "4.17.21",
-    "tweakpane": "3.1.4"
+    "tweakpane": "3.1.6"
   },
   "devDependencies": {
     "@escapace/unocss-preset-escapace": "0.1.1",
-    "@tweakpane/core": "1.1.4",
+    "@tweakpane/core": "1.1.5",
     "@types/lodash-es": "4.17.6",
     "@typescript-eslint/eslint-plugin": "5.54.0",
     "@typescript-eslint/parser": "5.54.0",
-    "@unocss/reset": "0.50.1",
+    "@unocss/reset": "0.50.3",
     "@vitejs/plugin-vue": "4.0.0",
     "@vueuse/core": "9.13.0",
     "eslint": "8.35.0",
@@ -38,7 +38,7 @@
     "prettier-config-escapace": "1.0.4",
     "sass": "1.58.3",
     "typescript": "4.9.5",
-    "unocss": "0.50.1",
+    "unocss": "0.50.3",
     "vite": "4.1.4",
     "vue": "3.2.47",
     "vue-router": "4",
