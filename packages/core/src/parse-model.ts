@@ -1,39 +1,55 @@
-import { chunk } from './chunk'
-import { ColorSpace, ModelParsed, ModelUnparsed, Triangle } from './types'
+import { ColorSpace, Model, ModelUnparsed, Point, Triangle } from './types'
+import { chunk } from './utilities/chunk'
 
-export const parseModel = (model: unknown): ModelParsed => {
+function assert(condition: unknown, msg?: string): asserts condition {
+  if (condition === false) throw new Error(msg)
+}
+
+export const parseModel = (model: unknown): Model => {
   if (!Array.isArray(model)) {
-    return model as ModelParsed
+    // TODO: isModel
+    return model as Model
   }
 
-  const [_space, interval, length, _triangle, squares, data] =
+  assert(model.length === 6)
+
+  const [colorSpaceIndex, interval, length, triangleFlat, squares, data] =
     model as ModelUnparsed
+
+  assert(typeof colorSpaceIndex === 'number')
+  assert(colorSpaceIndex === 1 || colorSpaceIndex === 2)
+  assert(typeof interval === 'number')
+  assert(typeof length === 'number')
+  assert(Array.isArray(triangleFlat))
+  assert(triangleFlat.length === 6)
+  assert(Array.isArray(squares))
+  assert(Array.isArray(data))
+
+  const triangle: Triangle = [
+    triangleFlat.slice(0, 2) as Point,
+    triangleFlat.slice(2, 4) as Point,
+    triangleFlat.slice(4, 6) as Point
+  ]
+
   const step = length * 3
-  const triangle = [
-    _triangle.slice(0, 2),
-    _triangle.slice(2, 4),
-    _triangle.slice(4, 6)
-  ] as Triangle
 
   const colors = new Map(
-    squares.map((square, index) => {
-      return [
-        square,
-        chunk(data.slice(index * step, (index + 1) * step)) as Array<
-          [number, number, number]
-        >
-      ]
-    })
+    squares.map((square, index) => [
+      square,
+      chunk(data.slice(index * step, (index + 1) * step)) as Array<
+        [number, number, number]
+      >
+    ])
   )
 
-  const colorSpace = _space === 1 ? ColorSpace.p3 : ColorSpace.srgb
+  const colorSpace = colorSpaceIndex === 1 ? ColorSpace.p3 : ColorSpace.srgb
 
-  return {
+  return Object.freeze({
     colorSpace,
     colors,
     interval,
     length,
     squares,
     triangle
-  }
+  })
 }

@@ -1,6 +1,6 @@
 import { ColorSpace, LCH, OKLCH, P3, sRGB } from '@cepheus/color'
 import type { Iterator, Plugin } from 'cassiopeia'
-import { type Interpolator } from 'cepheus'
+import { subscribe, type Interpolator } from 'cepheus'
 import { createIterator } from './create-iterator'
 import { permutations } from './permutations'
 import { Options, OptionsParsed } from './types'
@@ -104,7 +104,7 @@ export const createCepheusPlugin = (
   return {
     options: opts,
     plugin: (iterators: Map<string, () => Iterator>, update) => {
-      interpolator.subscribe(update)
+      subscribe(interpolator, update)
 
       iterators.set('color', () => iteratorColor(interpolator))
       iterators.set('hue', () => iteratorHue(interpolator))

@@ -9,10 +9,14 @@ import {
 } from '@cepheus/color'
 import type { Iterator } from 'cassiopeia'
 import { StyleSheetPartial } from 'cassiopeia/lib/types/types'
-import { normalizeAngle, type Interpolator } from 'cepheus'
+import {
+  color as c,
+  darkMode,
+  normalizeAngle,
+  type Interpolator
+} from 'cepheus'
 import { parseAlpha } from './parse-alpha'
 import { Flags, OptionsParsed } from './types'
-
 const HUE_REGEX = /^([0-9]+)-([0-9]+)-([0-9]+)-(-?[0-9]+)(-([0-1]|0[0-9]+))?$/i
 const COLOR_REGEX = /^([0-9]+)-([0-9]+)-([0-9]+)(-([0-1]|0[0-9]+))?$/i
 
@@ -84,7 +88,7 @@ export const createIterator = (
 
     const mode =
       flags.colorScheme === 'none' ||
-      (flags.colorScheme === 'dark') === interpolator.darkMode()
+      (flags.colorScheme === 'dark') === darkMode(interpolator)
 
     let cursor: true | string
 
@@ -100,7 +104,8 @@ export const createIterator = (
         .slice(2, 4)
         .map((value) => parseInt(value, 10)) as [number, number]
 
-      const coords = interpolator.get(
+      const coords = c(
+        interpolator,
         colorN,
         chroma,
         lightness,

@@ -3,6 +3,7 @@
 import { ColorSpace, convert, LCH, OKLCH, P3, sRGB } from '@cepheus/color'
 import { onMounted } from 'vue'
 import {
+  barycentric,
   createInterpolator,
   parseModel,
   type ModelUnparsed,
@@ -53,7 +54,7 @@ onMounted(() => {
   )
 
   const interpolator = (alpha: number, beta: number, gamma: number) => {
-    const coords = instance.barycentric(0, alpha, beta, gamma)
+    const coords = barycentric(instance, 0, alpha, beta, gamma)
 
     if (coords === undefined) {
       return [255, 255, 255]

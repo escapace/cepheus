@@ -1,16 +1,20 @@
 <script setup lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
+  INTERPOLATOR,
   createInterpolator,
   parseModel,
+  chroma as setChroma,
+  lightness as setLightness,
   type ModelUnparsed,
   type Point,
-  type Triangle
+  type Triangle,
+  barycentric
 } from 'cepheus'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, reactive, watch } from 'vue'
 import _model from '../models/model.json'
-import slider from './slider.vue'
 import { ColorSpace, convert, LCH, OKLCH, P3, sRGB } from '@cepheus/color'
+import { Pane } from 'tweakpane'
 
 ColorSpace.register(LCH)
 ColorSpace.register(sRGB)
@@ -43,7 +47,6 @@ function cross(a: Point, b: Point, c: Point) {
 //     ((b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1]))
 //   return [l0, l1, 1.0 - l0 - l1]
 // }
-//
 
 // const barycentricToCartesian = (
 //   t: Triangle,
@@ -117,10 +120,23 @@ function cross(a: Point, b: Point, c: Point) {
 //   }
 // }
 
-const lightness = ref()
-const chroma = ref()
-
 onMounted(() => {
+  const pane = new Pane()
+
+  const state = reactive({
+    lightness0: 0,
+    lightness1: 1,
+    chroma0: 0,
+    chroma1: 1,
+    darkMode: false
+  })
+
+  pane.addInput(state, 'lightness0', { min: 0, max: 1, step: 0.01 })
+  pane.addInput(state, 'lightness1', { min: 0, max: 1, step: 0.01 })
+
+  pane.addInput(state, 'chroma0', { min: 0, max: 1, step: 0.01 })
+  pane.addInput(state, 'chroma1', { min: 0, max: 1, step: 0.01 })
+
   const canvas = document.querySelector('canvas')!
 
   let context: CanvasRenderingContext2D | undefined
@@ -144,7 +160,7 @@ onMounted(() => {
   }
 
   const interpolator = (alpha: number, beta: number, gamma: number) => {
-    const coords = instance.barycentric(alpha, beta, gamma, 0)
+    const coords = barycentric(instance, 0, alpha, beta, gamma)
 
     if (coords === undefined) {
       return [255, 255, 255]
@@ -198,7 +214,7 @@ onMounted(() => {
         const w1 = cross(v2, v0, p) / area
         const w2 = cross(v0, v1, p) / area
 
-        // const [w0, w1, w2] = cartesianToBarycentric({ x, y }, v0, v1, v2)
+        // const [w0, w1, w2] = cartesianToBarycentric(p, v0, v1, v2)
 
         if (Math.max(w0, Math.max(w1, w2)) > 1.0) {
           continue
@@ -230,10 +246,8 @@ onMounted(() => {
     }
   }
 
-  const toX = (x: number) =>
-    Math.floor((x / 100) * canvas.width * 0.5) + canvas.width * 0.25
-  const toY = (y: number) =>
-    Math.floor((y / 100) * canvas.height * 0.5) + canvas.height * 0.25
+  const toX = (x: number) => Math.floor((x / 240) * canvas.width)
+  const toY = (y: number) => Math.floor((y / 240) * canvas.height)
 
   const strokeTriangle = (triangle: Triangle) => {
     context!.lineWidth = 2
@@ -246,46 +260,42 @@ onMounted(() => {
     context!.stroke()
   }
 
-  watch(
-    [lightness.value.range(), chroma.value.range()],
-    ([lightness, chroma]) => {
-      const img = context!.createImageData(
-        context!.canvas.width,
-        context!.canvas.height,
-        { colorSpace: supportsDisplayP3 ? 'display-p3' : 'srgb' }
-      )
-      instance.updateChroma(0, 1)
-      instance.updateLightness(0, 1)
-      context!.clearRect(0, 0, canvas.width, canvas.height)
+  watch(state, (state) => {
+    const img = context!.createImageData(
+      context!.canvas.width,
+      context!.canvas.height,
+      { colorSpace: supportsDisplayP3 ? 'display-p3' : 'srgb' }
+    )
+    // setChroma(instance, 0, 1)
+    // setLightness(instance, 0, 1)
+    context!.clearRect(0, 0, canvas.width, canvas.height)
 
-      const modelTriangle = model.triangle.map(([x, y]) => [
-        toX(x),
-        toY(y)
-      ]) as Triangle
+    const modelTriangle = model.triangle.map(([x, y]) => [
+      toX(x),
+      toY(y)
+    ]) as Triangle
 
-      fillTriangle(img, modelTriangle)
+    // fillTriangle(img, modelTriangle)
 
-      instance.updateChroma(chroma)
-      instance.updateLightness(lightness)
+    setChroma(instance, state.chroma0, state.chroma1)
+    setLightness(instance, state.lightness0, state.lightness1)
 
-      const triangle = instance
-        .triangle()
-        .map(([x, y]) => [toX(x), toY(y)]) as Triangle
+    const triangle = instance[INTERPOLATOR].triangle.map(([x, y]) => [
+      toX(x),
+      toY(y)
+    ]) as Triangle
 
-      fillTriangle(img, triangle)
+    fillTriangle(img, triangle)
 
-      context!.putImageData(img, 0, 0)
-      strokeTriangle(modelTriangle)
-      strokeTriangle(triangle)
-    }
-  )
+    context!.putImageData(img, 0, 0)
+    strokeTriangle(modelTriangle)
+    strokeTriangle(triangle)
+  })
 })
 </script>
 
 <template>
   <div>
-    <slider ref="lightness"></slider>
-    <slider ref="chroma"></slider>
     <div class="box">
       <canvas id="canvas" width="1024" height="1024"></canvas>
     </div>

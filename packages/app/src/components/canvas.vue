@@ -3,7 +3,12 @@
 import { ColorSpace, convert, LCH, OKLCH, P3, sRGB } from '@cepheus/color'
 import { onMounted } from 'vue'
 import _model from '../models/model.json'
-import { createInterpolator, parseModel, type ModelUnparsed } from 'cepheus'
+import {
+  cartesian,
+  createInterpolator,
+  parseModel,
+  type ModelUnparsed
+} from 'cepheus'
 
 ColorSpace.register(LCH)
 ColorSpace.register(sRGB)
@@ -43,7 +48,7 @@ onMounted(() => {
   )
 
   const interpolator = (x: number, y: number) => {
-    const coords = instance.cartesian(0, x, y, true)
+    const coords = cartesian(instance, 0, x, y, true)
 
     if (coords === undefined) {
       return [255, 255, 255]

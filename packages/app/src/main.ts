@@ -9,7 +9,7 @@ import Canvas from './components/canvas.vue'
 import HomeA from './components/home.vue'
 import HomeB from './components/home2.vue'
 import Triangle from './components/triangle.vue'
-// import Constraint from './components/constraint.vue'
+import Constraint from './components/constraint.vue'
 import Calendar from './components/calendar.vue'
 
 import '@unocss/reset/normalize.css'
@@ -38,8 +38,8 @@ const router = createRouter({
     { path: '/blocks', component: HomeA },
     { path: '/c', component: HomeB },
     { path: '/d', component: Canvas },
-    { path: '/e', component: Triangle }
-    // { path: '/f', component: Constraint }
+    { path: '/e', component: Triangle },
+    { path: '/f', component: Constraint }
   ]
 })
 
