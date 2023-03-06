@@ -110,7 +110,7 @@ importers:
       '@escapace/minimum-perimeter-triangle': 0.1.0
       '@js-temporal/polyfill': 0.4.3
       cassiopeia: 4.0.0
-      cepheus: link:../core
+      cepheus: link:../cepheus
       lodash-es: 4.17.21
       tweakpane: 3.1.4
     devDependencies:
@@ -138,6 +138,42 @@ importers:
       vue: 3.2.47
       vue-router: 4.1.6_vue@3.2.47
       vue-tsc: 1.2.0_typescript@4.9.5
+
+  packages/cepheus:
+    specifiers:
+      '@types/chai': 4.3.4
+      '@types/mocha': 10.0.1
+      '@types/node': 18.14.2
+      '@typescript-eslint/eslint-plugin': 5.54.0
+      '@typescript-eslint/parser': 5.54.0
+      c8: 7.13.0
+      chai: 4.3.7
+      eslint: 8.35.0
+      eslint-config-escapace: 3.16.1
+      eslint-config-prettier: 8.6.0
+      eslint-plugin-editorconfig: 4.0.2
+      eslint-plugin-no-null: 1.0.2
+      mocha: 10.2.0
+      prettier: 2.8.4
+      prettier-config-escapace: 1.0.4
+      typescript: 4.9.5
+    devDependencies:
+      '@types/chai': 4.3.4
+      '@types/mocha': 10.0.1
+      '@types/node': 18.14.2
+      '@typescript-eslint/eslint-plugin': 5.54.0_6mj2wypvdnknez7kws2nfdgupi
+      '@typescript-eslint/parser': 5.54.0_ycpbpc6yetojsgtrx3mwntkhsu
+      c8: 7.13.0
+      chai: 4.3.7
+      eslint: 8.35.0
+      eslint-config-escapace: 3.16.1_kajfotsg537uk3c4ulyn7jhrme
+      eslint-config-prettier: 8.6.0_eslint@8.35.0
+      eslint-plugin-editorconfig: 4.0.2
+      eslint-plugin-no-null: 1.0.2_eslint@8.35.0
+      mocha: 10.2.0
+      prettier: 2.8.4
+      prettier-config-escapace: 1.0.4
+      typescript: 4.9.5
 
   packages/cli:
     specifiers:
@@ -187,7 +223,7 @@ importers:
       arg: 5.0.2
       big-cartesian: 4.7.0
       bignumber.js: 9.1.1
-      cepheus: link:../core
+      cepheus: link:../cepheus
       chalk: 5.2.0
       emittery: 1.0.1
       lodash-es: 4.17.21
@@ -243,42 +279,6 @@ importers:
       prettier-config-escapace: 1.0.4
       typescript: 4.9.5
 
-  packages/core:
-    specifiers:
-      '@types/chai': 4.3.4
-      '@types/mocha': 10.0.1
-      '@types/node': 18.14.2
-      '@typescript-eslint/eslint-plugin': 5.54.0
-      '@typescript-eslint/parser': 5.54.0
-      c8: 7.13.0
-      chai: 4.3.7
-      eslint: 8.35.0
-      eslint-config-escapace: 3.16.1
-      eslint-config-prettier: 8.6.0
-      eslint-plugin-editorconfig: 4.0.2
-      eslint-plugin-no-null: 1.0.2
-      mocha: 10.2.0
-      prettier: 2.8.4
-      prettier-config-escapace: 1.0.4
-      typescript: 4.9.5
-    devDependencies:
-      '@types/chai': 4.3.4
-      '@types/mocha': 10.0.1
-      '@types/node': 18.14.2
-      '@typescript-eslint/eslint-plugin': 5.54.0_6mj2wypvdnknez7kws2nfdgupi
-      '@typescript-eslint/parser': 5.54.0_ycpbpc6yetojsgtrx3mwntkhsu
-      c8: 7.13.0
-      chai: 4.3.7
-      eslint: 8.35.0
-      eslint-config-escapace: 3.16.1_kajfotsg537uk3c4ulyn7jhrme
-      eslint-config-prettier: 8.6.0_eslint@8.35.0
-      eslint-plugin-editorconfig: 4.0.2
-      eslint-plugin-no-null: 1.0.2_eslint@8.35.0
-      mocha: 10.2.0
-      prettier: 2.8.4
-      prettier-config-escapace: 1.0.4
-      typescript: 4.9.5
-
   packages/plugin:
     specifiers:
       '@cepheus/color': workspace:*
@@ -303,7 +303,7 @@ importers:
       typescript: 4.9.5
     dependencies:
       '@cepheus/color': link:../color
-      cepheus: link:../core
+      cepheus: link:../cepheus
     devDependencies:
       '@types/chai': 4.3.4
       '@types/lodash-es': 4.17.6
@@ -346,7 +346,7 @@ importers:
       prettier-config-escapace: 1.0.4
       typescript: 4.9.5
     dependencies:
-      cepheus: link:../core
+      cepheus: link:../cepheus
       lodash-es: 4.17.21
     devDependencies:
       '@types/chai': 4.3.4
@@ -392,7 +392,7 @@ importers:
       vue: 3.2.47
     dependencies:
       '@cepheus/plugin': link:../plugin
-      cepheus: link:../core
+      cepheus: link:../cepheus
     devDependencies:
       '@types/chai': 4.3.4
       '@types/lodash-es': 4.17.6
