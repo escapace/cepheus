@@ -1,6 +1,6 @@
 import { normalizeAngle } from './normalize-angle'
 
-export const adjustAngle = (a: number, b: number) => {
+export const adjustAngle = (a: number, b: number): [number, number] => {
   let a1 = normalizeAngle(a)
   let a2 = normalizeAngle(b)
 

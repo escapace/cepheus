@@ -1,14 +1,15 @@
-export { LENGTH } from './constants'
+export { barycentric } from './barycentric'
+export { cartesian } from './cartesian'
+export { color } from './color'
+export { INTERPOLATOR, LENGTH } from './constants'
 export { createInterpolator } from './create-interpolator'
-export { lerp } from './lerp'
-export { normalize } from './normalize'
-export { normalizeAngle } from './normalize-angle'
 export { parseModel } from './parse-model'
-export { szudzik } from './szudzik'
+export { chroma, darkMode, lightness } from './setters'
+export { subscribe } from './subscribe'
 export { ColorSpace } from './types'
 export type {
   Interpolator,
-  ModelParsed,
+  Model,
   ModelUnparsed,
   Point,
   State,
@@ -16,4 +17,10 @@ export type {
   Triangle,
   Unsubscribe
 } from './types'
-export { xor } from './xor'
+export { lerp } from './utilities/lerp'
+export { lerpAngle } from './utilities/lerp-angle'
+export { lerpArray } from './utilities/lerp-array'
+export { normalize } from './utilities/normalize'
+export { normalizeAngle } from './utilities/normalize-angle'
+export { szudzik } from './utilities/szudzik'
+export { xor } from './utilities/xor'

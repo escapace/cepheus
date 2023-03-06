@@ -1,63 +1,57 @@
-import { adjustAngle } from './adjust-angle'
-import { LENGTH as N } from './constants'
-import { distance } from './distance'
-import { erfc } from './erfc'
-import { intersection } from './intersection'
-import { lerp } from './lerp'
-import { lerpArray } from './lerp-array'
-import { normalize } from './normalize'
+import { INTERPOLATOR } from './constants'
 import { parseModel } from './parse-model'
-import { szudzik } from './szudzik'
-import type {
+import {
   Interpolator,
   Line,
   Point,
   State,
   Subscription,
-  Unsubscribe
+  Triangle
 } from './types'
-import { xor } from './xor'
+import { intersection } from './utilities/intersection'
+import { lerpArray } from './utilities/lerp-array'
 
-// Two characters in 32 radix
-const MAX = 1024 - 1
+const notify = (subscriptions: Set<Subscription>) => {
+  for (const subscription of subscriptions) {
+    subscription()
+  }
+}
 
-// const MAX = 512
-// const MAX = 1024 - 1
-//
 export const createInterpolator = (
-  model: unknown,
-  initialState?: State
+  value: unknown,
+  initialSate?: Partial<State>
 ): Interpolator => {
-  const { interval, colors, triangle } = parseModel(model)
+  const triangle = [] as unknown as Triangle
+  const subscriptions = new Set<Subscription>()
 
-  const [v0, v1, v2] = triangle
-  const x0 = intersection([v0, v2], [v1, [v1[0], 0]]) as Point
+  const model = parseModel(value)
 
-  const state: State = initialState ?? {
+  const state: State = {
     lightness: [0, 1],
     chroma: [0, 1],
-    darkMode: false
+    darkMode: false,
+    ...initialSate
   }
+
+  const [v0, v1, v2] = model.triangle
+  const x0 = intersection([v0, v2], [v1, [v1[0], 0]]) as Point
 
   let p0: Point
   let p1: Point
-  let t0: Point
-  let t1: Point
-  let t2: Point
 
   const lightness1 = () => {
-    t2 = lerpArray(p0, p1, state.lightness[1]) as Point
+    triangle[2] = lerpArray(p0, p1, state.lightness[1]) as Point
   }
 
   const lightness0 = () => {
-    t0 = lerpArray(p1, p0, 1 - state.lightness[0]) as Point
+    triangle[0] = lerpArray(p1, p0, 1 - state.lightness[0]) as Point
   }
 
   const chroma1 = () => {
-    t1 = lerpArray(x0, v1, state.chroma[1]) as Point
+    triangle[1] = lerpArray(x0, v1, state.chroma[1]) as Point
   }
 
-  const chroma0 = (): void => {
+  const chroma0 = () => {
     const x1 = lerpArray(x0, v1, state.chroma[0]) as Point
 
     const delta = x1[1] - x0[1]
@@ -79,196 +73,66 @@ export const createInterpolator = (
     lightness1()
   }
 
-  const toWeight = (x: number, y: number, sx: number, sy: number) =>
-    erfc(distance(x, y, sx + interval / 2, sy + interval / 2) / interval)
-
-  const cartesian = (
-    color: number,
-    x: number,
-    y: number,
-    extend = false
-  ): [number, number, number] | undefined => {
-    const nXf = Math.floor(x / interval)
-    const nYf = Math.floor(y / interval)
-
-    const square = szudzik(nXf, nYf)
-
-    const sx = nXf * interval
-    const sy = nYf * interval
-
-    const base = colors.get(square)?.[color]
-
-    const weights: number[] = []
-    const values: Array<[number, number, number]> = []
-
-    if (base !== undefined) {
-      weights.push(toWeight(x, y, sx, sy))
-      values.push(base)
-    } else if (!extend) {
-      return undefined
-    }
-
-    const n = [sx, sy + interval]
-    const e = [sx + interval, sy]
-    const s = [sx, sy - interval]
-    const w = [sx - interval, sy]
-    const ne = [sx + interval, sy + interval]
-    const se = [sx + interval, sy - interval]
-    const sw = [sx - interval, sy - interval]
-    const nw = [sx - interval, sy + interval]
-
-    // prettier-ignore
-    const order = [
-      // long walk
-      //
-      // n, s, ne, sw, e, nw, se, w // !
-      // s, ne, sw, n, se, nw, e, w // !
-      // n, se, nw, s, ne, sw, e, w // !
-      // s, n, se, nw, e, sw, ne, w // !
-      // n, sw, ne, s, nw, se, w, e // !
-      // s, nw, se, n, sw, ne, w, e // !
-      // n, s, nw, se, w, ne, sw, e // !
-      s, n, sw, ne, w, se, nw, e // !
-      // e, nw, se, w, ne, sw, n, s
-      // w, ne, sw, e, nw, se, n, s
-      // w, e, nw, se, n, sw, ne, s
-      // e, w, ne, sw, n, se, nw, s
-      // e, w, se, nw, s, ne, sw, n
-      // w, e, sw, ne, s, nw, se, n
-      // w, se, nw, e, sw, ne, s, n
-      // e, sw, ne, w, se, nw, s, n
-    ]
-
-    order.forEach(([sx, sy]) => {
-      if (sx >= 0 && sy >= 0 && sx < N * 2 && sy < N * 2) {
-        const square = szudzik(sx / interval, sy / interval)
-        const coords = colors.get(square)?.[color]
-
-        if (coords !== undefined) {
-          weights.push(toWeight(x, y, sx, sy) * 2)
-          values.push(coords)
-        }
-      }
-
-      return undefined
-    })
-
-    if (values.length === 0) {
-      return undefined
-    }
-
-    const normalizedWeights = normalize(weights)
-
-    return values.reduce((prev, next, index) => {
-      const [a, b] = adjustAngle(prev[2], next[2])
-
-      return [
-        lerp(prev[0], next[0], normalizedWeights[index]),
-        lerp(prev[1], next[1], normalizedWeights[index]),
-        lerp(a, b, normalizedWeights[index])
-      ]
-    })
-  }
-
-  const barycentric = (
-    color: number,
-    alpha: number,
-    beta: number,
-    gamma: number,
-    invert = false
-  ) => {
-    const swap = xor(state.darkMode, invert)
-
-    const aa = swap ? gamma : alpha
-    const gg = swap ? alpha : gamma
-
-    const [a, b, g] = normalize([aa, beta, gg])
-
-    const x = a * t0[0] + b * t1[0] + g * t2[0]
-    const y = a * t0[1] + b * t1[1] + g * t2[1]
-
-    return cartesian(color, x, y, true)
-  }
-
-  const get = (
-    color: number,
-    chroma: number,
-    lightness: number,
-    invert = false
-  ) => {
-    return barycentric(color, MAX - lightness, chroma, lightness, invert)
-  }
-
   chroma0()
   chroma1()
 
-  const subscriptions = new Set<Subscription>()
+  const updateChroma = (a?: number, b?: number) => {
+    let changed = false
 
-  const notify = () => {
-    for (const subscription of subscriptions) {
-      subscription()
+    if (a !== undefined && a !== state.chroma[0]) {
+      state.chroma[0] = a
+      chroma0()
+      changed = true
+    }
+
+    if (b !== undefined && b !== state.chroma[1]) {
+      state.chroma[1] = b
+      chroma1()
+      changed = true
+    }
+
+    if (changed) {
+      notify(subscriptions)
+    }
+  }
+
+  const updateLightness = (a?: number, b?: number) => {
+    let changed = false
+
+    if (b !== undefined && b !== state.lightness[1]) {
+      state.lightness[1] = b
+      lightness1()
+      changed = true
+    }
+
+    if (a !== undefined && a !== state.lightness[0]) {
+      state.lightness[0] = a
+      lightness0()
+      changed = true
+    }
+
+    if (changed) {
+      notify(subscriptions)
+    }
+  }
+
+  const updateDarkMode = (value: boolean) => {
+    if (value !== state.darkMode) {
+      state.darkMode = value
+
+      notify(subscriptions)
     }
   }
 
   return {
-    get,
-    cartesian,
-    barycentric,
-    subscribe: (value: () => void): Unsubscribe => {
-      subscriptions.add(value)
-
-      return () => {
-        subscriptions.delete(value)
-      }
-    },
-    updateDarkMode: (value: boolean) => {
-      if (value !== state.darkMode) {
-        state.darkMode = value
-
-        notify()
-      }
-    },
-    updateLightness: (a?: number, b?: number) => {
-      let change = false
-
-      if (b !== undefined && b !== state.lightness[1]) {
-        state.lightness[1] = b
-        lightness1()
-        change = true
-      }
-
-      if (a !== undefined && a !== state.lightness[0]) {
-        state.lightness[0] = a
-        lightness0()
-        change = true
-      }
-
-      if (change) {
-        notify()
-      }
-    },
-    updateChroma: (a?: number, b?: number) => {
-      let change = false
-
-      if (a !== undefined && a !== state.chroma[0]) {
-        state.chroma[0] = a
-        chroma0()
-        change = true
-      }
-
-      if (b !== undefined && b !== state.chroma[1]) {
-        state.chroma[1] = b
-        chroma1()
-        change = true
-      }
-
-      if (change) {
-        notify()
-      }
-    },
-    triangle: () => [t0, t1, t2],
-    lightness: () => state.lightness,
-    chroma: () => state.chroma,
-    darkMode: () => state.darkMode
+    [INTERPOLATOR]: {
+      model,
+      state,
+      triangle,
+      updateChroma,
+      updateDarkMode,
+      updateLightness,
+      subscriptions
+    }
   }
 }
