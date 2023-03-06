@@ -1,3 +1,5 @@
+import { INTERPOLATOR } from './constants'
+
 export type Point = [x: number, y: number]
 export type Triangle = [Point, Point, Point]
 export type Line = [Point, Point]
@@ -16,7 +18,7 @@ export type ModelUnparsed = [
   colors: number[]
 ]
 
-export interface ModelParsed {
+export interface Model {
   colorSpace: ColorSpace
   colors: Map<number, Array<[number, number, number]>>
   interval: number
@@ -25,41 +27,23 @@ export interface ModelParsed {
   triangle: Triangle
 }
 
+export type Unsubscribe = () => unknown
+export type Subscription = () => unknown
+
 export interface State {
   lightness: [low: number, high: number]
   chroma: [low: number, high: number]
   darkMode: boolean
 }
 
-export type Unsubscribe = () => unknown
-export type Subscription = () => unknown
-
 export interface Interpolator {
-  triangle: () => Readonly<Triangle>
-  lightness: () => Readonly<State['lightness']>
-  chroma: () => Readonly<State['chroma']>
-  darkMode: () => Readonly<State['darkMode']>
-  updateLightness: (a?: number, b?: number) => void
-  updateChroma: (a?: number, b?: number) => void
-  updateDarkMode: (value: boolean) => void
-  subscribe: (cb: Subscription) => Unsubscribe
-  cartesian: (
-    color: number,
-    x: number,
-    y: number,
-    extend?: boolean
-  ) => [number, number, number] | undefined
-  barycentric: (
-    color: number,
-    alpha: number,
-    beta: number,
-    gamma: number,
-    invert?: boolean
-  ) => [number, number, number] | undefined
-  get: (
-    color: number,
-    chroma: number,
-    lightness: number,
-    invert?: boolean
-  ) => [number, number, number] | undefined
+  [INTERPOLATOR]: {
+    triangle: Triangle
+    model: Readonly<Model>
+    state: State
+    subscriptions: Set<Subscription>
+    updateLightness: (a?: number, b?: number) => void
+    updateChroma: (a?: number, b?: number) => void
+    updateDarkMode: (value: boolean) => void
+  }
 }

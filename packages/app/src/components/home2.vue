@@ -10,6 +10,7 @@ import {
   sRGB
 } from '@cepheus/color'
 import {
+  cartesian,
   createInterpolator,
   LENGTH as N,
   parseModel,
@@ -54,7 +55,7 @@ const squares = tile(interval)
 const toStyle = (xy: [number, number], colorIndex: number) => {
   const [x, y] = xy
 
-  const coords = instance.cartesian(colorIndex, x, y, false)
+  const coords = cartesian(instance, colorIndex, x, y, false)
   //
   if (coords === undefined) {
     return undefined

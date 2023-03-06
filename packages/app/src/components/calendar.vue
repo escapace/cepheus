@@ -7,6 +7,7 @@ import Event from './event.vue'
 import { Pane } from 'tweakpane'
 import { useCepheus } from '@cepheus/vue'
 import { useCassiopeia } from '@cassiopeia/vue'
+import { chroma, darkMode, lightness } from 'cepheus'
 
 const interpolator = useCepheus()
 const cassiopeia = useCassiopeia()
@@ -166,15 +167,15 @@ onMounted(() => {
       pane.refresh()
     }
 
-    interpolator.updateChroma(undefined, state.chroma)
+    chroma(interpolator, undefined, state.chroma)
 
     if (state.darkMode) {
-      interpolator.updateLightness(lerp(0, MAX, state.lightness), 1)
+      lightness(interpolator, lerp(0, MAX, state.lightness), 1)
     } else {
-      interpolator.updateLightness(0, lerp(1 - MAX, 1, state.lightness))
+      lightness(interpolator, 0, lerp(1 - MAX, 1, state.lightness))
     }
 
-    interpolator.updateDarkMode(state.darkMode)
+    darkMode(interpolator, state.darkMode)
   })
 
   onUnmounted(() => pane.dispose())
