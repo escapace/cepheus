@@ -3,7 +3,7 @@ import type { Iterator, Plugin } from 'cassiopeia'
 import { subscribe, type Interpolator } from 'cepheus'
 import { createIterator } from './create-iterator'
 import { permutations } from './permutations'
-import { Options, OptionsParsed } from './types'
+import { Options, OptionsAdvanced } from './types'
 
 const getColorFormat = (): Array<'srgb' | 'p3' | 'oklch'> => {
   if (!__BROWSER__) {
@@ -21,12 +21,12 @@ const getColorFormat = (): Array<'srgb' | 'p3' | 'oklch'> => {
   return (['oklch', 'p3', 'srgb'] as const).filter((key) => map[key])
 }
 
-const isParsed = (value: Options | OptionsParsed): value is Options =>
+const isParsed = (value: Options | OptionsAdvanced): value is Options =>
   !Array.isArray(value.flags)
 
 const createCepheusOptions = (
-  options: Options | OptionsParsed = {}
-): OptionsParsed => {
+  options: Options | OptionsAdvanced = {}
+): OptionsAdvanced => {
   if (!isParsed(options)) {
     return options
   }
@@ -79,11 +79,11 @@ const createCepheusOptions = (
   }
 }
 
-export type CepheusCassiopeiaPlugin = Plugin & { options: OptionsParsed }
+export type CepheusCassiopeiaPlugin = Plugin & { options: OptionsAdvanced }
 
 export const createCepheusPlugin = (
   interpolator: Interpolator,
-  options: Options | OptionsParsed = {}
+  options: Options | OptionsAdvanced = {}
 ): CepheusCassiopeiaPlugin => {
   const opts = createCepheusOptions(options)
 
@@ -113,4 +113,4 @@ export const createCepheusPlugin = (
   }
 }
 
-export type { Options, OptionsParsed }
+export type { Options, OptionsAdvanced as OptionsParsed }
