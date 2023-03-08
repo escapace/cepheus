@@ -36,6 +36,10 @@ export interface State {
   darkMode: boolean
 }
 
+export interface Options extends Partial<Pick<State, 'lightness' | 'chroma'>> {
+  initialState?: Partial<State>
+}
+
 export interface Interpolator {
   [INTERPOLATOR]: {
     triangle: Triangle

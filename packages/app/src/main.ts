@@ -45,7 +45,8 @@ const router = createRouter({
 
 const cepheus = createCepheus({
   model,
-  darkMode: 'media'
+  darkMode: 'media',
+  lightness: [0.1, 1]
   // flags: { colorScheme: ['dark', 'light'] }
 })
 

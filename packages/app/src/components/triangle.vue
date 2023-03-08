@@ -2,29 +2,20 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ColorSpace, convert, LCH, OKLCH, P3, sRGB } from '@cepheus/color'
 import { onMounted } from 'vue'
-import {
-  barycentric,
-  createInterpolator,
-  parseModel,
-  type ModelUnparsed,
-  type Point,
-  type Triangle
-} from 'cepheus'
-import _model from '../models/model.json'
+import { barycentric, INTERPOLATOR, type Point, type Triangle } from 'cepheus'
+import { useCepheus } from '@cepheus/vue'
 
 ColorSpace.register(LCH)
 ColorSpace.register(sRGB)
 ColorSpace.register(OKLCH)
 ColorSpace.register(P3)
 
-const model = parseModel(_model as ModelUnparsed)
-const instance = createInterpolator(model)
-
 function cross(a: Point, b: Point, c: Point) {
   return (b[0] - a[0]) * -(c[1] - a[1]) - -(b[1] - a[1]) * (c[0] - a[0])
 }
 
 onMounted(() => {
+  const instance = useCepheus()
   const canvas = document.querySelector('canvas')!
 
   let context: CanvasRenderingContext2D | undefined
@@ -143,20 +134,19 @@ onMounted(() => {
   const toX = (x: number) => Math.floor((x / 240) * img.width)
   const toY = (y: number) => Math.floor((y / 240) * img.height)
 
-  fillTriangle(
-    img,
-    model.triangle.map(([x, y]) => [toX(x), toY(y)]) as Triangle
-  )
+  const triangle = instance[INTERPOLATOR].model.triangle
+
+  fillTriangle(img, triangle.map(([x, y]) => [toX(x), toY(y)]) as Triangle)
   context.putImageData(img, 0, 0)
 
   context!.lineWidth = 2
   context!.strokeStyle = 'red'
 
   context.beginPath()
-  context.lineTo(toX(model.triangle[0][0]), toY(model.triangle[0][1]))
-  context.lineTo(toX(model.triangle[1][0]), toY(model.triangle[1][1]))
-  context.lineTo(toX(model.triangle[2][0]), toY(model.triangle[2][1]))
-  context.lineTo(toX(model.triangle[0][0]), toY(model.triangle[0][1]))
+  context.lineTo(toX(triangle[0][0]), toY(triangle[0][1]))
+  context.lineTo(toX(triangle[1][0]), toY(triangle[1][1]))
+  context.lineTo(toX(triangle[2][0]), toY(triangle[2][1]))
+  context.lineTo(toX(triangle[0][0]), toY(triangle[0][1]))
   context.stroke()
 
   // context.translate(0, context.canvas.height) // reset where 0,0 is located

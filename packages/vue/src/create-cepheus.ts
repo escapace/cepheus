@@ -4,26 +4,29 @@ import {
   type Options as PluginOptions,
   type OptionsParsed as PluginOptionsParsed
 } from '@cepheus/plugin'
-import { createInterpolator, Interpolator, State } from 'cepheus'
+import {
+  createInterpolator,
+  Interpolator,
+  Options as CepheusOptions
+} from 'cepheus'
 import { type App, type Plugin } from 'vue'
 import { INJECTION_KEY } from './constants'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { Plugin as _ } from 'cassiopeia'
 
-export interface Options extends PluginOptions {
+export interface Options extends PluginOptions, CepheusOptions {
   model: unknown
-  initialState?: State
 }
 
-export interface OptionsParsed extends PluginOptionsParsed {
+export interface OptionsAdvanced extends PluginOptionsParsed, CepheusOptions {
   model: unknown
-  initialState?: State
 }
 
-export const createCepheus = (
-  options: Options | OptionsParsed
-): Plugin & CepheusCassiopeiaPlugin & { interpolator: Interpolator } => {
-  const interpolator = createInterpolator(options.model, options.initialState)
+export type Cepheus = Plugin &
+  CepheusCassiopeiaPlugin & {
+    interpolator: Interpolator
+  }
+
+export const createCepheus = (options: Options | OptionsAdvanced): Cepheus => {
+  const interpolator = createInterpolator(options.model, options)
 
   return {
     ...createCepheusPlugin(interpolator, options),

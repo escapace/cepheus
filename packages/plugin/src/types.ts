@@ -13,6 +13,6 @@ export interface Flags {
   colorScheme: 'light' | 'dark' | 'none'
 }
 
-export interface OptionsParsed extends Pick<Required<Options>, 'darkMode'> {
+export interface OptionsAdvanced extends Pick<Required<Options>, 'darkMode'> {
   flags: Flags[]
 }

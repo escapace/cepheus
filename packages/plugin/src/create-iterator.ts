@@ -16,14 +16,14 @@ import {
   type Interpolator
 } from 'cepheus'
 import { parseAlpha } from './parse-alpha'
-import { Flags, OptionsParsed } from './types'
+import { Flags, OptionsAdvanced } from './types'
 const HUE_REGEX = /^([0-9]+)-([0-9]+)-([0-9]+)-(-?[0-9]+)(-([0-1]|0[0-9]+))?$/i
 const COLOR_REGEX = /^([0-9]+)-([0-9]+)-([0-9]+)(-([0-1]|0[0-9]+))?$/i
 
 const template = (
   values: string[],
   flags: Flags,
-  options: Omit<OptionsParsed, 'flags'>
+  options: Omit<OptionsAdvanced, 'flags'>
 ): StyleSheetPartial | undefined => {
   if (values.length === 0) {
     return undefined
@@ -70,7 +70,7 @@ const template = (
 
 export const createIterator = (
   type: 'color' | 'hue' | 'invert',
-  options: OptionsParsed
+  options: OptionsAdvanced
 ) => {
   const regex = {
     color: COLOR_REGEX,

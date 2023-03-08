@@ -1,16 +1,9 @@
+import { assert } from './assert'
 import { ColorSpace, Model, ModelUnparsed, Point, Triangle } from './types'
 import { chunk } from './utilities/chunk'
 
-function assert(condition: unknown, msg?: string): asserts condition {
-  if (condition === false) throw new Error(msg)
-}
-
 export const parseModel = (model: unknown): Model => {
-  if (!Array.isArray(model)) {
-    // TODO: isModel
-    return model as Model
-  }
-
+  assert(Array.isArray(model))
   assert(model.length === 6)
 
   const [colorSpaceIndex, interval, length, triangleFlat, squares, data] =
@@ -44,12 +37,12 @@ export const parseModel = (model: unknown): Model => {
 
   const colorSpace = colorSpaceIndex === 1 ? ColorSpace.p3 : ColorSpace.srgb
 
-  return Object.freeze({
+  return {
     colorSpace,
     colors,
     interval,
     length,
     squares,
     triangle
-  })
+  }
 }
