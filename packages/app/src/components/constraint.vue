@@ -11,7 +11,7 @@ import {
   type Triangle,
   barycentric
 } from 'cepheus'
-import { onMounted, reactive, watch } from 'vue'
+import { onMounted, onUnmounted, reactive, watch } from 'vue'
 import _model from '../models/model.json'
 import { ColorSpace, convert, LCH, OKLCH, P3, sRGB } from '@cepheus/color'
 import { Pane } from 'tweakpane'
@@ -136,6 +136,8 @@ onMounted(() => {
 
   pane.addInput(state, 'chroma0', { min: 0, max: 1, step: 0.01 })
   pane.addInput(state, 'chroma1', { min: 0, max: 1, step: 0.01 })
+
+  onUnmounted(() => pane.dispose())
 
   const canvas = document.querySelector('canvas')!
 

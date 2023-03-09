@@ -95,9 +95,9 @@ export const cartesian = (
 
   const normalizedWeights = normalize(weights)
 
-  return values.reduce((prev, next, index) => [
-    lerp(prev[0], next[0], normalizedWeights[index]),
-    lerp(prev[1], next[1], normalizedWeights[index]),
-    lerpAngle(prev[2], next[2], normalizedWeights[index])
+  return values.reduce((prev, next, i) => [
+    lerp(prev[0], next[0], normalizedWeights[i]),
+    lerp(prev[1], next[1], normalizedWeights[i]),
+    lerpAngle(prev[2], next[2], normalizedWeights[i])
   ])
 }
