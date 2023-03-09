@@ -11,7 +11,9 @@ import type { Iterator } from 'cassiopeia'
 import { StyleSheetPartial } from 'cassiopeia/lib/types/types'
 import {
   color as c,
+  ColorSpace,
   darkMode,
+  INTERPOLATOR,
   normalizeAngle,
   type Interpolator
 } from 'cepheus'
@@ -84,6 +86,13 @@ export const createIterator = (
     interpolator: Interpolator,
     flags: Flags = options.flags[0]
   ): Iterator {
+    const modelColorSpace: Flags['colorGamut'] =
+      interpolator[INTERPOLATOR].model.colorSpace === ColorSpace.p3
+        ? 'p3'
+        : 'srgb'
+
+    const isGamutMismatch = flags.colorGamut !== modelColorSpace
+
     const state: string[] = []
 
     const mode =
@@ -139,15 +148,17 @@ export const createIterator = (
       const value =
         flags.colorFormat === 'oklch'
           ? serialize(
-              // TODO: only do this when inputGamut is something else
-              toGamut(color, {
-                space: flags.colorGamut === 'p3' ? P3 : sRGB
-              })
+              // if model color space is not the same as the color gamut flag adjust coordinates to fit in gamut
+              isGamutMismatch
+                ? toGamut(color, {
+                    space: flags.colorGamut === 'p3' ? P3 : sRGB
+                  })
+                : color
             )
           : serialize(
               convert(color, flags.colorFormat === 'p3' ? P3 : sRGB, {
-                // TODO: only do this when inputGamut is something else
-                inGamut: true
+                // if model color space is not the same as the color gamut flag adjust coordinates to fit in gamut
+                inGamut: isGamutMismatch
               })
             )
 

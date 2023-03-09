@@ -1,21 +1,21 @@
 import { useLocalStorage } from '@vueuse/core'
 import type { StateTree } from 'pinia'
 import { createPinia } from 'pinia'
-import { createApp, defineComponent, h, watch } from 'vue'
+import { createApp, watch } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 import App from './components/app.vue'
 import Canvas from './components/canvas.vue'
 import HomeA from './components/home.vue'
-import HomeB from './components/home2.vue'
-import Triangle from './components/triangle.vue'
-import Constraint from './components/constraint.vue'
+// import HomeB from './components/home2.vue'
 import Calendar from './components/calendar.vue'
+import Constraint from './components/constraint.vue'
+import Triangle from './components/triangle.vue'
 
 import '@unocss/reset/normalize.css'
 import 'uno.css'
 
-import { browserSubscription, createCassiopeia } from '@cassiopeia/vue'
+import { createBrowserSubscription, createCassiopeia } from '@cassiopeia/vue'
 import { createCepheus } from '@cepheus/vue'
 import model from './models/model.json'
 
@@ -33,13 +33,13 @@ watch(pinia.state, () => {
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', component: defineComponent(() => () => h('div')) },
-    { path: '/calendar', component: Calendar },
-    { path: '/blocks', component: HomeA },
-    { path: '/c', component: HomeB },
-    { path: '/d', component: Canvas },
-    { path: '/e', component: Triangle },
-    { path: '/f', component: Constraint }
+    // { path: '/', component: defineComponent(() => () => h('div')) },
+    { path: '/', component: Calendar },
+    { path: '/swatches', component: HomeA },
+    // { path: '/c', component: HomeB },
+    { path: '/fitting', component: Canvas },
+    { path: '/triangle', component: Triangle },
+    { path: '/constraint', component: Constraint }
   ]
 })
 
@@ -54,6 +54,6 @@ const cassiopeia = createCassiopeia({
   plugins: [cepheus]
 })
 
-cassiopeia.subscribe(browserSubscription)
+cassiopeia.subscribe(createBrowserSubscription())
 
 createApp(App).use(router).use(pinia).use(cepheus).use(cassiopeia).mount('#app')

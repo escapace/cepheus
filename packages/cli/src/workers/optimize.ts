@@ -190,7 +190,7 @@ const distances = (colors: Color[], deficiency?: Deficiency) => {
       return color
     }
 
-    const sRGBColor = convert(color, sRGB, { inGamut: true })
+    const sRGBColor = convert(clone(color), sRGB, { inGamut: true })
 
     const { r, g, b } = simulateDeficiency(
       {

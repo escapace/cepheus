@@ -1,4 +1,4 @@
-import { convert, fixNaN, OKLCH, parse } from '@cepheus/color'
+import { convert, fixNaN, OKLCH, parse, clone } from '@cepheus/color'
 import { ColorSpace, normalizeAngle } from 'cepheus'
 import { isInteger, isString, omit } from 'lodash-es'
 import {
@@ -18,7 +18,7 @@ export function createStoreOptions(
     colors.map(
       (value) =>
         fixNaN(
-          convert(isString(value) ? parse(value) : value, OKLCH, {
+          convert(isString(value) ? parse(value) : clone(value), OKLCH, {
             inGamut: true
           })
         ).coords
@@ -28,7 +28,7 @@ export function createStoreOptions(
   const background = ['#000000', '#030202'].map(
     (value) =>
       fixNaN(
-        convert(isString(value) ? parse(value) : value, OKLCH, {
+        convert(isString(value) ? parse(value) : clone(value), OKLCH, {
           inGamut: true
         })
       ).coords

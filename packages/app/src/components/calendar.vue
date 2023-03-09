@@ -324,7 +324,6 @@ $subheader-color: var(---color-1-20-900);
   text-align: center;
   grid-template-columns: $calendar-template;
   top: $title-height;
-  /* z-index: 10; */
   border-bottom: 0.125rem solid $header-color;
   background-color: $subheader-color;
   color: var(---color-2-100-2);
@@ -402,8 +401,6 @@ $subheader-color: var(---color-1-20-900);
   text-align: center;
   display: grid;
   place-content: center;
-  /* top: 0; */
-  /* z-index: 10; */
 }
 
 .week {
