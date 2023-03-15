@@ -1,25 +1,14 @@
 <script setup lang="ts">
 import type { Color } from '@cepheus/color'
-import {
-  ColorSpace,
-  convert,
-  LCH,
-  OKLCH,
-  P3,
-  serialize,
-  sRGB
-} from '@cepheus/color'
-import { LENGTH as N, parseModel, type ModelUnparsed } from 'cepheus'
+import { convert, OKLCH, P3, serialize, sRGB } from '@cepheus/color'
+import { INTERPOLATOR, LENGTH as N } from 'cepheus'
 import { toSquare } from '@cepheus/utilities'
 import { range } from 'lodash-es'
-import _model from '../models/model.json'
+import { useCepheus } from '@cepheus/vue'
 
-ColorSpace.register(LCH)
-ColorSpace.register(sRGB)
-ColorSpace.register(OKLCH)
-ColorSpace.register(P3)
+const interpolator = useCepheus()
+const model = interpolator[INTERPOLATOR].state.model
 
-const model = parseModel(_model as ModelUnparsed)
 const levels = (N * 2) / model.interval
 const numColors = model.length
 const colors = range(0, numColors)

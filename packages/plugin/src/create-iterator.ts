@@ -19,8 +19,9 @@ import {
 } from 'cepheus'
 import { parseAlpha } from './parse-alpha'
 import { Flags, OptionsAdvanced } from './types'
-const HUE_REGEX = /^([0-9]+)-([0-9]+)-([0-9]+)-(-?[0-9]+)(-([0-1]|0[0-9]+))?$/i
-const COLOR_REGEX = /^([0-9]+)-([0-9]+)-([0-9]+)(-([0-1]|0[0-9]+))?$/i
+const HUE_REGEX =
+  /^([a-zA-Z0-9]+)-([0-9]+)-([0-9]+)-(-?[0-9]+)(-([0-1]|0[0-9]+))?$/i
+const COLOR_REGEX = /^([a-zA-Z0-9]+)-([0-9]+)-([0-9]+)(-([0-1]|0[0-9]+))?$/i
 
 const template = (
   values: string[],
@@ -87,7 +88,7 @@ export const createIterator = (
     flags: Flags = options.flags[0]
   ): Iterator {
     const modelColorSpace: Flags['colorGamut'] =
-      interpolator[INTERPOLATOR].model.colorSpace === ColorSpace.p3
+      interpolator[INTERPOLATOR].state.model.colorSpace === ColorSpace.p3
         ? 'p3'
         : 'srgb'
 
@@ -108,7 +109,7 @@ export const createIterator = (
         continue
       }
 
-      const colorN = parseInt(string[1], 10)
+      const colorN = string[1]
       const [chroma, lightness] = string
         .slice(2, 4)
         .map((value) => parseInt(value, 10)) as [number, number]

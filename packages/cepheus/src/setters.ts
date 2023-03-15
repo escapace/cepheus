@@ -1,5 +1,5 @@
 import { INTERPOLATOR } from './constants'
-import { Interpolator } from './types'
+import { Interpolator, Model } from './types'
 
 export function chroma(
   interpolator: Interpolator,
@@ -40,4 +40,14 @@ export function darkMode(
   }
 
   return value.state.darkMode
+}
+
+export function model(interpolator: Interpolator, model?: Model): Model {
+  const value = interpolator[INTERPOLATOR]
+
+  if (model !== undefined) {
+    value.updateModel(model)
+  }
+
+  return value.state.model
 }

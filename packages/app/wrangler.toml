@@ -1,0 +1,10 @@
+name = "app"
+main = "./dist/worker/index.mjs"
+compatibility_date = "2023-03-11"
+# no_bundle = true
+
+[build]
+command = "node ./scripts/build.mjs"
+
+[site]
+bucket = "./dist/client/"

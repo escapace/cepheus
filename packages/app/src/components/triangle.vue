@@ -134,7 +134,7 @@ onMounted(() => {
   const toX = (x: number) => Math.floor((x / 240) * img.width)
   const toY = (y: number) => Math.floor((y / 240) * img.height)
 
-  const triangle = instance[INTERPOLATOR].model.triangle
+  const triangle = instance[INTERPOLATOR].state.model.triangle
 
   fillTriangle(img, triangle.map(([x, y]) => [toX(x), toY(y)]) as Triangle)
   context.putImageData(img, 0, 0)

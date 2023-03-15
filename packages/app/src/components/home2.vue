@@ -1,36 +1,17 @@
 <script setup lang="ts">
 import type { Color } from '@cepheus/color'
-import {
-  ColorSpace,
-  convert,
-  LCH,
-  OKLCH,
-  P3,
-  serialize,
-  sRGB
-} from '@cepheus/color'
-import {
-  cartesian,
-  createInterpolator,
-  LENGTH as N,
-  parseModel,
-  type ModelUnparsed
-} from 'cepheus'
+import { convert, OKLCH, P3, serialize, sRGB } from '@cepheus/color'
+import { useCepheus } from '@cepheus/vue'
+import { cartesian, INTERPOLATOR, LENGTH as N } from 'cepheus'
 import { range } from 'lodash-es'
-import _model from '../models/model.json'
 
-ColorSpace.register(LCH)
-ColorSpace.register(sRGB)
-ColorSpace.register(OKLCH)
-ColorSpace.register(P3)
+const interpolator = useCepheus()
 
-const model = parseModel(_model as ModelUnparsed)
+const model = interpolator[INTERPOLATOR].state.model
 const levels = 40 // 120 / model.interval
 const interval = 240 / levels
 const numColors = model.length
 const colors = range(0, numColors)
-
-const instance = createInterpolator(model)
 
 const cartesianProduct = <T>(...sets: T[][]) =>
   sets.reduce<T[][]>(
@@ -55,7 +36,7 @@ const squares = tile(interval)
 const toStyle = (xy: [number, number], colorIndex: number) => {
   const [x, y] = xy
 
-  const coords = cartesian(instance, colorIndex, x, y, false)
+  const coords = cartesian(interpolator, colorIndex, x, y, false)
   //
   if (coords === undefined) {
     return undefined

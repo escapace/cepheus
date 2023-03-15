@@ -1,32 +1,27 @@
 import {
   createCepheusPlugin,
-  type CepheusCassiopeiaPlugin,
-  type Options as PluginOptions,
-  type OptionsParsed as PluginOptionsParsed
+  type Options as PluginOptions
 } from '@cepheus/plugin'
+import { type Plugin as CassiopeiaPlugin } from 'cassiopeia'
 import {
   createInterpolator,
   Interpolator,
   Options as CepheusOptions
 } from 'cepheus'
-import { type App, type Plugin } from 'vue'
+import { type App, type Plugin as VuePlugin } from 'vue'
 import { INJECTION_KEY } from './constants'
 
-export interface Options extends PluginOptions, CepheusOptions {
-  model: unknown
+export interface Options extends PluginOptions {
+  state: CepheusOptions
 }
 
-export interface OptionsAdvanced extends PluginOptionsParsed, CepheusOptions {
-  model: unknown
-}
-
-export type Cepheus = Plugin &
-  CepheusCassiopeiaPlugin & {
+export type Cepheus = CassiopeiaPlugin &
+  VuePlugin & {
     interpolator: Interpolator
   }
 
-export const createCepheus = (options: Options | OptionsAdvanced): Cepheus => {
-  const interpolator = createInterpolator(options.model, options)
+export const createCepheus = (options: Options): Cepheus => {
+  const interpolator = createInterpolator(options.state)
 
   return {
     ...createCepheusPlugin(interpolator, options),

@@ -10,16 +10,16 @@
   },
   "devDependencies": {
     "@types/chai": "4.3.4",
-    "@types/lodash-es": "4.17.6",
+    "@types/lodash-es": "4.17.7",
     "@types/mocha": "10.0.1",
-    "@types/node": "18.14.6",
-    "@typescript-eslint/eslint-plugin": "5.54.1",
-    "@typescript-eslint/parser": "5.54.1",
+    "@types/node": "18.15.3",
+    "@typescript-eslint/eslint-plugin": "5.55.0",
+    "@typescript-eslint/parser": "5.55.0",
     "c8": "7.13.0",
-    "cassiopeia": "5.0.0",
+    "cassiopeia": "5.1.0",
     "chai": "4.3.7",
-    "eslint": "8.35.0",
-    "eslint-config-escapace": "3.16.1",
+    "eslint": "8.36.0",
+    "eslint-config-escapace": "3.16.2",
     "eslint-config-prettier": "8.7.0",
     "eslint-plugin-editorconfig": "4.0.2",
     "eslint-plugin-no-null": "1.0.2",
@@ -30,16 +30,16 @@
   },
   "exports": {
     ".": {
-      "node": {
+      "browser": {
         "import": {
           "types": "./lib/types/index.d.ts",
-          "default": "./lib/server/index.mjs"
+          "default": "./lib/browser/index.mjs"
         }
       },
       "default": {
         "import": {
           "types": "./lib/types/index.d.ts",
-          "default": "./lib/browser/index.mjs"
+          "default": "./lib/server/index.mjs"
         }
       }
     }
@@ -53,7 +53,7 @@
   "license": "MPL-2.0",
   "module": "lib/esm/index.mjs",
   "peerDependencies": {
-    "cassiopeia": ">=5.0.0"
+    "cassiopeia": ">=5.1.0"
   },
   "private": false,
   "publishConfig": {

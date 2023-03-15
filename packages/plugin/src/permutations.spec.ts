@@ -6,6 +6,17 @@ describe('src/permutations.spec.ts', () => {
     assert.deepEqual(permutations({}), [])
   })
 
+  it('generates permutations for a partially empty object', () => {
+    assert.deepEqual(
+      permutations({
+        x: [1, 2, 3],
+        y: ['a', 'b'],
+        z: []
+      }),
+      []
+    )
+  })
+
   it('generates permutations', () => {
     const obj = {
       x: [1, 2, 3],
