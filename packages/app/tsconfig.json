@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
-    "noImplicitThis": true,
-    "preserveValueImports": true,
-    "importsNotUsedAsValues": "error",
+    "baseUrl": ".",
     "allowJs": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
@@ -12,7 +10,7 @@
     "importHelpers": false,
     "isolatedModules": true,
     "jsx": "preserve",
-    "lib": ["esnext", "dom", "DOM.Iterable"],
+    "lib": ["esnext", "dom"],
     "module": "esnext",
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
@@ -26,8 +24,7 @@
     "strict": true,
     "target": "esnext",
     "typeRoots": ["node_modules/@types"],
-    "types": ["vue", "vite/client"],
     "useDefineForClassFields": true
   },
-  "exclude": ["lib", "node_modules"]
+  "exclude": ["dist", "node_modules"]
 }

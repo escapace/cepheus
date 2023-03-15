@@ -1,18 +1,20 @@
+export { adjust } from './adjust'
+export { alias } from './alias'
 export { barycentric } from './barycentric'
 export { cartesian } from './cartesian'
 export { color } from './color'
 export { INTERPOLATOR, LENGTH } from './constants'
 export { createInterpolator } from './create-interpolator'
 export { isModel } from './is-model'
-export { parseModel } from './parse-model'
-export { chroma, darkMode, lightness } from './setters'
+export { parse } from './parse'
+export { chroma, darkMode, lightness, model } from './setters'
 export { subscribe } from './subscribe'
 export { ColorSpace } from './types'
 export type {
   Interpolator,
-  Options,
   Model,
   ModelUnparsed,
+  Options,
   Point,
   State,
   Subscription,

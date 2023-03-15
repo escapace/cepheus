@@ -1,22 +1,12 @@
 <script setup lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { ColorSpace, convert, LCH, OKLCH, P3, sRGB } from '@cepheus/color'
+import { convert, OKLCH, P3, sRGB } from '@cepheus/color'
 import { onMounted } from 'vue'
-import _model from '../models/model.json'
-import {
-  cartesian,
-  createInterpolator,
-  parseModel,
-  type ModelUnparsed
-} from 'cepheus'
+import { cartesian, INTERPOLATOR } from 'cepheus'
+import { useCepheus } from '@cepheus/vue'
 
-ColorSpace.register(LCH)
-ColorSpace.register(sRGB)
-ColorSpace.register(OKLCH)
-ColorSpace.register(P3)
-
-const model = parseModel(_model as ModelUnparsed)
-const instance = createInterpolator(model)
+const instance = useCepheus()
+const model = instance[INTERPOLATOR].state.model
 
 onMounted(() => {
   const canvas = document.querySelector('canvas')!

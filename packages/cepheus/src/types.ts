@@ -25,27 +25,29 @@ export interface Model {
   length: number
   squares: number[]
   triangle: Triangle
+  alias?: (value: string | number) => number | undefined
 }
 
 export type Unsubscribe = () => unknown
 export type Subscription = () => unknown
 
 export interface State {
+  model: Model
   lightness: [low: number, high: number]
   chroma: [low: number, high: number]
   darkMode: boolean
 }
 
-export interface Options extends Partial<Pick<State, 'lightness' | 'chroma'>> {
-  initialState?: Partial<State>
-}
+export interface Options
+  extends Partial<Omit<State, 'model'>>,
+    Pick<State, 'model'> {}
 
 export interface Interpolator {
   [INTERPOLATOR]: {
     triangle: Triangle
-    model: Readonly<Model>
     state: State
     subscriptions: Set<Subscription>
+    updateModel: (model: Model) => void
     updateLightness: (a?: number, b?: number) => void
     updateChroma: (a?: number, b?: number) => void
     updateDarkMode: (value: boolean) => void

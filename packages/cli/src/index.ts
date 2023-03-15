@@ -119,7 +119,7 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
         }
       }
 
-      for (const bias of [1.5, 1.8, 2.4]) {
+      for (const bias of [1.25, 1.5, 1.75]) {
         await attempt(bias)
       }
 
