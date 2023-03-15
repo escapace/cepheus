@@ -2,7 +2,7 @@ import { assert } from './assert'
 import { ColorSpace, Model, ModelUnparsed, Point, Triangle } from './types'
 import { chunk } from './utilities/chunk'
 
-export const parseModel = (model: unknown): Model => {
+export const parse = (model: unknown): Model => {
   assert(Array.isArray(model))
   assert(model.length === 6)
 

@@ -5,14 +5,16 @@ import { range } from 'lodash-es'
 import { onBeforeUpdate, onMounted, onUnmounted, reactive, ref } from 'vue'
 import Event from './event.vue'
 import { Pane } from 'tweakpane'
-import { useCepheus } from '@cepheus/vue'
+// import { useCepheus } from '@cepheus/vue'
 import { useCassiopeia } from '@cassiopeia/vue'
-import { chroma, darkMode, lightness } from 'cepheus'
+import { useCepheusStore } from '../use-cepheus-store'
+const { Xoshiro128 } = await import('@thi.ng/random')
 
-const interpolator = useCepheus()
+const store = useCepheusStore()
+const random = new Xoshiro128([123, 123, 123, 123])
+
+// const interpolator = useCepheus()
 const cassiopeia = useCassiopeia()
-
-const lerp = (v0: number, v1: number, t: number) => v0 * (1 - t) + v1 * t
 
 const calendar = new Temporal.Calendar('iso8601')
 const timeZone = Temporal.Now.timeZone()
@@ -40,12 +42,6 @@ interface Data {
 
 const data = ref<Data>()
 
-function random(min: number, max: number) {
-  min = Math.ceil(min)
-  max = Math.floor(max)
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
-
 const createEvents = (): Data['events'] => {
   const titles = [
     'Soft landing 2023?',
@@ -67,25 +63,31 @@ const createEvents = (): Data['events'] => {
   cassiopeia.clear()
 
   return titles.map((title) => {
-    const bc = random(0, 3)
+    const bc = random.minmaxInt(0, 4)
 
     const bg = cassiopeia.add(
-      `---color-${bc}-${random(200, 350)}-${random(0, 200)}`
+      `---color-${bc}-${random.minmaxInt(200, 350)}-${random.minmaxInt(0, 200)}`
     )
 
     const textColor = cassiopeia.add(
-      `---invert-${random(0, 3)}-${random(100, 200)}-${random(0, 23)}`
+      `---invert-${random.minmaxInt(0, 3)}-${random.minmaxInt(
+        100,
+        200
+      )}-${random.minmaxInt(0, 23)}`
     )
 
     const borderColor = cassiopeia.add(
-      `---hue-${bc}-${random(900, 1023)}-${random(1000, 1023)}--20-099`
+      `---hue-${bc}-${random.minmaxInt(900, 1023)}-${random.minmaxInt(
+        1000,
+        1023
+      )}--20-099`
     )
 
     return {
-      dayOfWeek: random(0, 6),
-      hour: random(4, 19),
-      minute: random(0, 40),
-      duration: random(60, 120),
+      dayOfWeek: random.minmaxInt(0, 7),
+      hour: random.minmaxInt(4, 20),
+      minute: random.minmaxInt(0, 41),
+      duration: random.minmaxInt(60, 121),
       backgroundColor: `var(${bg}, black)`,
       textColor: `var(${textColor}, black)`,
       borderColor: `var(${borderColor}, black)`,
@@ -140,6 +142,7 @@ onMounted(() => {
   const pane = new Pane()
 
   const state = reactive({
+    theme: 'one' as 'one' | 'two',
     lightness: 1,
     // lightness1: 1,
     // chroma0: 0,
@@ -147,6 +150,12 @@ onMounted(() => {
     darkMode: false
   })
 
+  pane.addInput(state, 'theme', {
+    options: {
+      one: 'one',
+      two: 'two'
+    }
+  })
   pane.addInput(state, 'lightness', { min: 0, max: 1, step: 0.01 })
   // pane.addInput(state, 'lightness1', {min: 0, max: 1, step: 0.01})
 
@@ -158,24 +167,36 @@ onMounted(() => {
 
   pane.on('change', (event) => {
     // console.log('here', event.presetKey === 'darkMode', (!state.darkMode && state.lightness >= 0.7), !state.darkMode, state.lightness)
-    if (
-      event.presetKey === 'darkMode' &&
-      ((!state.darkMode && state.lightness <= MAX) ||
-        (state.darkMode && state.lightness >= 1 - MAX))
-    ) {
-      state.lightness = 1 - state.lightness
-      pane.refresh()
+    if (event.presetKey === 'darkMode') {
+      const flip =
+        (!state.darkMode && state.lightness <= MAX) ||
+        (state.darkMode && state.lightness >= 1 - MAX)
+
+      store.$patch({
+        darkMode: state.darkMode
+      })
+
+      if (flip) {
+        state.lightness = 1 - state.lightness
+        pane.refresh()
+      }
     }
 
-    chroma(interpolator, undefined, state.chroma)
-
-    if (state.darkMode) {
-      lightness(interpolator, lerp(0, MAX, state.lightness), 1)
-    } else {
-      lightness(interpolator, 0, lerp(1 - MAX, 1, state.lightness))
+    if (event.presetKey === 'chroma') {
+      store.$patch({
+        chroma: [0, state.chroma]
+      })
     }
 
-    darkMode(interpolator, state.darkMode)
+    if (event.presetKey === 'lightness') {
+      store.updateLightness(state.lightness)
+    }
+
+    if (event.presetKey === 'theme') {
+      store.$patch({
+        model: state.theme
+      })
+    }
   })
 
   onUnmounted(() => pane.dispose())
@@ -294,11 +315,11 @@ $time-height: 3rem;
 $calendar-template: $time-width 0.625rem repeat(7, 1fr);
 $current-time-color: var(---color-3-1023-1023);
 $grid-color: var(---color-2-0-900);
-$background-weekday: var(---color-1-20-1020);
-$background-weekend: var(---color-1-75-1000);
+$background-weekday: var(---color-primary-20-1020);
+$background-weekend: var(---color-primary-75-1000);
 
-$header-color: var(---color-1-25-900);
-$subheader-color: var(---color-1-20-900);
+$header-color: var(---color-primary-25-900);
+$subheader-color: var(---color-primary-20-900);
 
 * {
   transition: background-color 200ms linear;

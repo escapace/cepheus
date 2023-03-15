@@ -2,27 +2,19 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   INTERPOLATOR,
-  createInterpolator,
-  parseModel,
   chroma as setChroma,
   lightness as setLightness,
-  type ModelUnparsed,
   type Point,
   type Triangle,
   barycentric
 } from 'cepheus'
 import { onMounted, onUnmounted, reactive, watch } from 'vue'
-import _model from '../models/model.json'
-import { ColorSpace, convert, LCH, OKLCH, P3, sRGB } from '@cepheus/color'
+import { convert, OKLCH, P3, sRGB } from '@cepheus/color'
 import { Pane } from 'tweakpane'
+import { useCepheus } from '@cepheus/vue'
 
-ColorSpace.register(LCH)
-ColorSpace.register(sRGB)
-ColorSpace.register(OKLCH)
-ColorSpace.register(P3)
-
-const model = parseModel(_model as ModelUnparsed)
-const instance = createInterpolator(model)
+const instance = useCepheus()
+const model = instance[INTERPOLATOR].state.model
 
 function cross(a: Point, b: Point, c: Point) {
   return (b[0] - a[0]) * -(c[1] - a[1]) - -(b[1] - a[1]) * (c[0] - a[0])
