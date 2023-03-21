@@ -1,19 +1,18 @@
 import {
-  convert,
   OKLCH,
   P3,
-  serialize,
+  convert,
   sRGB,
+  serialize,
   toGamut,
   type Color
 } from '@cepheus/color'
-import type { Iterator } from 'cassiopeia'
-import { StyleSheetPartial } from 'cassiopeia/lib/types/types'
+import type { Iterator, StyleSheetPartial } from 'cassiopeia'
 import {
-  color as c,
   ColorSpace,
-  darkMode,
   INTERPOLATOR,
+  color as c,
+  darkMode,
   normalizeAngle,
   type Interpolator
 } from 'cepheus'
