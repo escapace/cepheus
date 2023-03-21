@@ -1,10 +1,10 @@
 import type { Options } from '@yeuxjs/types'
 import { renderToString as cassiopeiaRenderToString } from 'cassiopeia'
+import { uneval } from 'devalue'
 import { Hono } from 'hono'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { renderToString, type SSRContext } from 'vue/server-renderer'
 import { createApp as vueCreateApp } from './create-app'
-import devalue from '@nuxt/devalue'
 
 export const createApp = async (options: Options = YEUX_OPTIONS) => {
   const hono = new Hono()
@@ -52,7 +52,7 @@ export const createApp = async (options: Options = YEUX_OPTIONS) => {
         .replace('<!--app-styles-->', styles)
         .replace(
           '<!--app-state-->',
-          `<script>var INITIAL_STATE = ${devalue(pinia.state.value)};</script>`
+          `<script>var INITIAL_STATE = ${uneval(pinia.state.value)};</script>`
         )
 
       return c.html(html)
