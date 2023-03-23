@@ -6,8 +6,7 @@ import { createSSRApp } from 'vue'
 import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router'
 import App from './components/app.vue'
 import Calendar from './components/calendar.vue'
-
-import { useCepheusStore } from './use-cepheus-store'
+import { useCepheusStore } from './hooks/use-cepheus-store'
 
 declare const INITIAL_STATE: Record<string, StateTree>
 
@@ -20,6 +19,10 @@ export async function createApp() {
     routes: [
       { path: '/', component: Calendar },
       {
+        path: '/constraint',
+        component: async () => await import('./components/constraint.vue')
+      },
+      {
         path: '/swatches',
         component: async () => await import('./components/home.vue')
       },
@@ -30,10 +33,6 @@ export async function createApp() {
       {
         path: '/triangle',
         component: async () => await import('./components/triangle.vue')
-      },
-      {
-        path: '/constraint',
-        component: async () => await import('./components/constraint.vue')
       }
     ]
   })

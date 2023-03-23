@@ -34,6 +34,16 @@ import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
                       active ? 'menu-link menu-link-active' : 'menu-link',
                       'group flex w-full items-center rounded-md px-2 py-2 text-sm'
                     ]"
+                    to="/constraint"
+                    >Constraint</router-link
+                  >
+                </MenuItem>
+                <MenuItem v-slot="{ active }">
+                  <router-link
+                    :class="[
+                      active ? 'menu-link menu-link-active' : 'menu-link',
+                      'group flex w-full items-center rounded-md px-2 py-2 text-sm'
+                    ]"
                     to="/swatches"
                     >Swatches</router-link
                   >
@@ -56,16 +66,6 @@ import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
                     ]"
                     to="/fitting"
                     >Fitting</router-link
-                  >
-                </MenuItem>
-                <MenuItem v-slot="{ active }">
-                  <router-link
-                    :class="[
-                      active ? 'menu-link menu-link-active' : 'menu-link',
-                      'group flex w-full items-center rounded-md px-2 py-2 text-sm'
-                    ]"
-                    to="/constraint"
-                    >Constraint</router-link
                   >
                 </MenuItem>
               </div>
