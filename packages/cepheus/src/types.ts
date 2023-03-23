@@ -29,7 +29,7 @@ export interface Model {
 }
 
 export type Unsubscribe = () => unknown
-export type Subscription = () => unknown
+export type Subscription = () => Promise<unknown> | unknown
 
 export interface State {
   model: Model
@@ -47,9 +47,9 @@ export interface Interpolator {
     triangle: Triangle
     state: State
     subscriptions: Set<Subscription>
-    updateModel: (model: Model) => void
-    updateLightness: (a?: number, b?: number) => void
-    updateChroma: (a?: number, b?: number) => void
-    updateDarkMode: (value: boolean) => void
+    updateModel: (model: Model) => Promise<void>
+    updateLightness: (a?: number, b?: number) => Promise<void>
+    updateChroma: (a?: number, b?: number) => Promise<void>
+    updateDarkMode: (value: boolean) => Promise<void>
   }
 }

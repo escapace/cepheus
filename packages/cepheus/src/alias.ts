@@ -1,6 +1,6 @@
 import { Model } from './types'
 
-export const alias = (model: Model, alias?: Model['alias']) => ({
+export const alias = (model: Model, alias?: Model['alias']): Model => ({
   ...model,
   alias
 })

@@ -9,11 +9,8 @@ import {
   lightness1
 } from './utilities/calculations'
 
-const notify = (subscriptions: Set<Subscription>) => {
-  for (const subscription of subscriptions) {
-    subscription()
-  }
-}
+const notify = async (subscriptions: Set<Subscription>) =>
+  await Promise.all(Array.from(subscriptions).map((value) => value()))
 
 const changeModel = (
   state: State,
@@ -56,7 +53,7 @@ export const createInterpolator = (options: Options): Interpolator => {
     triangle
   )
 
-  const updateModel = (model: Model) => {
+  const updateModel = async (model: Model) => {
     if (state.model !== model) {
       const props = changeModel(state, triangle, model)
 
@@ -64,11 +61,11 @@ export const createInterpolator = (options: Options): Interpolator => {
       p0 = props.p0
       p1 = props.p1
 
-      notify(subscriptions)
+      await notify(subscriptions)
     }
   }
 
-  const updateChroma = (a?: number, b?: number) => {
+  const updateChroma = async (a?: number, b?: number) => {
     let changed = false
 
     if (a !== undefined && a !== state.chroma[0]) {
@@ -88,11 +85,11 @@ export const createInterpolator = (options: Options): Interpolator => {
     }
 
     if (changed) {
-      notify(subscriptions)
+      await notify(subscriptions)
     }
   }
 
-  const updateLightness = (a?: number, b?: number) => {
+  const updateLightness = async (a?: number, b?: number) => {
     let changed = false
 
     if (b !== undefined && b !== state.lightness[1]) {
@@ -108,15 +105,15 @@ export const createInterpolator = (options: Options): Interpolator => {
     }
 
     if (changed) {
-      notify(subscriptions)
+      await notify(subscriptions)
     }
   }
 
-  const updateDarkMode = (value: boolean) => {
+  const updateDarkMode = async (value: boolean) => {
     if (value !== state.darkMode) {
       state.darkMode = value
 
-      notify(subscriptions)
+      await notify(subscriptions)
     }
   }
 
