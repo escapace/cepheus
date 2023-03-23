@@ -2,16 +2,16 @@
 import { Temporal, Intl } from '@js-temporal/polyfill'
 import { useTimeoutPoll } from '@vueuse/core'
 import { range } from 'lodash-es'
-import { onBeforeUpdate, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { onBeforeUpdate, onMounted, onUnmounted, ref } from 'vue'
 import Event from './event.vue'
-import { Pane } from 'tweakpane'
 // import { useCepheus } from '@cepheus/vue'
 import { useCassiopeia } from '@cassiopeia/vue'
-import { useCepheusStore } from '../use-cepheus-store'
+import { usePane } from '../hooks/use-pane'
 const { Xoshiro128 } = await import('@thi.ng/random')
 
-const store = useCepheusStore()
 const random = new Xoshiro128([123, 123, 123, 123])
+
+usePane()
 
 // const interpolator = useCepheus()
 const cassiopeia = useCassiopeia()
@@ -66,13 +66,16 @@ const createEvents = (): Data['events'] => {
     const bc = random.minmaxInt(0, 4)
 
     const bg = cassiopeia.add(
-      `---color-${bc}-${random.minmaxInt(200, 350)}-${random.minmaxInt(0, 200)}`
+      `---color-${bc}-${random.minmaxInt(200, 850)}-${random.minmaxInt(
+        50,
+        100
+      )}`
     )
 
     const textColor = cassiopeia.add(
       `---invert-${random.minmaxInt(0, 3)}-${random.minmaxInt(
-        100,
-        200
+        0,
+        100
       )}-${random.minmaxInt(0, 23)}`
     )
 
@@ -139,68 +142,6 @@ const { pause, resume } = useTimeoutPoll(update, 30 * 1000)
 cassiopeia.update(false)
 
 onMounted(() => {
-  const pane = new Pane()
-
-  const state = reactive({
-    theme: 'one' as 'one' | 'two',
-    lightness: 1,
-    // lightness1: 1,
-    // chroma0: 0,
-    chroma: 1,
-    darkMode: false
-  })
-
-  pane.addInput(state, 'theme', {
-    options: {
-      one: 'one',
-      two: 'two'
-    }
-  })
-  pane.addInput(state, 'lightness', { min: 0, max: 1, step: 0.01 })
-  // pane.addInput(state, 'lightness1', {min: 0, max: 1, step: 0.01})
-
-  // pane.addInput(state, 'chroma0', {min: 0, max: 1, step: 0.01})
-  pane.addInput(state, 'chroma', { min: 0, max: 1, step: 0.01 })
-  pane.addInput(state, 'darkMode')
-
-  const MAX = 0.3
-
-  pane.on('change', (event) => {
-    // console.log('here', event.presetKey === 'darkMode', (!state.darkMode && state.lightness >= 0.7), !state.darkMode, state.lightness)
-    if (event.presetKey === 'darkMode') {
-      const flip =
-        (!state.darkMode && state.lightness <= MAX) ||
-        (state.darkMode && state.lightness >= 1 - MAX)
-
-      store.$patch({
-        darkMode: state.darkMode
-      })
-
-      if (flip) {
-        state.lightness = 1 - state.lightness
-        pane.refresh()
-      }
-    }
-
-    if (event.presetKey === 'chroma') {
-      store.$patch({
-        chroma: [0, state.chroma]
-      })
-    }
-
-    if (event.presetKey === 'lightness') {
-      store.updateLightness(state.lightness)
-    }
-
-    if (event.presetKey === 'theme') {
-      store.$patch({
-        model: state.theme
-      })
-    }
-  })
-
-  onUnmounted(() => pane.dispose())
-
   resume()
 })
 
