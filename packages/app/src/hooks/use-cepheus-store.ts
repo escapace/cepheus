@@ -16,7 +16,7 @@ import { defineStore, skipHydrate } from 'pinia'
 import { computed, ref, watch } from 'vue'
 
 const MAX = 0.25
-const MIN = 0.05
+const MIN = 0.1
 
 const enum EnumModel {
   One = 'one',
@@ -28,6 +28,15 @@ const enum ModelState {
   Active = 'resolved'
 }
 
+const importModel = async (model: EnumModel): Promise<Model> => {
+  const value =
+    model === EnumModel.One
+      ? await import('../models/model-one')
+      : await import('../models/model-two')
+
+  return value.model
+}
+
 export const useCepheusStore = defineStore('cepheus', () => {
   const chroma = ref(1)
   const darkMode = ref(false)
@@ -37,31 +46,20 @@ export const useCepheusStore = defineStore('cepheus', () => {
   const modelState = ref<ModelState>(ModelState.Pending)
   let cepheus: undefined | Cepheus
 
-  // const cepheusChroma = computed((): [low: number, high: number] => [
-  //   0,
-  //   chroma.value
-  // ])
-
   const cepheusChroma = computed((): [low: number, high: number] => {
-    const c = lerp(0.025, 0, contrast.value)
+    const low = lerp(0.025, 0, contrast.value)
 
-    return [lerp(0, c, chroma.value), chroma.value]
+    const high = chroma.value
+
+    return [lerp(0, low, high), high]
   })
 
   const cepheusLightness = computed((): [low: number, high: number] => {
-    const c = lerp(MAX, MIN, contrast.value)
+    const l = lightness.value
+    const c = lerp(MAX, MIN, contrast.value) - lerp(0, MIN, l)
 
-    return [lerp(0, c, lightness.value), lerp(1 - c, 1, lightness.value)]
+    return [lerp(0, c, l), lerp(1 - c, 1, l)]
   })
-
-  const importModel = async (model: EnumModel): Promise<Model> => {
-    const value =
-      model === EnumModel.One
-        ? await import('./models/model-one')
-        : await import('./models/model-two')
-
-    return value.model
-  }
 
   const createCepheus = async (
     options: Omit<Options, 'state'>
