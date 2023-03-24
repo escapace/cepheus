@@ -7,10 +7,11 @@ import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router'
 import App from './components/app.vue'
 import Calendar from './components/calendar.vue'
 import { useCepheusStore } from './hooks/use-cepheus-store'
+import { SSRContext } from 'vue/server-renderer'
 
 declare const INITIAL_STATE: Record<string, StateTree>
 
-export async function createApp() {
+export async function createApp(context?: SSRContext) {
   const pinia = createPinia()
   if (!import.meta.env.SSR) pinia.state.value = INITIAL_STATE
 
@@ -37,18 +38,9 @@ export async function createApp() {
     ]
   })
 
-  const store = useCepheusStore(pinia)
+  const cepheusStore = useCepheusStore(pinia)
 
-  const cepheus = await store.createCepheus({
-    darkMode: 'media'
-    // flags: import.meta.env.SSR
-    //   ? {
-    //       colorGamut: ['p3', 'srgb'],
-    //       colorFormat: ['p3', 'srgb', 'oklch'],
-    //       colorScheme: ['dark', 'light']
-    //     }
-    //   : undefined
-  })
+  const cepheus = await cepheusStore.createCepheus(context?.cepheus)
 
   const cassiopeia = createCassiopeia({
     plugins: [cepheus]
@@ -67,6 +59,7 @@ export async function createApp() {
   return {
     app,
     cassiopeia,
+    cepheusStore,
     pinia,
     router
   }

@@ -263,7 +263,7 @@ $header-color: var(---color-primary-25-900);
 $subheader-color: var(---color-primary-20-900);
 
 * {
-  transition: background-color 200ms linear;
+  transition: background-color 30ms linear;
 }
 
 .control {

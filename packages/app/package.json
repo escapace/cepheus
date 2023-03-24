@@ -5,8 +5,8 @@
   "author": "escapace <opensource@escapace.com>",
   "bugs": "https://github.com/escapace/cepheus/issues",
   "dependencies": {
-    "@cassiopeia/vite": "5.2.0",
-    "@cassiopeia/vue": "5.2.0",
+    "@cassiopeia/vite": "5.2.1",
+    "@cassiopeia/vue": "5.2.1",
     "@cepheus/color": "workspace:*",
     "@cepheus/plugin": "workspace:*",
     "@cepheus/utilities": "workspace:*",
@@ -18,14 +18,15 @@
     "@thi.ng/random": "3.3.27",
     "@tweakpane/core": "1.1.6",
     "@vueuse/core": "9.13.0",
-    "cassiopeia": "5.2.0",
+    "cassiopeia": "5.2.1",
     "cepheus": "workspace:*",
     "devalue": "4.3.0",
     "hono": "3.1.2",
     "lodash-es": "4.17.21",
     "pinia": "2.0.33",
     "tweakpane": "3.1.7",
-    "vue-router": "4"
+    "vue-router": "4",
+    "zod": "3.21.4"
   },
   "devDependencies": {
     "@escapace/unocss-preset-escapace": "0.2.0",
@@ -44,7 +45,7 @@
     "eslint-plugin-vue": "9.10.0",
     "prettier": "2.8.6",
     "prettier-config-escapace": "1.0.5",
-    "sass": "1.59.3",
+    "sass": "1.60.0",
     "typescript": "5.0.2",
     "unocss": "0.50.6",
     "vite": "4.2.1",
