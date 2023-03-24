@@ -2,9 +2,24 @@ import type { Options } from '@yeuxjs/types'
 import { renderToString as cassiopeiaRenderToString } from 'cassiopeia'
 import { uneval } from 'devalue'
 import { Hono } from 'hono'
+import { validator } from 'hono/validator'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { renderToString, type SSRContext } from 'vue/server-renderer'
-import { createApp as vueCreateApp } from './create-app'
+import { SSRContext, renderToString } from 'vue/server-renderer'
+import { z } from 'zod'
+import { createApp as _createApp } from './create-app'
+import { preferencesSchema } from './types'
+
+const safeParse = <T>(schema: z.ZodType<T>, string: string | undefined) => {
+  if (string === undefined) {
+    return undefined
+  }
+
+  try {
+    return schema.parse(JSON.parse(string))
+  } catch (e) {
+    return undefined
+  }
+}
 
 export const createApp = async (options: Options = YEUX_OPTIONS) => {
   const hono = new Hono()
@@ -19,8 +34,42 @@ export const createApp = async (options: Options = YEUX_OPTIONS) => {
     hono.use('*', serveStatic({ root: './' }))
   }
 
+  hono.post(
+    '/preferences',
+    validator('json', (value, c) => {
+      const parsed = preferencesSchema.safeParse(value)
+
+      if (!parsed.success) {
+        return c.text('Invalid!', 401)
+      }
+
+      return parsed.data
+    }),
+    // eslint-disable-next-line @typescript-eslint/require-await
+    async (c) => {
+      const preferences = c.req.valid('json')
+
+      c.cookie('preferences', JSON.stringify(preferences))
+
+      return c.text('ok', 201)
+    }
+  )
+
   hono.get('*', async (c) => {
-    const { app, router, pinia, cassiopeia } = await vueCreateApp()
+    const preferences = safeParse(
+      preferencesSchema,
+      c.req.cookie('preferences')
+    )
+
+    const context: SSRContext = {
+      cepheus: {
+        preferences,
+        darkMode: preferences === undefined ? 'media' : 'class'
+      }
+    }
+
+    const { app, router, pinia, cassiopeia } = await _createApp(context)
+
     const url = new URL(c.req.url)
 
     await router.push(url.pathname)
@@ -32,11 +81,9 @@ export const createApp = async (options: Options = YEUX_OPTIONS) => {
     if (route.matched.length === 0) {
       return await c.notFound()
     } else {
-      const context: SSRContext & { modules?: string[] } = {}
-
       const appHTML = await renderToString(app, context)
 
-      await cassiopeia.update(false)
+      await cassiopeia.update(true)
 
       const styles = cassiopeiaRenderToString(cassiopeia)
         .map(
@@ -53,6 +100,12 @@ export const createApp = async (options: Options = YEUX_OPTIONS) => {
         .replace(
           '<!--app-state-->',
           `<script>var INITIAL_STATE = ${uneval(pinia.state.value)};</script>`
+        )
+        .replace(
+          '<!--app-html-tag-->',
+          preferences === undefined
+            ? ''
+            : ` class=${preferences.darkMode ? 'dark' : 'light'}`
         )
 
       return c.html(html)
