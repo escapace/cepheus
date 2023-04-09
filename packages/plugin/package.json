@@ -12,21 +12,21 @@
     "@types/chai": "4.3.4",
     "@types/lodash-es": "4.17.7",
     "@types/mocha": "10.0.1",
-    "@types/node": "18.15.6",
-    "@typescript-eslint/eslint-plugin": "5.56.0",
-    "@typescript-eslint/parser": "5.56.0",
+    "@types/node": "18.15.11",
+    "@typescript-eslint/eslint-plugin": "5.57.1",
+    "@typescript-eslint/parser": "5.57.1",
     "c8": "7.13.0",
     "cassiopeia": "5.2.1",
     "chai": "4.3.7",
-    "eslint": "8.36.0",
+    "eslint": "8.38.0",
     "eslint-config-escapace": "3.17.0",
     "eslint-config-prettier": "8.8.0",
     "eslint-plugin-editorconfig": "4.0.2",
     "eslint-plugin-no-null": "1.0.2",
     "mocha": "10.2.0",
-    "prettier": "2.8.6",
+    "prettier": "2.8.7",
     "prettier-config-escapace": "1.0.5",
-    "typescript": "5.0.2"
+    "typescript": "5.0.4"
   },
   "exports": {
     ".": {

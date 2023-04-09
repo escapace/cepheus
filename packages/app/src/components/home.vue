@@ -122,7 +122,5 @@ const toStyle = (squareIndex: number, colorIndex: number) => {
   font-size: 8px;
   text-align: center;
   font-stretch: condensed;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 </style>

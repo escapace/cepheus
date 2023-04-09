@@ -8,6 +8,7 @@ import { SSRContext, renderToString } from 'vue/server-renderer'
 import { z } from 'zod'
 import { createApp as _createApp } from './create-app'
 import { preferencesSchema } from './types'
+import webFonts from './web-fonts.json'
 
 const safeParse = <T>(schema: z.ZodType<T>, string: string | undefined) => {
   if (string === undefined) {
@@ -85,14 +86,19 @@ export const createApp = async (options: Options = YEUX_OPTIONS) => {
 
       await cassiopeia.update(true)
 
-      const styles = cassiopeiaRenderToString(cassiopeia)
-        .map(
+      const styles = [
+        ...cassiopeiaRenderToString(cassiopeia).map(
           (style) =>
             `<style ${
               style.media === undefined ? ' ' : `media="${style.media}" `
             }cassiopeia="${style.name}-${style.key}">${style.content}</style>`
-        )
-        .join('\n')
+        ),
+        `<style>${webFonts.fontFace}</style>`,
+        `<style>${webFonts.style}</style>`,
+        `<noscript><style>${webFonts.noScriptStyle}</style></noscript>`,
+        `<script>${webFonts.script}</script>`,
+        `<script>window.webFontLoader(${JSON.stringify('en')});</script>`
+      ].join('\n')
 
       const html = options.template
         .replace('<!--app-html-->', appHTML)
@@ -103,9 +109,11 @@ export const createApp = async (options: Options = YEUX_OPTIONS) => {
         )
         .replace(
           '<!--app-html-tag-->',
-          preferences === undefined
-            ? ''
-            : ` class=${preferences.darkMode ? 'dark' : 'light'}`
+          ` lang="en"${
+            preferences === undefined
+              ? ''
+              : ` class=${preferences.darkMode ? 'dark' : 'light'}`
+          }`
         )
 
       return c.html(html)
