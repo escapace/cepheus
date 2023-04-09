@@ -13,6 +13,16 @@
   ],
   automerge: false,
   stabilityDays: 7,
+  hostRules: [
+    {
+      matchHost: 'https://npm.pkg.github.com/',
+      hostType: 'npm',
+      encrypted: {
+        token: 'wcFMA/xDdHCJBTolAQ/9EI4a0PrdnZseSApwy3mSM+gewXF8r0oVgouz0vjvTz8USnxdk5ZYXHCd/+9+qOoMLzIaL2iKfpAT80oGralK6ryB3+r8B91JIEu5WnYiTBn9vsoikF0UrrA36l8s5MYNFwVdcnE9Qgjv57nbrWjlkZCdQneDOd7uKhiKenyDx4zQjY/Q3KqoreBWfUltxBjQ6VWB/lrbO0E/ZUCrDoRxWbKxnS9mpt7wt3FGu3/mXp9XjEqxOS8/hpNNKaA+3vGWmiJziEN0Nk/pzGBUSUUVzr/kAXMGFADH3oUYevzzx/DEswp3yAUoebx/QJjHrEyfy+9BIfhJOuM7+tnF05eV90rMJM2HfvGIsoAZWTGmw4rvkhE27z54OJEagniV/h79eia/IfshxyM7qX2R2s9mWtYhL8xvXNPxIaBQ8FS4JVIIZ4/hoEuBaU67sLWDRvi/YkClQNtHWoQs51Hnz15nmpGJ7eTWPCYzZPT3yYiup4cjgwNxWXUxQCSqX9oIJELSkzhzqIVs6PdN/Ti/B+25TF9L15KgOVKdMmnEyDAUG2wMK3Qle/XRtsxqpZP/SKiG6zhmLw3jwUBXbFhUpObpQHxnKz+IRUIB/E0E2gC31nrTQVlwhwTiHETG70w2mxoEOhHjHBisVHjmFYYOcNNj4prwL8RQS6+5JmnmTndMPzLSdwEzzmUPAzZjeHihCUq5MvwSMrXvK8bJZRKz2P/kfgiHPxkMrQDRZjM2e2OhL/b8f1es7LZw8X9IYFGbs1FZ23WXthCkfmR/ZoxWW2DZwPaViISalE+jmH8LbH59mIBrxXw6OnN2MHryzXa/0Z/7PpOTJ+WoPhTR'
+      }
+    }
+  ],
+  npmrc: '@escapace:registry=https://npm.pkg.github.com/',
   packageRules: [
     {
       matchDepTypes: ['devDependencies'],

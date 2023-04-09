@@ -72,7 +72,7 @@ export const useCepheusStore = defineStore('cepheus', () => {
 
       const cepheusLightness = computed((): [low: number, high: number] => {
         const l = lightness.value
-        const c = lerp(MAX, MIN, contrast.value) - lerp(0, MIN, l)
+        const c = lerp(MAX, MIN, contrast.value) /*  - lerp(0, MIN, l) */
 
         return [lerp(0, c, l), lerp(1 - c, 1, l)]
       })

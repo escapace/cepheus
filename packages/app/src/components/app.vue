@@ -3,7 +3,7 @@ import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 </script>
 
 <template>
-  <div>
+  <div class="sans-serif">
     <Suspense>
       <div>
         <div class="top-8 w-10 text-right ml1 mb5">
@@ -86,7 +86,6 @@ import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 <style>
 body {
   background-color: var(---color-1-20-1020);
-  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
 }
 
 .menu-button {
