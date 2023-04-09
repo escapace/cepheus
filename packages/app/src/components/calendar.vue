@@ -274,9 +274,6 @@ $subheader-color: var(---color-primary-20-900);
   width: 100%;
   display: grid;
   grid-template-rows: $title-height $days-height auto;
-  font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui,
-    helvetica neue, helvetica, Cantarell, Ubuntu, roboto, noto, arial,
-    sans-serif;
   /* position: absolute; */
 }
 

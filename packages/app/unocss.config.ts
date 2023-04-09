@@ -6,16 +6,16 @@ import {
   transformerVariantGroup
 } from 'unocss'
 
-import { presetEscapace } from '@escapace/unocss-preset-escapace'
+import { presetEscapace } from 'unocss-preset-escapace'
 
 export default defineConfig({
-  // shortcuts: [
-  //   ['container', '']
-  //   // [
-  //   //   'icon-btn',
-  //   //   'inline-block cursor-pointer select-none opacity-75 transition duration-200 ease-in-out hover:opacity-100 hover:text-teal-600'
-  //   // ]
-  // ],
+  shortcuts: [
+    ['container', '']
+    // [
+    //   'icon-btn',
+    //   'inline-block cursor-pointer select-none opacity-75 transition duration-200 ease-in-out hover:opacity-100 hover:text-teal-600'
+    // ]
+  ],
   presets: [
     presetEscapace(),
     // presetAttributify({

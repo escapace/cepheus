@@ -5,13 +5,7 @@ import { defineConfig, splitVendorChunkPlugin } from 'vite'
 
 export default defineConfig({
   plugins: [
-    vue({
-      template: {
-        compilerOptions: {
-          isCustomElement: (tag) => tag.startsWith('sl-')
-        }
-      }
-    }),
+    vue(),
     unocss(),
     cassiopeia(),
     splitVendorChunkPlugin()
