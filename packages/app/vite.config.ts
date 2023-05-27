@@ -3,11 +3,9 @@ import vue from '@vitejs/plugin-vue'
 import unocss from 'unocss/vite'
 import { defineConfig, splitVendorChunkPlugin } from 'vite'
 
-export default defineConfig({
-  plugins: [
-    vue(),
-    unocss(),
-    cassiopeia(),
-    splitVendorChunkPlugin()
-  ]
-})
+export default defineConfig(() => ({
+  // ssr: {
+  //   target: 'webworker'
+  // },
+  plugins: [vue(), unocss(), cassiopeia(), splitVendorChunkPlugin()]
+}))

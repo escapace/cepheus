@@ -44,6 +44,7 @@ const buildOptions = {
   external,
   format: 'esm',
   logLevel: 'info',
+  minifySyntax: true,
   target,
   outExtension: { '.js': '.mjs' },
   outdir: path.join(cwd, `lib/esm`),

@@ -6,8 +6,6 @@ import { fileURLToPath } from 'url'
 const cwd = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 process.chdir(cwd)
 
-console.log(cwd)
-
 await yeux({ command: 'build', directory: cwd })
 
 await build({
@@ -16,9 +14,14 @@ await build({
   bundle: true,
   treeShaking: true,
   platform: 'neutral',
+  minify: true,
   format: 'esm',
+  banner: {
+    'js': `import { Buffer } from 'node:buffer';`
+  },
   external: ['__STATIC_CONTENT_MANIFEST'],
   allowOverwrite: true,
+  conditions: ['workerd', 'default'],
   mainFields: ['module', 'main'],
   target: 'es2022',
   logOverride: {

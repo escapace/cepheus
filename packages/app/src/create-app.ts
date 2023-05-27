@@ -34,6 +34,10 @@ export async function createApp(context?: SSRContext) {
       {
         path: '/triangle',
         component: async () => await import('./components/triangle.vue')
+      },
+      {
+        path: '/text',
+        component: async () => await import('./components/text.vue')
       }
     ]
   })

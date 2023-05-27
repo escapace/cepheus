@@ -1,6 +1,7 @@
 name = "app"
 main = "./dist/worker/index.mjs"
 compatibility_date = "2023-03-11"
+compatibility_flags = [ "nodejs_compat" ]
 # no_bundle = true
 
 [build]
