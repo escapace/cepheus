@@ -17,7 +17,7 @@ usePane()
 const cassiopeia = useCassiopeia()
 
 const calendar = new Temporal.Calendar('iso8601')
-const timeZone = Temporal.Now.timeZone()
+const timeZone = Temporal.Now.timeZoneId()
 const weekDayFormatter = new Intl.DateTimeFormat('en-GB', {
   day: '2-digit',
   weekday: 'short',
@@ -154,7 +154,7 @@ onUnmounted(() => {
   <div>
     <div class="container">
       <div class="header">
-        <div class="week">{{ data?.week }}</div>
+        <div class="week sans-serif-italic">{{ data?.week }}</div>
         <div class="month">{{ data?.month }}</div>
       </div>
       <div class="subheader">
@@ -163,7 +163,7 @@ onUnmounted(() => {
         <div
           v-for="(day, index) in data?.days"
           :key="index"
-          :class="{ current: day.current }"
+          :class="{ 'sans-serif-bold': day.current }"
           class="day"
         >
           {{ day.title }}
@@ -237,7 +237,7 @@ onUnmounted(() => {
           :title="event.title"
         />
         <div
-          class="current-time"
+          class="current-time sans-serif-bold"
           :style="{
             gridRow: data?.time.row,
             top: `calc(${data?.time.hour.toFixed(5)}% - 0.0625rem)`
@@ -339,10 +339,6 @@ $subheader-color: var(---color-primary-20-900);
   position: relative;
 }
 
-.current {
-  font-weight: 500;
-}
-
 .header {
   padding-right: 0.75rem;
   padding-left: 0.75rem;
@@ -363,7 +359,6 @@ $subheader-color: var(---color-primary-20-900);
 }
 
 .week {
-  font-weight: 500;
   grid-column: 1;
   grid-row: 1;
 }
