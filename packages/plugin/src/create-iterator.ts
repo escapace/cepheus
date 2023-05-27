@@ -31,6 +31,8 @@ const template = (
     return undefined
   }
 
+  // TODO: :root, ::backdrop, ::selection { }
+  // https://kilianvalkhof.com/2023/css-html/root-isnt-global/
   let selector = ':root'
   const media: string[] = []
   const supports: string[] = []

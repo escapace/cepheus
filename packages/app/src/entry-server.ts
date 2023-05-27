@@ -3,6 +3,8 @@ import { renderToString as cassiopeiaRenderToString } from 'cassiopeia'
 import { uneval } from 'devalue'
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
+// import { take } from 'lodash-es'
+import { cookie, jar, take } from 'seedpods'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { SSRContext, renderToString } from 'vue/server-renderer'
 import { z } from 'zod'
@@ -10,16 +12,42 @@ import { createApp as _createApp } from './create-app'
 import { preferencesSchema } from './types'
 import webFonts from './web-fonts.json'
 
-const safeParse = <T>(schema: z.ZodType<T>, string: string | undefined) => {
-  if (string === undefined) {
-    return undefined
-  }
+const key = Buffer.from(
+  'XSRvhjsuPTumCCVsVjPFFdvQF62g6az0rzvVFfed+4E=',
+  'base64'
+)
 
-  try {
-    return schema.parse(JSON.parse(string))
-  } catch (e) {
-    return undefined
-  }
+const cookies = jar().put(
+  cookie<'preferences', 'aes-gcm', z.infer<typeof preferencesSchema>>({
+    key: 'preferences',
+    type: 'aes-gcm',
+    secure: true,
+    sameSite: 'Lax',
+    prefix: '__Secure-',
+    maxAge: 86400,
+    keys: [key]
+  })
+)
+
+export const createSession = async (cookieHeader?: string) => {
+  const session = await take(cookieHeader, cookies, {
+    preferences: (prev, next) => {
+      try {
+        const parsed = preferencesSchema.parse({
+          ...(prev ?? {}),
+          ...(next ?? {})
+        })
+
+        return parsed
+      } catch {
+        return prev
+      }
+    }
+  })
+
+  session.set('preferences', undefined)
+
+  return session
 }
 
 export const createApp = async (options: Options = YEUX_OPTIONS) => {
@@ -46,21 +74,23 @@ export const createApp = async (options: Options = YEUX_OPTIONS) => {
 
       return parsed.data
     }),
-    // eslint-disable-next-line @typescript-eslint/require-await
-    async (c) => {
-      const preferences = c.req.valid('json')
 
-      c.cookie('preferences', JSON.stringify(preferences))
+    async (c) => {
+      const session = await createSession(c.req.header('cookie'))
+
+      session.set('preferences', c.req.valid('json'))
+
+      for await (const value of session.values()) {
+        c.header('set-cookie', value)
+      }
 
       return c.text('ok', 201)
     }
   )
 
   hono.get('*', async (c) => {
-    const preferences = safeParse(
-      preferencesSchema,
-      c.req.cookie('preferences')
-    )
+    const session = await createSession(c.req.header('cookie'))
+    const preferences = session.get('preferences')
 
     const context: SSRContext = {
       cepheus: {
