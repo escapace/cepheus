@@ -80,7 +80,7 @@ export const createApp = async (options: Options = YEUX_OPTIONS) => {
 
       session.set('preferences', c.req.valid('json'))
 
-      for await (const value of session.values()) {
+      for await (const value of await session.values()) {
         c.header('set-cookie', value)
       }
 
