@@ -18,7 +18,7 @@
       matchHost: 'https://npm.pkg.github.com/',
       hostType: 'npm',
       encrypted: {
-        token: 'wcFMA/xDdHCJBTolAQ/9EI4a0PrdnZseSApwy3mSM+gewXF8r0oVgouz0vjvTz8USnxdk5ZYXHCd/+9+qOoMLzIaL2iKfpAT80oGralK6ryB3+r8B91JIEu5WnYiTBn9vsoikF0UrrA36l8s5MYNFwVdcnE9Qgjv57nbrWjlkZCdQneDOd7uKhiKenyDx4zQjY/Q3KqoreBWfUltxBjQ6VWB/lrbO0E/ZUCrDoRxWbKxnS9mpt7wt3FGu3/mXp9XjEqxOS8/hpNNKaA+3vGWmiJziEN0Nk/pzGBUSUUVzr/kAXMGFADH3oUYevzzx/DEswp3yAUoebx/QJjHrEyfy+9BIfhJOuM7+tnF05eV90rMJM2HfvGIsoAZWTGmw4rvkhE27z54OJEagniV/h79eia/IfshxyM7qX2R2s9mWtYhL8xvXNPxIaBQ8FS4JVIIZ4/hoEuBaU67sLWDRvi/YkClQNtHWoQs51Hnz15nmpGJ7eTWPCYzZPT3yYiup4cjgwNxWXUxQCSqX9oIJELSkzhzqIVs6PdN/Ti/B+25TF9L15KgOVKdMmnEyDAUG2wMK3Qle/XRtsxqpZP/SKiG6zhmLw3jwUBXbFhUpObpQHxnKz+IRUIB/E0E2gC31nrTQVlwhwTiHETG70w2mxoEOhHjHBisVHjmFYYOcNNj4prwL8RQS6+5JmnmTndMPzLSdwEzzmUPAzZjeHihCUq5MvwSMrXvK8bJZRKz2P/kfgiHPxkMrQDRZjM2e2OhL/b8f1es7LZw8X9IYFGbs1FZ23WXthCkfmR/ZoxWW2DZwPaViISalE+jmH8LbH59mIBrxXw6OnN2MHryzXa/0Z/7PpOTJ+WoPhTR'
+        token: 'wcFMA/xDdHCJBTolAQ//cfCuWVepV7aFGe0zv7/j5/fa47yE8HdvbfAl/RM4sXf0zgPrktZjQJz9AKQ5rzUx9uYUW/fDb5wYcYYZa9NOsCnzIZ3C2/gHnVjBNgEvtwB5kefbtshVo9se3OS5MME64oYARx3EtzZ45eIYiUD0PF7nfZu9p5L2a+0skG3krx0OLlLuWG6uZ7tzkMCDvzJcphQt/JxEyrWZzQGldCvVapvGDA8UCpoypYOLNvUDns7jTQOU93toGuKDSeGqXdaMokWQTM1nshd8k3PEx+hzfLo3JxR0e1oePTTF+NM+AUVVwCL2Mb0Hec2k+A+GB0a3xafUbJB7kWF6bQ1QDsX9hl0lxMFTiHylRA1ilnOsUXE7iX/AtYqQR8YuLlUmA7v/SCNs8blGPsu+ymtoZBC1SPgLGYzPpeGMvjaLW36fFPugHGu19MpikWqMSyvsPbVTTE8hkk+G3cA69v3TNE1YuK9viG2XItx1cP+Z/nM1d//+UQ1TYKsVsQIRjU23RZ5xExXXOvlO27vzyQS3BdhXYITNL+FxP++u1oFRAZOOHaD7uoW7gkJsBr7v0w5cvO/ewGb6LleaKYTIjE1CZRCeJwQAyT065hAWhsTjrEv9o7IbsCrBsu0IYqqU8CZ+FAzjbJdvlgOSn8h3pdn7nWbj/ALPhSwd2WP4xDO+Pru6seHSdwEaPxV1DZNVhMtW7RAK7HqQuDuosk4fpLLwltDbS6QhVgSGcsRtXOFnJlV8ShbR4yCjizNdmB80drLAi5PxH/qZDJ4CJQNxrwcR2f5ZYdEGxMJYyS/7qOic6t5QbsWdJ/VOFm9k2wLh+dQ75rylLRsTwtiYWCGz'
       }
     }
   ],
@@ -53,6 +53,6 @@
   node: {
     enabled: false
   },
-  prCreation: 'not-pending',
+  prCreation: 'immediate',
   rebaseWhen: 'conflicted'
 }
