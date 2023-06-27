@@ -28,7 +28,7 @@
     "lodash-es": "4.17.21",
     "prettier": "2.8.8",
     "prettier-config-escapace": "1.0.5",
-    "semver": "7.5.1",
+    "semver": "7.5.2",
     "syncpack": "10.1.0",
     "typescript": "5.0.4"
   },
