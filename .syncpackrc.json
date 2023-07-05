@@ -15,6 +15,13 @@
       "strategy": "versionsByName"
     }
   },
+  "versionGroups": [
+    {
+      "packages": ["**"],
+      "dependencies": ["@cepheus/**", "cepheus"],
+      "isIgnored": true
+    }
+  ],
   "semverGroups": [
     {
       "dependencies": ["**"],
