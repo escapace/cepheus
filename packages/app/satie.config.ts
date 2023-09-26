@@ -1,5 +1,5 @@
-import type { Font, Locales } from '@escapace/web-fonts'
-import { arialBold, arialItalic, arialRegular, helveticaBold, helveticaRegular, helveticaOblique } from '@escapace/web-fonts'
+import type { Font, Locales } from '@escapace/satie'
+import { arialBold, arialItalic, arialRegular, helveticaBold, helveticaRegular, helveticaOblique } from '@escapace/satie'
 
 const enUnicodeRange =
   'U+20-7E,U+A0-BF,U+2BB,U+2BC,U+2C6,U+2DA,U+2DC,U+303,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'

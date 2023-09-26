@@ -8,19 +8,19 @@ export const usePane = () => {
   onMounted(() => {
     const pane = new Pane()
 
-    pane.addInput(store, 'model', {
+    pane.addBinding(store, 'model', {
       label: 'theme',
       options: {
         one: 'one',
         two: 'two'
       }
     })
-    pane.addInput(store, 'lightness', { min: 0, max: 1, step: 0.01 })
-    pane.addInput(store, 'chroma', { min: 0, max: 1, step: 0.01 })
-    pane.addInput(store, 'contrast', { min: 0, max: 1, step: 0.01 })
-    pane.addInput(store, 'darkMode', { label: 'dark mode' })
+    pane.addBinding(store, 'lightness', { min: 0, max: 1, step: 0.01 })
+    pane.addBinding(store, 'chroma', { min: 0, max: 1, step: 0.01 })
+    pane.addBinding(store, 'contrast', { min: 0, max: 1, step: 0.01 })
+    pane.addBinding(store, 'darkMode', { label: 'dark mode' })
 
-    pane.addMonitor(store, 'modelState', { label: 'state' })
+    pane.addBinding(store, 'modelState', { label: 'state', readonly: true })
 
     onUnmounted(
       store.$subscribe(() => {
