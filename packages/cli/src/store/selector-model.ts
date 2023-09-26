@@ -32,7 +32,7 @@ export const selectorModel = (store: Store): ModelUnparsed => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       (square): Array<[number, number, number]> => values.get(square)!
     )
-  ) as number[]
+  )
 
   const triangle = selectorTriangle(store)
     .triangle.flat()

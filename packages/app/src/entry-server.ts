@@ -10,7 +10,7 @@ import { SSRContext, renderToString } from 'vue/server-renderer'
 import { z } from 'zod'
 import { createApp as _createApp } from './create-app'
 import { preferencesSchema } from './types'
-import webFonts from './web-fonts.json'
+import webFonts from './fonts.json'
 
 const key = Buffer.from(
   'XSRvhjsuPTumCCVsVjPFFdvQF62g6az0rzvVFfed+4E=',

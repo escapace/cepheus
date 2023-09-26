@@ -29,6 +29,7 @@ export interface Model {
 }
 
 export type Unsubscribe = () => unknown
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export type Subscription = () => Promise<unknown> | unknown
 
 export interface State {
