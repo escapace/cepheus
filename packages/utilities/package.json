@@ -44,7 +44,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "repository": "https://github.com/escapace/cepheus.git",
+  "repository": "escapace/cepheus",
   "scripts": {
     "build": "node ../../scripts/build.mjs",
     "lint": "eslint 'src/**/*.ts'",
