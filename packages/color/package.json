@@ -36,7 +36,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "repository": "https://github.com/escapace/cepheus.git",
+  "repository": "escapace/cepheus",
   "scripts": {
     "build": "node ../../scripts/build.mjs && cp ./src/colorjs-io.d.ts ./lib/types/colorjs-io.d.ts",
     "lint": "eslint 'src/**/*.ts'",

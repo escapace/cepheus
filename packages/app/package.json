@@ -59,7 +59,7 @@
   "homepage": "https://github.com/escapace/cepheus",
   "license": "MPL-2.0",
   "private": true,
-  "repository": "https://github.com/escapace/cepheus.git",
+  "repository": "escapace/cepheus",
   "scripts": {
     "build": "wrangler publish --dry-run --outdir=dist/worker",
     "dev": "yeux dev",

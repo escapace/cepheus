@@ -42,7 +42,7 @@
   "homepage": "https://github.com/escapace/cepheus",
   "license": "MPL-2.0",
   "private": true,
-  "repository": "escapace/cepheus.git",
+  "repository": "escapace/cepheus",
   "scripts": {
     "build": "pnpm run -r --filter './packages/*' build",
     "lint": "ls-lint && pnpm run -r --filter './packages/*' lint",
