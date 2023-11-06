@@ -310,8 +310,8 @@ importers:
         specifier: ^5.0.2
         version: 5.0.2
       big-cartesian:
-        specifier: ^5.0.0
-        version: 5.0.0
+        specifier: ^6.0.0
+        version: 6.0.0
       bignumber.js:
         specifier: ^9.1.2
         version: 9.1.2
@@ -2547,9 +2547,9 @@ packages:
   /base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
-  /big-cartesian@5.0.0:
-    resolution: {integrity: sha512-mUWmXfSq+We9MWud1mymazuPJqy8vkSkadQ/NcB9necb1ntNlFmoZ2vjk83XvCsAe5A9tQyvxiK25tR4NNZU2Q==}
-    engines: {node: '>=16.17.0'}
+  /big-cartesian@6.0.0:
+    resolution: {integrity: sha512-Zc2Uh2P8OSdMEuLIQZth0M9u65f1qPlap3CJNifJCV7da10oYcUw6dOafm1YvzeSyUhCiwcmdDiB4jS7Twc6WQ==}
+    engines: {node: '>=18.18.0'}
     dev: false
 
   /bignumber.js@9.1.2:
