@@ -53,7 +53,7 @@
     "vite": "4.5.0",
     "vue": "3.3.7",
     "vue-tsc": "1.8.22",
-    "wrangler": "3.15.0",
+    "wrangler": "3.19.0",
     "yeux": "5.10.4"
   },
   "homepage": "https://github.com/escapace/cepheus",
