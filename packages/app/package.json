@@ -35,7 +35,7 @@
     "@typescript-eslint/eslint-plugin": "6.9.1",
     "@typescript-eslint/parser": "6.9.1",
     "@unocss/reset": "0.57.1",
-    "@vitejs/plugin-vue": "4.4.0",
+    "@vitejs/plugin-vue": "5.0.4",
     "@yeuxjs/types": "5.10.4",
     "esbuild": "0.19.5",
     "eslint": "8.52.0",
