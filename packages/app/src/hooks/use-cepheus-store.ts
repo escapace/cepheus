@@ -43,10 +43,10 @@ export const useCepheusStore = defineStore('cepheus', () => {
     import.meta.env.SSR
       ? 0.5
       : window.matchMedia('prefers-color-scheme: more').matches
-      ? 1
-      : window.matchMedia('prefers-color-scheme: less').matches
-      ? 0
-      : 0.5
+        ? 1
+        : window.matchMedia('prefers-color-scheme: less').matches
+          ? 0
+          : 0.5
   )
   const model = ref<Preferences['model']>('one')
   const modelState = ref<ModelState>(ModelState.Pending)
@@ -126,7 +126,10 @@ export const useCepheusStore = defineStore('cepheus', () => {
           void fetch('/preferences', {
             method: 'post',
             credentials: 'same-origin',
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
+            headers: {
+              'content-type': 'application/json'
+            }
           })
         },
         1000,

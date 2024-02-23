@@ -7,5 +7,10 @@ export default defineConfig(() => ({
   // ssr: {
   //   target: 'webworker'
   // },
+  build: {
+    rollupOptions: {
+      external: ['__STATIC_CONTENT_MANIFEST']
+    }
+  },
   plugins: [vue(), unocss(), cassiopeia(), splitVendorChunkPlugin()]
 }))
