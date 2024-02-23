@@ -22,7 +22,7 @@
     "cassiopeia": "^5.3.3",
     "cepheus": "workspace:*",
     "devalue": "^4.3.2",
-    "hono": "^3.9.1",
+    "hono": "^4.0.3",
     "lodash-es": "^4.17.21",
     "pinia": "^2.1.7",
     "seedpods": "^0.9.3",
