@@ -137,6 +137,18 @@ declare module 'colorjs.io/fn' {
 
   export const toGamut: (
     color: Color,
-    options?: { method?: 'clip' | 'lch.c'; space?: ColorSpace }
+    options?: {
+      method?: 'clip' | 'css'
+      jnd?: number
+      deltaEMethod?:
+        | 'deltaE76'
+        | 'deltaECMC'
+        | 'deltaE2000'
+        | 'deltaEJz'
+        | 'deltaEITP'
+        | 'deltaEOK'
+        | 'deltaEHCT'
+      space?: ColorSpace
+    }
   ) => Color
 }

@@ -4,13 +4,14 @@ import { uneval } from 'devalue'
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
 // import { take } from 'lodash-es'
+// import manifest from '__STATIC_CONTENT_MANIFEST'
 import { cookie, jar, take } from 'seedpods'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { SSRContext, renderToString } from 'vue/server-renderer'
 import { z } from 'zod'
 import { createApp as _createApp } from './create-app'
-import { preferencesSchema } from './types'
 import webFonts from './fonts.json'
+import { preferencesSchema } from './types'
 
 const key = Buffer.from(
   'XSRvhjsuPTumCCVsVjPFFdvQF62g6az0rzvVFfed+4E=',
@@ -58,10 +59,12 @@ export const createApp = async (options: Options = YEUX_OPTIONS) => {
     hono.use('*', serveStatic({ root: '../client' }))
   }
 
-  if (import.meta.env.MODE === 'production') {
-    const { serveStatic } = await import('hono/cloudflare-workers')
-    hono.use('*', serveStatic({ root: './' }))
-  }
+  // if (import.meta.env.MODE === 'production') {
+  //   const { serveStatic } = await import('hono/cloudflare-workers')
+  //   // const manifest = await import('__STATIC_CONTENT_MANIFEST')
+  //
+  //   hono.use('*', serveStatic({ root: './', manifest }))
+  // }
 
   hono.post(
     '/preferences',
@@ -74,7 +77,6 @@ export const createApp = async (options: Options = YEUX_OPTIONS) => {
 
       return parsed.data
     }),
-
     async (c) => {
       const session = await createSession(c.req.header('cookie'))
 
@@ -146,7 +148,7 @@ export const createApp = async (options: Options = YEUX_OPTIONS) => {
           }`
         )
 
-      return c.html(html)
+      return await c.html(html)
     }
   })
 
