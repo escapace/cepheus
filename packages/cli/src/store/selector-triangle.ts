@@ -131,7 +131,7 @@ const cartesianToBarycentric = (p: Point, a: Point, b: Point, c: Point) => {
 export const selectorTriangle = once((store: Store) => {
   const squares = Array.from(selectorSquares(store, store.allIterations).keys())
 
-  const pointsIndex: Map<number, Set<number>> = new Map()
+  const pointsIndex = new Map<number, Set<number>>()
 
   const add = (key: number, value: number) => {
     if (pointsIndex.has(key)) {
