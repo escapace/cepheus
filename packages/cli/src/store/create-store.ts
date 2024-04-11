@@ -39,11 +39,11 @@ export const createStore = (
 
   const storeOptions = createStoreOptions(options)
 
-  const indexSquare: Map<Square, Map<number, string>> = new Map()
+  const indexSquare = new Map<Square, Map<number, string>>()
 
-  const indexState: Map<string, OptimizeTask> = new Map()
+  const indexState = new Map<string, OptimizeTask>()
 
-  const indexInitialState: Map<string, OptimizeTask> = new Map(
+  const indexInitialState = new Map<string, OptimizeTask>(
     Object.entries(initialState)
   )
 

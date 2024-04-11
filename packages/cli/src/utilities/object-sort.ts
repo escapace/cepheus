@@ -27,10 +27,10 @@ export const objectSort = <T extends JSONType>(value: T): T => {
   if (isPlainObject(value)) {
     return Object.assign(
       {},
-      ...Object.keys(value as { [key: string]: JSONType })
+      ...Object.keys(value as Record<string, JSONType>)
         .sort((a, b) => sum(a) - sum(b))
         .map((key) => ({
-          [key]: objectSort((value as { [key: string]: JSONType })[key])
+          [key]: objectSort((value as Record<string, JSONType>)[key])
         }))
     ) as T
   }

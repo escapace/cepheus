@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Line, Point, State, Triangle } from '../types'
 import { intersection } from './intersection'
 import { lerpArray } from './lerp-array'
@@ -36,8 +37,8 @@ export const chroma0 = (
     ) as Line
 
     // can this break?
-    p0 = intersection(ab, [triangle[0], triangle[1]]) as Point
-    p1 = intersection(ab, [triangle[1], triangle[2]]) as Point
+    p0 = intersection(ab, [triangle[0], triangle[1]])!
+    p1 = intersection(ab, [triangle[1], triangle[2]])!
   }
 
   return { p0, p1 }
@@ -48,7 +49,7 @@ export const getX0 = (triangle: Triangle) => {
   const x0 = intersection(
     [triangle[0], triangle[2]],
     [triangle[1], [triangle[1][0], 0]]
-  ) as Point
+  )!
   // const x0: Point = [
   //   (triangle[0][0] + triangle[2][0]) / 2,
   //   (triangle[0][1] + triangle[2][1]) / 2
