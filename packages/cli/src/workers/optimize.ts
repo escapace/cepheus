@@ -1,7 +1,10 @@
-import { Deficiency, simulate as simulateDeficiency } from '@bjornlu/colorblind'
+import {
+  type Deficiency,
+  simulate as simulateDeficiency
+} from '@bjornlu/colorblind'
 import {
   clone,
-  Color,
+  type Color,
   ColorSpace,
   contrastAPCA,
   convert,
@@ -23,9 +26,9 @@ import {
 } from 'simple-statistics'
 import { N } from '../constants'
 import {
-  OptimizationState,
-  OptimizeOptions,
-  RequiredOptimizeOptions,
+  type OptimizationState,
+  type OptimizeOptions,
+  type RequiredOptimizeOptions,
   TypeOptimizationState
 } from '../types'
 import { createPRNG } from '../utilities/create-prng'
@@ -56,7 +59,7 @@ function randomColor(
   const next = (): Color => {
     if (temperature === undefined || referenceColor === undefined) {
       return {
-        space: OKLCH,
+        alpha: 1,
         coords: [
           randomWithin(
             options.lightness.range[0],
@@ -76,7 +79,7 @@ function randomColor(
             )
           )
         ],
-        alpha: 1
+        space: OKLCH
       }
     } else {
       const index = sample([0, 1, 2], 1, () => options.prng.float())[0]
@@ -124,7 +127,7 @@ function randomColor(
     }
   }
 
-  let iterations = 15000
+  let iterations = 15_000
 
   while (iterations !== 0) {
     const value = next()
@@ -192,29 +195,29 @@ const distances = (colors: Color[], deficiency?: Deficiency) => {
 
     const sRGBColor = convert(clone(color), sRGB, { inGamut: true })
 
-    const { r, g, b } = simulateDeficiency(
+    const { b, g, r } = simulateDeficiency(
       {
-        r: Math.round(sRGBColor.coords[0] * 255),
+        b: Math.round(sRGBColor.coords[2] * 255),
         g: Math.round(sRGBColor.coords[1] * 255),
-        b: Math.round(sRGBColor.coords[2] * 255)
+        r: Math.round(sRGBColor.coords[0] * 255)
       },
       deficiency
     )
 
     if (isNaN(r) || isNaN(g) || isNaN(b)) {
-      throw new Error(`${deficiency} outputs NaN`)
+      throw new TypeError(`${deficiency} outputs NaN`)
     }
 
     return fixNaN(
       convert(
         {
-          space: sRGB,
-          coords: map([r, g, b], (value) => value / 255.0) as [
+          alpha: 1,
+          coords: map([r, g, b], (value) => value / 255) as [
             number,
             number,
             number
           ],
-          alpha: 1
+          space: sRGB
         },
         sRGB,
         { inGamut: true }
@@ -222,9 +225,9 @@ const distances = (colors: Color[], deficiency?: Deficiency) => {
     )
   })
 
-  for (let i = 0; i < colors.length; i++) {
-    for (let j = i + 1; j < colors.length; j++) {
-      distances.push(distance(convertedColors[i], convertedColors[j]))
+  for (let index = 0; index < colors.length; index++) {
+    for (let index_ = index + 1; index_ < colors.length; index_++) {
+      distances.push(distance(convertedColors[index], convertedColors[index_]))
     }
   }
 
@@ -235,15 +238,15 @@ const distances = (colors: Color[], deficiency?: Deficiency) => {
 const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
   // reward the decrease in central tendency of distances from initial colors
   const differenceScore = mean(
-    flatMap(state, (c, index) => {
-      return map(options.colors[index], (color) => {
+    flatMap(state, (c, index) =>
+      map(options.colors[index], (color) => {
         const modifiedColor = clone(color)
 
         modifiedColor.coords[0] = c.coords[0]
 
         return distance(c, modifiedColor)
       })
-    })
+    )
   )
 
   // reward the decrease in relative distance to lightness target
@@ -383,9 +386,9 @@ const normalizeOptions = (
       colors,
       (coords): Color =>
         fixNaN({
-          space: OKLCH,
+          alpha: 1,
           coords,
-          alpha: 1
+          space: OKLCH
         })
     )
   )
@@ -394,9 +397,9 @@ const normalizeOptions = (
     options.background,
     (coords): Color =>
       fixNaN({
-        space: OKLCH,
+        alpha: 1,
         coords,
-        alpha: 1
+        space: OKLCH
       })
   )
 
@@ -413,28 +416,28 @@ const normalizeOptions = (
 
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const value = {
-    weights: options.weights,
-    colors,
     background,
-    prng,
+    chroma: normalizeChroma({
+      range: [0, N],
+      target: mean(options.chroma?.range ?? [0, N]),
+      ...options.chroma
+    }),
+    colors,
+    colorSpace,
+    hueAngle,
     hyperparameters: {
-      temperature: 8000,
       coolingRate: 0.99,
       cutoff: 0.0001,
+      temperature: 8000,
       ...options.hyperparameters
     },
-    hueAngle,
-    colorSpace,
     lightness: normalizeLightness({
       range: [0, N],
       target: mean(options.lightness?.range ?? [0, N]),
       ...options.lightness
     }),
-    chroma: normalizeChroma({
-      range: [0, N],
-      target: mean(options.chroma?.range ?? [0, N]),
-      ...options.chroma
-    })
+    prng,
+    weights: options.weights
   } as RequiredOptimizeOptions
 
   ;(['lightness', 'chroma'] as const).forEach((key) => {
@@ -455,12 +458,9 @@ const normalizeOptions = (
 }
 
 const iterate = (options: RequiredOptimizeOptions) => {
-  const colors: Color[] = map(options.colors, (colors) => {
-    return randomColor(
-      options,
-      sample(colors, 1, () => options.prng.float())[0]
-    )
-  })
+  const colors: Color[] = map(options.colors, (colors) =>
+    randomColor(options, sample(colors, 1, () => options.prng.float())[0])
+  )
 
   const startColors: Color[] = colors.map((value) => clone(value))
   const startCost = cost(options, startColors)
@@ -494,7 +494,7 @@ const iterate = (options: RequiredOptimizeOptions) => {
         if (options.prng.float() < probability) {
           colors[index] = newColors[index]
         }
-      } catch (e) {}
+      } catch (error) {}
     }
 
     const current = cost(options, colors)
@@ -514,8 +514,8 @@ const iterate = (options: RequiredOptimizeOptions) => {
   }
 
   return {
-    cost: bestCost,
-    colors: map(bestColors, (value): [number, number, number] => value.coords)
+    colors: map(bestColors, (value): [number, number, number] => value.coords),
+    cost: bestCost
   }
 }
 
@@ -535,13 +535,13 @@ export const optimize = async (
       type: TypeOptimizationState.Fulfilled,
       ...iterate(normalizedOptions)
     }
-  } catch (e) {
-    if (e instanceof IterationError) {
+  } catch (error) {
+    if (error instanceof IterationError) {
       return { type: TypeOptimizationState.Rejected }
     }
 
-    console.error(e)
+    console.error(error)
 
-    throw e
+    throw error
   }
 }

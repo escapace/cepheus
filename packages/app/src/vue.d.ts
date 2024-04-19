@@ -1,13 +1,13 @@
-import { Options as CepheusOptions } from '@cepheus/vue'
+import type { Options as CepheusOptions } from '@cepheus/vue'
 import 'vue/server-renderer'
-import { Preferences } from './types'
+import type { Preferences } from './types'
 
 declare module 'vue/server-renderer' {
   export interface SSRContext {
+    cepheus?: {
+      preferences?: Preferences
+    } & Omit<CepheusOptions, 'state'>
     modules?: string[]
     teleports?: Record<string, string>
-    cepheus?: Omit<CepheusOptions, 'state'> & {
-      preferences?: Preferences
-    }
   }
 }

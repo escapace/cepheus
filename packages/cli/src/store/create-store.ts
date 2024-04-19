@@ -1,11 +1,11 @@
 import Emittery from 'emittery'
 import { range } from 'lodash-es'
 import {
-  CepheusState,
-  OptimizeTask,
-  RequiredStoreOptions,
-  Square,
-  StoreOptions,
+  type CepheusState,
+  type OptimizeTask,
+  type RequiredStoreOptions,
+  type Square,
+  type StoreOptions,
   TypeCepheusState
 } from '../types'
 import { createStoreOptions } from './create-store-options'
@@ -13,14 +13,14 @@ import { createStoreOptions } from './create-store-options'
 export interface Store
   extends Pick<
     ReturnType<typeof createEmitter>,
-    'on' | 'events' | 'anyEvent' | 'clearListeners' | 'emit'
+    'anyEvent' | 'clearListeners' | 'emit' | 'events' | 'on'
   > {
+  allIterations: number[]
   indexInitialState: Map<string, OptimizeTask>
   indexSquare: Map<Square, Map<number, string>>
   indexState: Map<string, OptimizeTask>
   log: CepheusState[]
   options: RequiredStoreOptions
-  allIterations: number[]
 }
 
 const createEmitter = () =>
@@ -50,18 +50,18 @@ export const createStore = (
   const allIterations = range(Math.max(storeOptions.iterations * 2, 4))
 
   const store = {
-    options: storeOptions,
-    log,
+    allIterations,
+    indexInitialState,
     indexSquare,
     indexState,
-    indexInitialState,
-    allIterations
+    log,
+    options: storeOptions
   }
 
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const storeWithEmitter = { ...store } as Pick<
     typeof emitter,
-    'on' | 'events' | 'anyEvent' | 'clearListeners' | 'emit'
+    'anyEvent' | 'clearListeners' | 'emit' | 'events' | 'on'
   > &
     typeof store
 

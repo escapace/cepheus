@@ -18,12 +18,12 @@ describe('src/permutations.spec.ts', () => {
   })
 
   it('generates permutations', () => {
-    const obj = {
+    const object = {
       x: [1, 2, 3],
       y: ['a', 'b'],
       z: [20, 30]
     }
-    const combos = permutations(obj)
+    const combos = permutations(object)
     assert.deepEqual(combos, [
       { x: 1, y: 'a', z: 20 },
       { x: 2, y: 'a', z: 20 },

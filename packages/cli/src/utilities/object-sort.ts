@@ -1,12 +1,12 @@
 import { isArray, isPlainObject, range } from 'lodash-es'
 
 export type JSONType =
-  | string
-  | number
-  | boolean
-  | null
-  | JSONType[]
   | { [key: string]: JSONType }
+  | boolean
+  | JSONType[]
+  | null
+  | number
+  | string
 
 /* const compare = (a: string, b: string): number =>  */
 

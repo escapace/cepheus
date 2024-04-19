@@ -2,15 +2,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-export function permutations<O extends Record<string | number, any[]>>(obj: O) {
+export function permutations<O extends Record<number | string, any[]>>(
+  object: O
+) {
   let combos: Array<{ [k in keyof O]: O[k][number] }> = []
 
-  for (const key in obj) {
-    const values = obj[key]
+  for (const key in object) {
+    const values = object[key]
     const all = []
-    for (let i = 0; i < values.length; i++) {
-      for (let j = 0; j < (combos.length === 0 ? 1 : combos.length); j++) {
-        const newCombo = { ...combos[j], [key]: values[i] }
+    for (let index = 0; index < values.length; index++) {
+      for (
+        let index_ = 0;
+        index_ < (combos.length === 0 ? 1 : combos.length);
+        index_++
+      ) {
+        const newCombo = { ...combos[index_], [key]: values[index] }
         all.push(newCombo)
       }
     }

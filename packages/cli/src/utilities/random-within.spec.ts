@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 import { assert } from 'chai'
-import { PRNG } from './create-prng'
+import type { PRNG } from './create-prng'
 import { randomWithin } from './random-within'
 
 const one = {

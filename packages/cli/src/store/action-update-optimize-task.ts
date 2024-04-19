@@ -1,5 +1,5 @@
-import { OptimizationState, OptimizeTask } from '../types'
-import { Store } from './create-store'
+import type { OptimizationState, OptimizeTask } from '../types'
+import type { Store } from './create-store'
 
 export async function actionUpdateOptimizeTask(
   store: Store,

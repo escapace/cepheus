@@ -1,13 +1,13 @@
 import { compact, groupBy, map, memoize, uniq } from 'lodash-es'
 import { N } from '../constants'
 import {
-  OptimizationStateFulfilled,
-  OptimizationStatePending,
-  OptimizeTask,
+  type OptimizationStateFulfilled,
+  type OptimizationStatePending,
+  type OptimizeTask,
   TypeOptimizationState
 } from '../types'
 import { objectHash } from '../utilities/object-hash'
-import { Store } from './create-store'
+import type { Store } from './create-store'
 
 export const selectorOptimizeTasksPending = (
   store: Store
@@ -32,11 +32,9 @@ const selectorOptimizeTasksFulfilledAll = (
   iterations: number[]
 ): Record<string, OptimizeTask<OptimizationStateFulfilled>> => {
   const keys = uniq(
-    Array.from(store.indexSquare.values()).flatMap((iterationsMap) => {
-      return compact(
-        iterations.map((iteration) => iterationsMap.get(iteration))
-      )
-    })
+    Array.from(store.indexSquare.values()).flatMap((iterationsMap) =>
+      compact(iterations.map((iteration) => iterationsMap.get(iteration)))
+    )
   )
 
   return Object.fromEntries(
@@ -80,8 +78,8 @@ const selectorOptimizeTasksCountTotal = memoize(
     store.options.iterations * Math.pow(N / store.options.interval, 2)
 )
 
-export const selectorOptimizeTasksCount = (store: Store) => {
-  return Array.from(store.indexState.values()).reduce(
+export const selectorOptimizeTasksCount = (store: Store) =>
+  Array.from(store.indexState.values()).reduce(
     (counts, task) => {
       switch (task.state.type) {
         case TypeOptimizationState.Rejected:
@@ -97,10 +95,9 @@ export const selectorOptimizeTasksCount = (store: Store) => {
       return counts
     },
     {
+      fulfilled: 0,
       minTotal: selectorOptimizeTasksCountTotal(store),
       pending: 0,
-      rejected: 0,
-      fulfilled: 0
+      rejected: 0
     }
   )
-}

@@ -1,5 +1,5 @@
 import { INTERPOLATOR, LENGTH as N } from './constants'
-import { Interpolator } from './types'
+import type { Interpolator } from './types'
 import { distance } from './utilities/distance'
 import { erfc } from './utilities/erfc'
 import { lerp } from './utilities/lerp'
@@ -22,7 +22,7 @@ export const cartesian = (
   y: number,
   extend = true
 ): [number, number, number] | undefined => {
-  const { interval, colors } = interpolator[INTERPOLATOR].state.model
+  const { colors, interval } = interpolator[INTERPOLATOR].state.model
 
   const nXf = Math.floor(x / interval)
   const nYf = Math.floor(y / interval)
@@ -45,6 +45,7 @@ export const cartesian = (
   }
 
   const n = [sx, sy + interval]
+  // eslint-disable-next-line unicorn/prevent-abbreviations
   const e = [sx + interval, sy]
   const s = [sx, sy - interval]
   const w = [sx - interval, sy]
@@ -95,9 +96,9 @@ export const cartesian = (
 
   const normalizedWeights = normalize(weights)
 
-  return values.reduce((prev, next, i) => [
-    lerp(prev[0], next[0], normalizedWeights[i]),
-    lerp(prev[1], next[1], normalizedWeights[i]),
-    lerpAngle(prev[2], next[2], normalizedWeights[i])
+  return values.reduce((previous, next, index) => [
+    lerp(previous[0], next[0], normalizedWeights[index]),
+    lerp(previous[1], next[1], normalizedWeights[index]),
+    lerpAngle(previous[2], next[2], normalizedWeights[index])
   ])
 }

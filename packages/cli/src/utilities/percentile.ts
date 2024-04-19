@@ -1,4 +1,4 @@
-import { PRNG } from './create-prng'
+import type { PRNG } from './create-prng'
 import { clamp } from './clamp'
 import { randomWithin } from './random-within'
 
@@ -11,5 +11,5 @@ export const percentile = (
 ) => {
   const value = percent * (max - min)
 
-  return clamp(current + randomWithin(-1.0 * value, value, prng), min, max)
+  return clamp(current + randomWithin(-1 * value, value, prng), min, max)
 }

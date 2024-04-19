@@ -7,7 +7,7 @@ import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router'
 import App from './components/app.vue'
 import Calendar from './components/calendar.vue'
 import { useCepheusStore } from './hooks/use-cepheus-store'
-import { SSRContext } from 'vue/server-renderer'
+import type { SSRContext } from 'vue/server-renderer'
 
 declare const INITIAL_STATE: Record<string, StateTree>
 
@@ -18,26 +18,26 @@ export async function createApp(context?: SSRContext) {
   const router = createRouter({
     history: import.meta.env.SSR ? createMemoryHistory() : createWebHistory(),
     routes: [
-      { path: '/', component: Calendar },
+      { component: Calendar, path: '/' },
       {
-        path: '/constraint',
-        component: async () => await import('./components/constraint.vue')
+        component: async () => await import('./components/constraint.vue'),
+        path: '/constraint'
       },
       {
-        path: '/swatches',
-        component: async () => await import('./components/home.vue')
+        component: async () => await import('./components/home.vue'),
+        path: '/swatches'
       },
       {
-        path: '/fitting',
-        component: async () => await import('./components/canvas.vue')
+        component: async () => await import('./components/canvas.vue'),
+        path: '/fitting'
       },
       {
-        path: '/triangle',
-        component: async () => await import('./components/triangle.vue')
+        component: async () => await import('./components/triangle.vue'),
+        path: '/triangle'
       },
       {
-        path: '/text',
-        component: async () => await import('./components/text.vue')
+        component: async () => await import('./components/text.vue'),
+        path: '/text'
       }
     ]
   })

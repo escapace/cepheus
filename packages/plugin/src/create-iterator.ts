@@ -17,10 +17,9 @@ import {
   type Interpolator
 } from 'cepheus'
 import { parseAlpha } from './parse-alpha'
-import { Flags, OptionsAdvanced } from './types'
-const HUE_REGEX =
-  /^([a-zA-Z0-9]+)-([0-9]+)-([0-9]+)-(-?[0-9]+)(-([0-1]|0[0-9]+))?$/i
-const COLOR_REGEX = /^([a-zA-Z0-9]+)-([0-9]+)-([0-9]+)(-([0-1]|0[0-9]+))?$/i
+import type { Flags, OptionsAdvanced } from './types'
+const HUE_REGEX = /^([\da-z]+)-(\d+)-(\d+)-(-?\d+)(-([01]|0\d+))?$/i
+const COLOR_REGEX = /^([\da-z]+)-(\d+)-(\d+)(-([01]|0\d+))?$/i
 
 const template = (
   values: string[],
@@ -78,11 +77,11 @@ export const createIterator = (
 ) => {
   const regex = {
     color: COLOR_REGEX,
-    invert: COLOR_REGEX,
-    hue: HUE_REGEX
+    hue: HUE_REGEX,
+    invert: COLOR_REGEX
   }[type]
 
-  const props = { darkMode: options.darkMode }
+  const properties = { darkMode: options.darkMode }
 
   function* iteratorColor(
     interpolator: Interpolator,
@@ -101,7 +100,7 @@ export const createIterator = (
       flags.colorScheme === 'none' ||
       (flags.colorScheme === 'dark') === darkMode(interpolator)
 
-    let cursor: true | string
+    let cursor: string | true
 
     while ((cursor = yield) !== true) {
       const string = cursor.match(regex)
@@ -141,9 +140,9 @@ export const createIterator = (
       }
 
       const color: Color = {
-        space: OKLCH,
+        alpha,
         coords,
-        alpha
+        space: OKLCH
       }
 
       const name = `---${type}-${cursor}`
@@ -167,7 +166,7 @@ export const createIterator = (
       state.push(`${name}: ${value};`)
     }
 
-    return template(state, flags, props)
+    return template(state, flags, properties)
   }
 
   return options.flags.length === 1
@@ -180,7 +179,7 @@ export const createIterator = (
           return iterator
         })
 
-        let cursor: true | string
+        let cursor: string | true
 
         while ((cursor = yield) !== true) {
           for (const iterator of iterators) {

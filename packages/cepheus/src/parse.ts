@@ -1,5 +1,11 @@
 import { assert } from './assert'
-import { ColorSpace, Model, ModelUnparsed, Point, Triangle } from './types'
+import {
+  ColorSpace,
+  type Model,
+  type ModelUnparsed,
+  type Point,
+  type Triangle
+} from './types'
 import { chunk } from './utilities/chunk'
 
 export const parse = (model: unknown): Model => {
@@ -38,8 +44,8 @@ export const parse = (model: unknown): Model => {
   const colorSpace = colorSpaceIndex === 1 ? ColorSpace.p3 : ColorSpace.srgb
 
   return {
-    colorSpace,
     colors,
+    colorSpace,
     interval,
     length,
     squares,

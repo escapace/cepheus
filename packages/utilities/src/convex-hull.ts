@@ -1,4 +1,4 @@
-import { Point } from 'cepheus'
+import type { Point } from 'cepheus'
 
 interface Options {
   sorted?: boolean
@@ -19,8 +19,8 @@ export function convexHull(points: Point[], options: Options = {}): Point[] {
   const result = new Array(n * 2) as Point[]
   let k = 0
 
-  for (let i = 0; i < n; i++) {
-    const point = values[i]
+  for (let index = 0; index < n; index++) {
+    const point = values[index]
     while (k >= 2 && cw(result[k - 2], result[k - 1], point) <= 0) {
       k--
     }
@@ -28,8 +28,8 @@ export function convexHull(points: Point[], options: Options = {}): Point[] {
   }
 
   const t = k + 1
-  for (let i = n - 2; i >= 0; i--) {
-    const point = values[i]
+  for (let index = n - 2; index >= 0; index--) {
+    const point = values[index]
     while (k >= t && cw(result[k - 2], result[k - 1], point) <= 0) {
       k--
     }

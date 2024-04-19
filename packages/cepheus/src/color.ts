@@ -1,6 +1,6 @@
 import { barycentric } from './barycentric'
 import { INTERPOLATOR, MAX } from './constants'
-import { Interpolator } from './types'
+import type { Interpolator } from './types'
 
 function isNumeric(value: string): boolean {
   return /^\d+$/.test(value)
@@ -8,7 +8,7 @@ function isNumeric(value: string): boolean {
 
 export const color = (
   interpolator: Interpolator,
-  color: string | number,
+  color: number | string,
   chroma: number,
   lightness: number,
   invert = false
@@ -20,12 +20,14 @@ export const color = (
         : color
       : color
 
-  const fn = interpolator[INTERPOLATOR].state.model.alias
+  const function_ = interpolator[INTERPOLATOR].state.model.alias
 
-  const n = fn === undefined ? c : fn(c)
+  const n = function_ === undefined ? c : function_(c)
 
   if (typeof n !== 'number') {
-    throw new Error(`Unknown color ${typeof n === 'string' ? n : 'undefined'}`)
+    throw new TypeError(
+      `Unknown color ${typeof n === 'string' ? n : 'undefined'}`
+    )
   }
 
   return barycentric(

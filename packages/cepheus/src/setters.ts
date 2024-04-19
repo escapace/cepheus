@@ -1,5 +1,5 @@
 import { INTERPOLATOR } from './constants'
-import { Interpolator, Model } from './types'
+import type { Interpolator, Model } from './types'
 
 export function chroma(interpolator: Interpolator): [low: number, high: number]
 export function chroma(
@@ -68,7 +68,7 @@ export function darkMode(
 export function darkMode(
   interpolator: Interpolator,
   darkMode?: boolean
-): Promise<boolean> | boolean {
+): boolean | Promise<boolean> {
   const value = interpolator[INTERPOLATOR]
 
   if (darkMode !== undefined) {
@@ -84,7 +84,7 @@ export function model(interpolator: Interpolator, model: Model): Promise<Model>
 export function model(
   interpolator: Interpolator,
   model?: Model
-): Promise<Model> | Model {
+): Model | Promise<Model> {
   const value = interpolator[INTERPOLATOR]
 
   if (model !== undefined) {

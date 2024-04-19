@@ -1,5 +1,5 @@
 import type { Color, ColorSpace } from '@cepheus/color'
-import { ColorSpace as ColorSpaceId } from 'cepheus'
+import type { ColorSpace as ColorSpaceId } from 'cepheus'
 import type { DeepRequired } from 'utility-types'
 import type { PRNG, PRNGName } from './utilities/create-prng'
 export { PRNG, PRNGName }
@@ -7,8 +7,8 @@ export { PRNG, PRNGName }
 export type Square = number
 
 export interface OptimizeTask<T extends OptimizationState = OptimizationState> {
-  state: T
   options: OptimizeTaskOptions
+  state: T
 }
 
 export enum TypeCepheusState {
@@ -36,8 +36,8 @@ export interface CepheusStateDone {
 }
 
 export interface CepheusStateError {
-  type: TypeCepheusState.Error
   error: unknown
+  type: TypeCepheusState.Error
 }
 
 export type CepheusState =
@@ -50,43 +50,43 @@ export type CepheusState =
 export interface StoreOptions
   extends Omit<
     OptimizeOptions,
-    | 'colors'
     | 'background'
-    | 'lightness'
     | 'chroma'
+    | 'colors'
     | 'colorSpace'
-    | 'weights'
     | 'hueAngle'
+    | 'lightness'
+    | 'weights'
   > {
-  precision?: number
-  hueAngle?: OptimizeOptions['hueAngle']
-  weights?: OptimizeOptions['weights']
-  colorSpace?: 'p3' | 'srgb'
   colors: Array<Color[] | string[]>
+  colorSpace?: 'p3' | 'srgb'
+  hueAngle?: OptimizeOptions['hueAngle']
+  iterations?: number
   // background: Color[] | string[]
   levels?: number
-  iterations?: number
+  precision?: number
+  weights?: OptimizeOptions['weights']
 }
 
 export interface RequiredStoreOptions
   extends Omit<
     StoreOptions,
-    | 'colors'
     | 'background'
-    | 'levels'
+    | 'colors'
     | 'colorSpace'
-    | 'weights'
     | 'hueAngle'
+    | 'levels'
     | 'precision'
+    | 'weights'
   > {
-  precision: number
-  hueAngle: OptimizeOptions['hueAngle']
-  weights: OptimizeOptions['weights']
-  colorSpace: ColorSpaceId
-  colors: Array<Array<[number, number, number]>>
   background: Array<[number, number, number]>
+  colors: Array<Array<[number, number, number]>>
+  colorSpace: ColorSpaceId
+  hueAngle: OptimizeOptions['hueAngle']
   interval: number
   iterations: number
+  precision: number
+  weights: OptimizeOptions['weights']
 }
 
 export interface OptimizeTaskOptions extends OptimizeOptions {
@@ -94,17 +94,27 @@ export interface OptimizeTaskOptions extends OptimizeOptions {
 }
 
 export interface OptimizeOptions {
-  randomSeed: string
-  randomSource?: PRNGName
-  colors: Array<Array<[number, number, number]>>
   background: Array<[number, number, number]>
+  chroma?: {
+    range?: [number, number]
+    // Chroma [0, 0.4]
+    target?: number
+  }
+  colors: Array<Array<[number, number, number]>>
   colorSpace: ColorSpaceId
+  hueAngle: number
   hyperparameters?: {
-    temperature: number
     coolingRate: number
     cutoff: number
+    temperature: number
   }
-  hueAngle: number
+  lightness?: {
+    range?: [number, number]
+    // Lightness [0, 1]
+    target?: number
+  }
+  randomSeed: string
+  randomSource?: PRNGName
   weights: {
     chroma: number
     contrast: number
@@ -117,16 +127,6 @@ export interface OptimizeOptions {
     protanopia: number
     tritanopia: number
   }
-  lightness?: {
-    // Lightness [0, 1]
-    target?: number
-    range?: [number, number]
-  }
-  chroma?: {
-    // Chroma [0, 0.4]
-    target?: number
-    range?: [number, number]
-  }
   // contrast?: {
   //   // APCA [0, 106] or [0, 108]
   //   target?: number
@@ -138,17 +138,17 @@ export interface OptimizeOptions {
   // }
 }
 
-export type RequiredOptimizeOptions = DeepRequired<
+export type RequiredOptimizeOptions = {
+  background: Color[]
+  colors: Color[][]
+  colorSpace: ColorSpace
+  prng: PRNG
+} & DeepRequired<
   Omit<
     OptimizeOptions,
-    'colorSpace' | 'colors' | 'background' | 'randomSeed' | 'randomSource'
+    'background' | 'colors' | 'colorSpace' | 'randomSeed' | 'randomSource'
   >
-> & {
-  prng: PRNG
-  colorSpace: ColorSpace
-  colors: Color[][]
-  background: Color[]
-}
+>
 
 export const enum TypeOptimizationState {
   Pending,
@@ -161,9 +161,9 @@ interface IOptimizationState {
 }
 
 export interface OptimizationStateFulfilled extends IOptimizationState {
-  type: TypeOptimizationState.Fulfilled
   colors: Array<[number, number, number]>
   cost: number
+  type: TypeOptimizationState.Fulfilled
 }
 
 export interface OptimizationStateRejected extends IOptimizationState {
@@ -176,5 +176,5 @@ export interface OptimizationStatePending extends IOptimizationState {
 
 export type OptimizationState =
   | OptimizationStateFulfilled
-  | OptimizationStateRejected
   | OptimizationStatePending
+  | OptimizationStateRejected

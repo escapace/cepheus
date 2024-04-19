@@ -7,8 +7,8 @@ import { validator } from 'hono/validator'
 // import manifest from '__STATIC_CONTENT_MANIFEST'
 import { cookie, jar, take } from 'seedpods'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { SSRContext, renderToString } from 'vue/server-renderer'
-import { z } from 'zod'
+import { type SSRContext, renderToString } from 'vue/server-renderer'
+import type { z } from 'zod'
 import { createApp as _createApp } from './create-app'
 import webFonts from './fonts.json'
 import { preferencesSchema } from './types'
@@ -21,27 +21,27 @@ const key = Buffer.from(
 const cookies = jar().put(
   cookie<'preferences', 'aes-gcm', z.infer<typeof preferencesSchema>>({
     key: 'preferences',
-    type: 'aes-gcm',
-    secure: true,
-    sameSite: 'Lax',
+    keys: [key],
+    maxAge: 86_400,
     prefix: '__Secure-',
-    maxAge: 86400,
-    keys: [key]
+    sameSite: 'Lax',
+    secure: true,
+    type: 'aes-gcm'
   })
 )
 
 export const createSession = async (cookieHeader?: string) => {
   const session = await take(cookieHeader, cookies, {
-    preferences: (prev, next) => {
+    preferences: (previous, next) => {
       try {
         const parsed = preferencesSchema.parse({
-          ...(prev ?? {}),
-          ...(next ?? {})
+          ...previous,
+          ...next
         })
 
         return parsed
       } catch {
-        return prev
+        return previous
       }
     }
   })
@@ -96,12 +96,12 @@ export const createApp = async (options: Options = YEUX_OPTIONS) => {
 
     const context: SSRContext = {
       cepheus: {
-        preferences,
-        darkMode: preferences === undefined ? 'media' : 'class'
+        darkMode: preferences === undefined ? 'media' : 'class',
+        preferences
       }
     }
 
-    const { app, router, pinia, cassiopeia } = await _createApp(context)
+    const { app, cassiopeia, pinia, router } = await _createApp(context)
 
     const url = new URL(c.req.url)
 
@@ -152,15 +152,15 @@ export const createApp = async (options: Options = YEUX_OPTIONS) => {
     }
   })
 
-  return { hono, fetch: hono.request }
+  return { fetch: hono.request, hono }
 }
 
 if (
   import.meta.env.MODE === 'staging' &&
-  process.argv[1] === (await import('url')).fileURLToPath(import.meta.url)
+  process.argv[1] === (await import('node:url')).fileURLToPath(import.meta.url)
 ) {
-  const { fileURLToPath } = await import('url')
-  const path = await import('path')
+  const { fileURLToPath } = await import('node:url')
+  const path = await import('node:path')
 
   process.chdir(path.dirname(fileURLToPath(import.meta.url)))
 
@@ -169,9 +169,9 @@ if (
 
   serve({
     ...hono,
+    hostname: process.env.HOST,
     port:
-      typeof process.env.PORT === 'string' ? parseInt(process.env.PORT) : 3000,
-    hostname: process.env.HOST
+      typeof process.env.PORT === 'string' ? parseInt(process.env.PORT) : 3000
   })
 }
 

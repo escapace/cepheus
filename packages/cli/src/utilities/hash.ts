@@ -1,7 +1,7 @@
-import { createHash } from 'crypto'
+import { createHash } from 'node:crypto'
 import { isNumber } from 'lodash-es'
 
-export const hash = (...data: Array<string | number>) =>
+export const hash = (...data: Array<number | string>) =>
   createHash('sha512')
     .update(
       data.reduce<string>(

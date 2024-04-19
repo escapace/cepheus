@@ -1,7 +1,7 @@
 // import { isolate as iso } from '@cepheus/utilities'
 import { compact, difference } from 'lodash-es'
-import { OptimizationStateFulfilled, OptimizeTask } from '../types'
-import { Store } from './create-store'
+import type { OptimizationStateFulfilled, OptimizeTask } from '../types'
+import type { Store } from './create-store'
 import { selectorOptimizeTasksFulfilled } from './selector-optimize-tasks'
 import { selectorTriangle } from './selector-triangle'
 

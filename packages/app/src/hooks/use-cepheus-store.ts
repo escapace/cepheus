@@ -10,16 +10,16 @@ import {
 } from 'cepheus'
 import { throttle } from 'lodash-es'
 import { defineStore, skipHydrate } from 'pinia'
-import { Preferences } from 'src/types'
+import type { Preferences } from 'src/types'
 import { computed, ref, watch } from 'vue'
-import { SSRContext } from 'vue/server-renderer'
+import type { SSRContext } from 'vue/server-renderer'
 
 const MAX = 0.25
 const MIN = 0.1
 
 const enum ModelState {
-  Pending = 'pending',
-  Active = 'active'
+  Active = 'active',
+  Pending = 'pending'
 }
 
 const importModel = async (model: Preferences['model']): Promise<Model> => {
@@ -50,7 +50,7 @@ export const useCepheusStore = defineStore('cepheus', () => {
   )
   const model = ref<Preferences['model']>('one')
   const modelState = ref<ModelState>(ModelState.Pending)
-  let cepheus: undefined | Cepheus
+  let cepheus: Cepheus | undefined
 
   const createCepheus = async (
     options?: SSRContext['cepheus']
@@ -78,14 +78,14 @@ export const useCepheusStore = defineStore('cepheus', () => {
       })
 
       cepheus = _createCepheus({
+        darkMode: options?.darkMode,
+        flags: options?.flags,
         state: {
-          lightness: cepheusLightness.value,
           chroma: cepheusChroma.value,
           darkMode: darkMode.value,
+          lightness: cepheusLightness.value,
           model: await importModel(model.value)
-        },
-        darkMode: options?.darkMode,
-        flags: options?.flags
+        }
       })
 
       modelState.value = ModelState.Active
@@ -116,20 +116,20 @@ export const useCepheusStore = defineStore('cepheus', () => {
       const update = throttle(
         () => {
           const body: Preferences = {
-            lightness: lightness.value,
             chroma: chroma.value,
             contrast: contrast.value,
             darkMode: darkMode.value,
+            lightness: lightness.value,
             model: model.value
           }
 
           void fetch('/preferences', {
-            method: 'post',
-            credentials: 'same-origin',
             body: JSON.stringify(body),
+            credentials: 'same-origin',
             headers: {
               'content-type': 'application/json'
-            }
+            },
+            method: 'post'
           })
         },
         1000,

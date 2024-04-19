@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prevent-abbreviations */
 // forked from https://github.com/tomgp/gaussian
 
 export function erfc2(x: number) {
@@ -6,26 +7,22 @@ export function erfc2(x: number) {
     t *
     Math.exp(
       -x * x +
-        ((((((((0.17087277 * t - 0.82215223) * t + 1.48851587) * t -
-          1.13520398) *
+        ((((((((0.170_872_77 * t - 0.822_152_23) * t + 1.488_515_87) * t -
+          1.135_203_98) *
           t +
-          0.27886807) *
+          0.278_868_07) *
           t -
-          0.18628806) *
+          0.186_288_06) *
           t +
-          0.09678418) *
+          0.096_784_18) *
           t +
-          0.37409196) *
+          0.374_091_96) *
           t +
-          1.00002368) *
+          1.000_023_68) *
           t -
-        1.26551223
+        1.265_512_23
     )
-  if (x >= 0) {
-    return 1 - r
-  } else {
-    return r - 1
-  }
+  return x >= 0 ? 1 - r : r - 1
 }
 
 /**
@@ -36,10 +33,10 @@ export function erfc(x: number): number {
   const z = Math.abs(x)
   const t = 1 / (1 + z / 2)
   // prettier-ignore
-  const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 +
-          t * (0.37409196 + t * (0.09678418 + t * (-0.18628806 +
-          t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 +
-          t * (-0.82215223 + t * 0.17087277)))))))));
+  const r = t * Math.exp(-z * z - 1.265_512_23 + t * (1.000_023_68 +
+          t * (0.374_091_96 + t * (0.096_784_18 + t * (-0.186_288_06 +
+          t * (0.278_868_07 + t * (-1.135_203_98 + t * (1.488_515_87 +
+          t * (-0.822_152_23 + t * 0.170_872_77)))))))));
 
   return x >= 0 ? r : 2 - r
 }
@@ -61,13 +58,13 @@ export function ierfc(x: number): number {
   const t = Math.sqrt(-2 * Math.log(xx / 2))
 
   // prettier-ignore
-  let r = -0.70711 * ((2.30753 + t * 0.27061) /
-          (1 + t * (0.99229 + t * 0.04481)) - t);
+  let r = -0.707_11 * ((2.307_53 + t * 0.270_61) /
+          (1 + t * (0.992_29 + t * 0.044_81)) - t);
 
-  for (let j = 0; j < 2; j++) {
-    const err = erfc(r) - xx
+  for (let index = 0; index < 2; index++) {
+    const error = erfc(r) - xx
     // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
-    r += err / (1.12837916709551257 * Math.exp(-(r * r)) - r * err)
+    r += error / (1.128_379_167_095_512_57 * Math.exp(-(r * r)) - r * error)
   }
 
   return x < 1 ? r : -r
@@ -79,7 +76,10 @@ export function ierfc(x: number): number {
 export class Gaussian {
   readonly standardDeviation: number
 
-  constructor(public mean: number, public variance: number) {
+  constructor(
+    public mean: number,
+    public variance: number
+  ) {
     if (variance <= 0) {
       throw new Error(`Variance must be > 0 (but was ${variance})`)
     }
@@ -88,13 +88,11 @@ export class Gaussian {
   }
 
   /**
-   * probability density function, which describes the probability
-   * of a random variable taking on the value _x_
+   * Addition of this and d
+   * @returns the result of adding this and the given distribution's means and variances
    */
-  pdf(x: number): number {
-    const m = this.standardDeviation * Math.sqrt(2 * Math.PI)
-    const e = Math.exp(-((x - this.mean) ** 2) / (2 * this.variance))
-    return e / m
+  add(d: Gaussian): Gaussian {
+    return new Gaussian(this.mean + d.mean, this.variance + d.variance)
   }
 
   /**
@@ -108,10 +106,24 @@ export class Gaussian {
   }
 
   /**
-   * percent point function, the inverse of _cdf_
+   * Quotient distribution of this and d (scale for constant)
+   * @returns the quotient distribution of this and the given distribution; equivalent to `scale(1/d)` when d is a constant
    */
-  ppf(x: number): number {
-    return this.mean - this.standardDeviation * Math.sqrt(2) * ierfc(2 * x)
+  div(d: Gaussian | number): Gaussian {
+    if (typeof d === 'number') {
+      return this.scale(1 / d)
+    }
+
+    const precision = 1 / this.variance
+    const dprecision = 1 / d.variance
+    return this.fromPrecisionMean(
+      precision - dprecision,
+      precision * this.mean - dprecision * d.mean
+    )
+  }
+
+  fromPrecisionMean(precision: number, precisionmean: number): Gaussian {
+    return new Gaussian(precisionmean / precision, 1 / precision)
   }
 
   /**
@@ -119,7 +131,7 @@ export class Gaussian {
    * @returns the product distribution of this and the given distribution;
    * equivalent to `scale(d)` when d is a constant
    */
-  mul(d: number | Gaussian): Gaussian {
+  mul(d: Gaussian | number): Gaussian {
     if (typeof d === 'number') {
       return this.scale(d)
     }
@@ -133,36 +145,20 @@ export class Gaussian {
   }
 
   /**
-   * Quotient distribution of this and d (scale for constant)
-   * @returns the quotient distribution of this and the given distribution; equivalent to `scale(1/d)` when d is a constant
+   * probability density function, which describes the probability
+   * of a random variable taking on the value _x_
    */
-  div(d: number | Gaussian): Gaussian {
-    if (typeof d === 'number') {
-      return this.scale(1 / d)
-    }
-
-    const precision = 1 / this.variance
-    const dprecision = 1 / d.variance
-    return this.fromPrecisionMean(
-      precision - dprecision,
-      precision * this.mean - dprecision * d.mean
-    )
+  pdf(x: number): number {
+    const m = this.standardDeviation * Math.sqrt(2 * Math.PI)
+    const e = Math.exp(-((x - this.mean) ** 2) / (2 * this.variance))
+    return e / m
   }
 
   /**
-   * Addition of this and d
-   * @returns the result of adding this and the given distribution's means and variances
+   * percent point function, the inverse of _cdf_
    */
-  add(d: Gaussian): Gaussian {
-    return new Gaussian(this.mean + d.mean, this.variance + d.variance)
-  }
-
-  /**
-   * Subtraction of this and d
-   * @returns the result of subtracting this and the given distribution's means and variances
-   */
-  sub(d: Gaussian): Gaussian {
-    return new Gaussian(this.mean - d.mean, this.variance + d.variance)
+  ppf(x: number): number {
+    return this.mean - this.standardDeviation * Math.sqrt(2) * ierfc(2 * x)
   }
 
   /**
@@ -173,7 +169,11 @@ export class Gaussian {
     return new Gaussian(this.mean * c, this.variance * c * c)
   }
 
-  fromPrecisionMean(precision: number, precisionmean: number): Gaussian {
-    return new Gaussian(precisionmean / precision, 1 / precision)
+  /**
+   * Subtraction of this and d
+   * @returns the result of subtracting this and the given distribution's means and variances
+   */
+  sub(d: Gaussian): Gaussian {
+    return new Gaussian(this.mean - d.mean, this.variance + d.variance)
   }
 }

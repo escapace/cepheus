@@ -7,45 +7,45 @@ import {
   unszudzik2
 } from '@cepheus/utilities'
 import { minTriangle } from '@escapace/minimum-perimeter-triangle'
-import assert from 'assert'
-import { normalize, Point, Triangle } from 'cepheus'
+import assert from 'node:assert'
+import { normalize, type Point, type Triangle } from 'cepheus'
 import { map, once, range, sortBy } from 'lodash-es'
 import { mean, sum } from 'simple-statistics'
 // import { mean } from 'simple-statistics'
 import { N } from '../constants'
-import { OptimizeTaskOptions, Square } from '../types'
+import type { OptimizeTaskOptions, Square } from '../types'
 import { clamp } from '../utilities/clamp'
 import { distance } from '../utilities/distance'
 import { toPrecision } from '../utilities/to-precision'
-import { Store } from './create-store'
+import type { Store } from './create-store'
 import { selectorSquares } from './selector-squares'
 
 function createMissingSquareOptions(
   store: Store,
   square: Square
-): Required<Pick<OptimizeTaskOptions, 'lightness' | 'chroma'>> {
+): Required<Pick<OptimizeTaskOptions, 'chroma' | 'lightness'>> {
   const squarePosition = toPosition(square, store.options.interval)
   const [squareX, squareY] = squarePosition
 
-  const i = store.options.interval
+  const index_ = store.options.interval
 
   const squarePoints: Point[] = [
     [squareX, squareY],
-    [squareX, squareY + i],
-    [squareX + i, squareY + i],
-    [squareX + i, squareY]
+    [squareX, squareY + index_],
+    [squareX + index_, squareY + index_],
+    [squareX + index_, squareY]
   ]
 
   const squares = Array.from(selectorSquares(store, store.allIterations).keys())
 
   const closestSquares = sortBy(
     map(squares, (square) => {
-      const [x, y] = toPosition(square, i)
+      const [x, y] = toPosition(square, index_)
       const points: Point[] = [
         [x, y],
-        [x, y + i],
-        [x + i, y + i],
-        [x + i, y]
+        [x, y + index_],
+        [x + index_, y + index_],
+        [x + index_, y]
       ]
 
       const d = mean(
@@ -54,7 +54,7 @@ function createMissingSquareOptions(
         )
       )
 
-      return { square, distance: d }
+      return { distance: d, square }
     }),
     ({ distance }) => distance
   ).slice(0, 4)
@@ -66,7 +66,7 @@ function createMissingSquareOptions(
   )
 
   const moves = closestSquares.map(({ square }, index): Point => {
-    const [x, y] = toPosition(square, i)
+    const [x, y] = toPosition(square, index_)
     const weight = weights[index]
 
     const distanceX = x - squareX
@@ -81,28 +81,28 @@ function createMissingSquareOptions(
   ]
 
   const [lightness, chroma] = range(2).map((_, index) => {
-    const prev = squarePosition[index] - N / 2
+    const previous = squarePosition[index] - N / 2
     const next = positions[index] - N / 2
     const offset = 0
 
     const rrr =
-      next >= prev
+      next >= previous
         ? /*
            * we are moving in -> or ^ i.e. changing the range[1]
            */
-          [prev, next + i + offset]
+          [previous, next + index_ + offset]
         : /*
            * we are moving <- or v i.e. changing the range[0]
            */
-          [next - offset, prev]
+          [next - offset, previous]
 
     const range = rrr.map((value) => clamp(value, 0, 120)) as [number, number]
-    const target = next >= prev ? range[0] : range[1]
+    const target = next >= previous ? range[0] : range[1]
 
     assert(
       range[1] > range[0],
       `createMissingSquareOptions() unable to produce correct range: ${JSON.stringify(
-        { prev, next, rrr, range, i, positions }
+        { i: index_, next, positions, prev: previous, range, rrr }
       )}`
     )
 
@@ -113,8 +113,8 @@ function createMissingSquareOptions(
   })
 
   return {
-    lightness,
-    chroma
+    chroma,
+    lightness
   }
 }
 
@@ -125,7 +125,7 @@ const cartesianToBarycentric = (p: Point, a: Point, b: Point, c: Point) => {
   const l1 =
     ((c[1] - a[1]) * (p[0] - c[0]) + (a[0] - c[0]) * (p[1] - c[1])) /
     ((b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1]))
-  return [l0, l1, 1.0 - l0 - l1]
+  return [l0, l1, 1 - l0 - l1]
 }
 
 export const selectorTriangle = once((store: Store) => {
@@ -146,13 +146,13 @@ export const selectorTriangle = once((store: Store) => {
   }
 
   squares.forEach((value) => {
-    const i = store.options.interval
-    const [x, y] = toPosition(value, i)
+    const index = store.options.interval
+    const [x, y] = toPosition(value, index)
 
     add(szudzik2(x, y), value)
-    add(szudzik2(x, y + i), value)
-    add(szudzik2(x + i, y + i), value)
-    add(szudzik2(x + i, y), value)
+    add(szudzik2(x, y + index), value)
+    add(szudzik2(x + index, y + index), value)
+    add(szudzik2(x + index, y), value)
   })
 
   const points = Array.from(pointsIndex.keys()).map((value) =>
@@ -202,13 +202,13 @@ export const selectorTriangle = once((store: Store) => {
         return false
       }
 
-      const i = store.options.interval
-      const [x, y] = toPosition(square, i)
+      const index = store.options.interval
+      const [x, y] = toPosition(square, index)
       const points: Point[] = [
         [x, y],
-        [x, y + i],
-        [x + i, y + i],
-        [x + i, y]
+        [x, y + index],
+        [x + index, y + index],
+        [x + index, y]
       ]
 
       return points.some((point) =>
@@ -223,7 +223,7 @@ export const selectorTriangle = once((store: Store) => {
   )
 
   return {
-    triangle,
-    squares: squareMap
+    squares: squareMap,
+    triangle
   }
 })
