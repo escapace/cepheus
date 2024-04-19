@@ -9,7 +9,7 @@ import {
   N,
   N_DIVISORS
 } from '../constants'
-import { RequiredStoreOptions, StoreOptions } from '../types'
+import type { RequiredStoreOptions, StoreOptions } from '../types'
 
 export function createStoreOptions(
   options: StoreOptions
@@ -57,13 +57,13 @@ export function createStoreOptions(
 
   return {
     ...omit(options, ['levels']),
-    hueAngle,
-    precision,
-    weights: DEFAULT_WEIGHTS,
-    colorSpace,
     background,
     colors,
+    colorSpace,
+    hueAngle,
     interval,
-    iterations
+    iterations,
+    precision,
+    weights: DEFAULT_WEIGHTS
   }
 }

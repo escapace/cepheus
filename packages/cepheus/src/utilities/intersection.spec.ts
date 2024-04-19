@@ -14,7 +14,7 @@ describe('./src/intersection.spec.ts', () => {
           [2.5, 4]
         ]
       ),
-      [0.734375, 0.46875]
+      [0.734_375, 0.468_75]
     )
 
     assert.deepEqual(

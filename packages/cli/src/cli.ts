@@ -1,12 +1,12 @@
 import arg from 'arg'
 import chalk from 'chalk'
-import { readFileSync } from 'fs'
-import { readFile, writeFile } from 'fs/promises'
+import { readFileSync } from 'node:fs'
+import { readFile, writeFile } from 'node:fs/promises'
 import { isError, isInteger, isString, map, repeat, throttle } from 'lodash-es'
 import ora from 'ora'
-import path, { resolve } from 'path'
-import { promisify } from 'util'
-import { gzip } from 'zlib'
+import path, { resolve } from 'node:path'
+import { promisify } from 'node:util'
+import { gzip } from 'node:zlib'
 import { DEFAULT_ITERATIONS, DEFAULT_N_DIVISOR, N_DIVISORS } from './constants'
 import { selectorModel } from './store/selector-model'
 import {
@@ -15,7 +15,13 @@ import {
 } from './store/selector-optimize-tasks'
 import { selectorState } from './store/selector-state'
 import { selectorStatistics } from './store/selector-statistics'
-import { OptimizeTask, TypeCepheusState } from './types'
+import { type OptimizeTask, TypeCepheusState } from './types'
+
+const padNumber = (n: number, base: number) => {
+  const string = n.toString()
+
+  return `${repeat('0', base.toString().length - string.length)}${string}`
+}
 
 const compress = promisify(gzip)
 
@@ -50,28 +56,28 @@ ${chalk.bold('Example:')}
 `
 
 const run = async () => {
-  const args = arg(
+  const arguments_ = arg(
     {
-      '--seed': String,
       '--color': [String],
-      '--output': String,
       '--color-space': String,
-      '--prng': String,
-      '--hue-angle': Number,
-      '--levels': Number,
-      '--iterations': Number,
-      '--save': String,
-      '--restore': String,
       '--help': Boolean,
-      '--version': Boolean,
+      '--hue-angle': Number,
+      '--iterations': Number,
+      '--levels': Number,
+      '--output': String,
       '--precision': Number,
-      '-v': '--version',
-      '-h': '--help'
+      '--prng': String,
+      '--restore': String,
+      '--save': String,
+      '--seed': String,
+      '--version': Boolean,
+      '-h': '--help',
+      '-v': '--version'
     },
-    { permissive: false, argv: process.argv.slice(2) }
+    { argv: process.argv.slice(2), permissive: false }
   )
 
-  if (args['--version'] === true) {
+  if (arguments_['--version'] === true) {
     const { version } = JSON.parse(
       readFileSync(resolve('../../package.json'), 'utf8')
     ) as Record<'version', string>
@@ -80,25 +86,25 @@ const run = async () => {
     process.exit(0)
   }
 
-  if (args['--help'] === true) {
+  if (arguments_['--help'] === true) {
     console.log(HELP)
     process.exit(0)
   }
 
-  const colorSpace = args['--color-space'] as 'p3' | 'srgb' | undefined
-  const colors = args['--color']
-  const levels = args['--levels']
-  const randomSource = args['--prng'] as
-    | 'xoshiro128++'
-    | 'xorwow'
-    | 'xorshift128'
+  const colorSpace = arguments_['--color-space'] as 'p3' | 'srgb' | undefined
+  const colors = arguments_['--color']
+  const levels = arguments_['--levels']
+  const randomSource = arguments_['--prng'] as
     | 'sfc32'
+    | 'xorshift128'
+    | 'xorwow'
+    | 'xoshiro128++'
     | undefined
-  const randomSeed = args['--seed']
-  const iterations = args['--iterations']
-  const output = args['--output']
-  const hueAngle = args['--hue-angle']
-  const precision = args['--precision']
+  const randomSeed = arguments_['--seed']
+  const iterations = arguments_['--iterations']
+  const output = arguments_['--output']
+  const hueAngle = arguments_['--hue-angle']
+  const precision = arguments_['--precision']
 
   // required
 
@@ -130,7 +136,7 @@ const run = async () => {
 
   if (
     randomSource !== undefined &&
-    !['xoshiro128++', 'xorwow', 'xorshift128', 'sfc32'].includes(randomSource)
+    !['sfc32', 'xorshift128', 'xorwow', 'xoshiro128++'].includes(randomSource)
   ) {
     console.log(HELP)
     console.error(
@@ -172,57 +178,56 @@ const run = async () => {
     process.exit(1)
   }
 
-  if (args._.length !== 0) {
+  if (arguments_._.length !== 0) {
     console.log(HELP)
     process.exit(1)
   }
 
   const { cepheus } = await import('./index')
 
-  const initialState = isString(args['--restore'])
+  const initialState = isString(arguments_['--restore'])
     ? (JSON.parse(
-        await readFile(path.resolve(process.cwd(), args['--restore']), 'utf8')
+        await readFile(
+          path.resolve(process.cwd(), arguments_['--restore']),
+          'utf8'
+        )
       ) as Record<string, OptimizeTask>)
     : undefined
 
   const spinner = ora({ text: 'Preparing' }).start()
 
   const instance = cepheus({
-    hueAngle,
-    colorSpace,
     colors: map(colors, (colors) =>
       colors.split(',').map((value) => value.trim())
     ),
-    precision,
+    colorSpace,
+    hueAngle,
     initialState,
+    iterations,
     levels,
+    precision,
     randomSeed,
-    randomSource,
-    iterations
+    randomSource
   })
-
-  const ns = (n: number, base: number) => {
-    const string = n.toString()
-
-    return `${repeat('0', base.toString().length - string.length)}${string}`
-  }
 
   const updateSpinner = throttle(
     (type: TypeCepheusState) => {
       if (type === TypeCepheusState.Optimization) {
-        const { minTotal, pending, rejected, fulfilled } =
+        const { fulfilled, minTotal, pending, rejected } =
           selectorOptimizeTasksCount(instance.store)
         const done = rejected + fulfilled
         const total = Math.max(pending + done, minTotal)
 
-        spinner.text = `Palette optimization \t${ns(done, total)} / ~${total}`
+        spinner.text = `Palette optimization \t${padNumber(done, total)} / ~${total}`
       } else if (type === TypeCepheusState.OptimizationDone) {
-        const { minTotal, pending, rejected, fulfilled } =
+        const { fulfilled, minTotal, pending, rejected } =
           selectorOptimizeTasksCount(instance.store)
         const done = rejected + fulfilled
         const total = Math.max(pending + done, minTotal)
 
-        spinner.succeed(`Palette optimization \t${ns(done, total)} / ~${total}`)
+        spinner.succeed(
+          `Palette optimization \t${padNumber(done, total)} / ~${total}`
+        )
       } else if (type === TypeCepheusState.Abort) {
         spinner.fail()
       } else if (type === TypeCepheusState.Error) {
@@ -234,9 +239,9 @@ const run = async () => {
   )
 
   instance.store.on('optimizeTask', async () => {
-    if (args['--save'] !== undefined) {
+    if (arguments_['--save'] !== undefined) {
       await writeFile(
-        path.resolve(process.cwd(), args['--save']),
+        path.resolve(process.cwd(), arguments_['--save']),
         JSON.stringify(selectorOptimizeTasksNotPending(instance.store)),
         'utf8'
       )

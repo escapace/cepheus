@@ -1,3 +1,6 @@
-export function assert(condition: unknown, msg?: string): asserts condition {
-  if (condition === false) throw new Error(msg)
+export function assert(
+  condition: unknown,
+  message?: string
+): asserts condition {
+  if (condition === false) throw new Error(message)
 }

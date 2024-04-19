@@ -1,4 +1,4 @@
-import { Model, State, Triangle } from './types'
+import type { Model, State, Triangle } from './types'
 import {
   chroma0,
   chroma1,

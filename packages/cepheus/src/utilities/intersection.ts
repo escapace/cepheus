@@ -1,4 +1,4 @@
-import { Line, Point } from '../types'
+import type { Line, Point } from '../types'
 
 export const intersection = (a: Line, b: Line): Point | undefined => {
   const [x1, y1] = a[0]

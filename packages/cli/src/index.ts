@@ -8,8 +8,8 @@ import {
   P3,
   sRGB
 } from '@cepheus/color'
-import { setMaxListeners } from 'events'
 import { assign, isError, map, omit, range } from 'lodash-es'
+import { setMaxListeners } from 'node:events'
 import Tinypool from 'tinypool'
 import { actionCreateOptimizeTasks } from './store/action-create-optimize-tasks'
 import { actionUpdateOptimizeTask } from './store/action-update-optimize-task'
@@ -22,12 +22,12 @@ import {
 } from './store/selector-squares'
 import { selectorState } from './store/selector-state'
 import {
-  CepheusState,
-  OptimizationState,
-  OptimizeOptions,
-  OptimizeTask,
-  StoreOptions,
-  TypeCepheusState
+  TypeCepheusState,
+  type CepheusState,
+  type OptimizationState,
+  type OptimizeOptions,
+  type OptimizeTask,
+  type StoreOptions
 } from './types'
 
 export {
@@ -104,13 +104,13 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
         if (squares.size !== 0) {
           for (const iteration of range(store.options.iterations)) {
             actionCreateOptimizeTasks(store, iteration, {
-              squares,
               hueAngle: store.options.hueAngle * bias,
+              squares,
               weights: {
                 ...store.options.weights,
-                lightness: store.options.weights.lightness * bias,
                 chroma: store.options.weights.chroma * bias,
-                hue: store.options.weights.hue * bias
+                hue: store.options.weights.hue * bias,
+                lightness: store.options.weights.lightness * bias
               }
             })
           }
@@ -137,19 +137,17 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
         type: TypeCepheusState.OptimizationDone
       })
     })
-    .catch(async (error) => {
-      if (isError(error) && error.name === 'AbortError') {
-        return await actionUpdateStage(store, {
-          type: TypeCepheusState.Abort
-        })
-      } else {
-        return await actionUpdateStage(store, {
-          type: TypeCepheusState.Error,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          error
-        })
-      }
-    })
+    .catch(async (error) =>
+      isError(error) && error.name === 'AbortError'
+        ? await actionUpdateStage(store, {
+            type: TypeCepheusState.Abort
+          })
+        : await actionUpdateStage(store, {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            error,
+            type: TypeCepheusState.Error
+          })
+    )
     .then(async () => await pool.destroy())
     .then(async () => {
       const state = selectorState(store)

@@ -1,6 +1,6 @@
 import { mapValues } from 'lodash-es'
 import { sum } from 'simple-statistics'
-import { OptimizeOptions } from '../types'
+import type { OptimizeOptions } from '../types'
 import { toPrecision } from './to-precision'
 
 export const normalizeWeights = (

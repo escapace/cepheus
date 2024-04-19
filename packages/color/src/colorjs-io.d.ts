@@ -33,8 +33,8 @@ declare module 'colorjs.io/fn' {
 
   export abstract class ColorSpace {
     id: ColorSpaceId
-    static register(space: ColorSpace): void
     static get(id: ColorSpaceId): ColorSpace
+    static register(space: ColorSpace): void
   }
 
   export const XYZ_D65: InstanceType<typeof ColorSpace>
@@ -60,9 +60,9 @@ declare module 'colorjs.io/fn' {
   export const OKLCH: InstanceType<typeof ColorSpace>
 
   export interface Color {
-    space: ColorSpace
-    coords: [number, number, number]
     alpha: number
+    coords: [number, number, number]
+    space: ColorSpace
   }
 
   export const deltaE76: (color: Color, sample: Color) => number
@@ -100,36 +100,36 @@ declare module 'colorjs.io/fn' {
   ) => Color
 
   export interface DenormalizedColor {
+    alpha?: number
+    coords: number[]
     space?: ColorSpace
     spaceId: ColorSpaceId
-    coords: number[]
-    alpha?: number
   }
 
   // export const parse: (value: string) => DenormalizedColor
-  export const getColor: (color: DenormalizedColor | Color | string) => Color
+  export const getColor: (color: Color | DenormalizedColor | string) => Color
 
   type ColorFormat =
-    | 'default'
     | 'color'
+    | 'default'
+    | 'hex'
     | 'hsl'
     | 'hsla'
     | 'hwb'
+    | 'keyword'
     | 'lab'
     | 'lch'
     | 'oklab'
     | 'oklch'
     | 'rgb'
     | 'rgba'
-    | 'hex'
-    | 'keyword'
 
   export const serialize: (
     color: Color,
     options?: {
-      precision?: number
       format: ColorFormat
       inGamut?: boolean
+      precision?: number
     }
   ) => string
 
@@ -138,16 +138,16 @@ declare module 'colorjs.io/fn' {
   export const toGamut: (
     color: Color,
     options?: {
-      method?: 'clip' | 'css'
-      jnd?: number
       deltaEMethod?:
+        | 'deltaE2000'
         | 'deltaE76'
         | 'deltaECMC'
-        | 'deltaE2000'
-        | 'deltaEJz'
-        | 'deltaEITP'
-        | 'deltaEOK'
         | 'deltaEHCT'
+        | 'deltaEITP'
+        | 'deltaEJz'
+        | 'deltaEOK'
+      jnd?: number
+      method?: 'clip' | 'css'
       space?: ColorSpace
     }
   ) => Color
