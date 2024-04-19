@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 import { normalizeAngle } from 'cepheus'
 import { assert } from 'chai'
-import { PRNG } from './create-prng'
+import type { PRNG } from './create-prng'
 import { percentile } from './percentile'
 
 const one = {

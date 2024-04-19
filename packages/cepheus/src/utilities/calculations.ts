@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Line, Point, State, Triangle } from '../types'
+import type { Line, Point, State, Triangle } from '../types'
 import { intersection } from './intersection'
 import { lerpArray } from './lerp-array'
 

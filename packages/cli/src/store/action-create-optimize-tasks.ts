@@ -1,19 +1,19 @@
 import { tile } from '@cepheus/utilities'
 import { normalizeAngle } from 'cepheus'
-import { OptimizeTaskOptions, TypeOptimizationState } from '../types'
+import { type OptimizeTaskOptions, TypeOptimizationState } from '../types'
 import { hash } from '../utilities/hash'
 import { normalizeWeights } from '../utilities/normalize-weights'
 import { objectHash } from '../utilities/object-hash'
 import { createSquareOptions } from './create-square-options'
-import { Store } from './create-store'
+import type { Store } from './create-store'
 
 interface Options {
+  hueAngle?: number
   squares?: Map<
     number,
-    Required<Pick<OptimizeTaskOptions, 'lightness' | 'chroma'>>
+    Required<Pick<OptimizeTaskOptions, 'chroma' | 'lightness'>>
   >
   weights?: OptimizeTaskOptions['weights']
-  hueAngle?: number
 }
 
 export function actionCreateOptimizeTasks(
@@ -38,6 +38,11 @@ export function actionCreateOptimizeTasks(
           options.squares.get(square)!
 
     const optimizeTaskOptions: OptimizeTaskOptions = {
+      background: store.options.background,
+      colors: store.options.colors,
+      colorSpace: store.options.colorSpace,
+      hueAngle: normalizeAngle(options.hueAngle ?? store.options.hueAngle),
+      hyperparameters: store.options.hyperparameters,
       key: hash(square, store.options.interval, store.options.randomSeed),
       randomSeed: hash(
         iteration,
@@ -46,15 +51,10 @@ export function actionCreateOptimizeTasks(
         store.options.randomSeed
       ),
       randomSource: store.options.randomSource,
-      colors: store.options.colors,
-      background: store.options.background,
-      colorSpace: store.options.colorSpace,
-      hyperparameters: store.options.hyperparameters,
       weights:
         options?.weights === undefined
           ? store.options.weights
           : normalizeWeights(options.weights),
-      hueAngle: normalizeAngle(options.hueAngle ?? store.options.hueAngle),
       ...squareOptions
     }
 

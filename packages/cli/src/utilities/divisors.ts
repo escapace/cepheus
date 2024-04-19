@@ -3,7 +3,7 @@ const enumFromTo = (m: number) => (n: number) =>
     {
       length: 1 + n - m
     },
-    (_, i) => m + i
+    (_, index) => m + index
   )
 
 export const divisors = (n: number) => {

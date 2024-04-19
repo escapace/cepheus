@@ -1,6 +1,12 @@
-import { Options } from '.'
+import type { Options } from '.'
 import { INTERPOLATOR } from './constants'
-import { Interpolator, Model, State, Subscription, Triangle } from './types'
+import type {
+  Interpolator,
+  Model,
+  State,
+  Subscription,
+  Triangle
+} from './types'
 import {
   chroma0,
   chroma1,
@@ -30,24 +36,24 @@ const changeModel = (
   triangle[1] = triangle1
   triangle[2] = triangle2
 
-  return { x0, p0, p1, state }
+  return { p0, p1, state, x0 }
 }
 
 export const createInterpolator = (options: Options): Interpolator => {
   const subscriptions = new Set<Subscription>()
   const triangle: Triangle = [] as unknown as Triangle
 
-  let { state, x0, p0, p1 } = changeModel(
+  let { p0, p1, state, x0 } = changeModel(
     {
-      lightness:
-        options.lightness === undefined
-          ? [0, 1]
-          : [options.lightness[0], options.lightness[1]],
       chroma:
         options.chroma === undefined
           ? [0, 1]
           : [options.chroma[0], options.chroma[1]],
       darkMode: options.darkMode ?? false,
+      lightness:
+        options.lightness === undefined
+          ? [0, 1]
+          : [options.lightness[0], options.lightness[1]],
       model: options.model
     },
     triangle
@@ -55,11 +61,11 @@ export const createInterpolator = (options: Options): Interpolator => {
 
   const updateModel = async (model: Model) => {
     if (state.model !== model) {
-      const props = changeModel(state, triangle, model)
+      const properties = changeModel(state, triangle, model)
 
-      x0 = props.x0
-      p0 = props.p0
-      p1 = props.p1
+      x0 = properties.x0
+      p0 = properties.p0
+      p1 = properties.p1
 
       await notify(subscriptions)
     }
@@ -70,9 +76,9 @@ export const createInterpolator = (options: Options): Interpolator => {
 
     if (a !== undefined && a !== state.chroma[0]) {
       state.chroma[0] = a
-      const tmp = chroma0(x0, state.model.triangle, state)
-      p0 = tmp.p0
-      p1 = tmp.p1
+      const temporary = chroma0(x0, state.model.triangle, state)
+      p0 = temporary.p0
+      p1 = temporary.p1
       triangle[0] = lightness0(p0, p1, state)
       triangle[2] = lightness1(p0, p1, state)
       changed = true
@@ -120,12 +126,12 @@ export const createInterpolator = (options: Options): Interpolator => {
   return {
     [INTERPOLATOR]: {
       state,
+      subscriptions,
       triangle,
-      updateModel,
       updateChroma,
       updateDarkMode,
       updateLightness,
-      subscriptions
+      updateModel
     }
   }
 }

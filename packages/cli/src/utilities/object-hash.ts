@@ -1,4 +1,4 @@
-import { JSONType, objectSort } from './object-sort'
+import { type JSONType, objectSort } from './object-sort'
 import { hash } from './hash'
 
 export const objectHash = <T extends JSONType>(value: T): string =>

@@ -5,7 +5,7 @@ describe('./src/utilities/object-sort.spec.ts', () => {
   it('.', () => {
     /* console.log() */
     assert.equal(
-      JSON.stringify(objectSort({ f: {}, a: 'b', c: ['e', 'd'] })),
+      JSON.stringify(objectSort({ a: 'b', c: ['e', 'd'], f: {} })),
       '{"a":"b","c":["e","d"],"f":{}}'
     )
   })

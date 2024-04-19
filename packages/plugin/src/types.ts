@@ -1,16 +1,16 @@
 export interface Options {
   darkMode?: 'class' | 'media'
   flags?: {
-    colorFormat?: Array<'p3' | 'srgb' | 'oklch'>
-    colorGamut?: Array<'srgb' | 'p3'>
-    colorScheme?: Array<'light' | 'dark' | 'none'>
+    colorFormat?: Array<'oklch' | 'p3' | 'srgb'>
+    colorGamut?: Array<'p3' | 'srgb'>
+    colorScheme?: Array<'dark' | 'light' | 'none'>
   }
 }
 
 export interface Flags {
-  colorFormat: 'p3' | 'srgb' | 'oklch'
-  colorGamut: 'srgb' | 'p3'
-  colorScheme: 'light' | 'dark' | 'none'
+  colorFormat: 'oklch' | 'p3' | 'srgb'
+  colorGamut: 'p3' | 'srgb'
+  colorScheme: 'dark' | 'light' | 'none'
 }
 
 export interface OptionsAdvanced extends Pick<Required<Options>, 'darkMode'> {

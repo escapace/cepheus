@@ -14,15 +14,15 @@ function sub(o: number[], a: number[], b: number[]) {
   return o
 }
 
-function distSq(a: number[], b: number[]) {
+function distributionSq(a: number[], b: number[]) {
   const dx = b[0] - a[0]
   const dy = b[1] - a[1]
   const dz = b[2] - a[2]
   return dx * dx + dy * dy + dz * dz
 }
 
-function dist(a: number[], b: number[]) {
-  return Math.sqrt(distSq(a, b))
+function distribution(a: number[], b: number[]) {
+  return Math.sqrt(distributionSq(a, b))
 }
 
 export function CubicPoly() {
@@ -47,6 +47,12 @@ export function CubicPoly() {
   }
 
   return {
+    calc: function (t: number) {
+      const t2 = t * t
+      const t3 = t2 * t
+      return c0 + c1 * t + c2 * t2 + c3 * t3
+    },
+
     initCatmullRom: function (
       x0: number,
       x1: number,
@@ -75,21 +81,15 @@ export function CubicPoly() {
       t2 *= dt1
 
       init(x1, x2, t1, t2)
-    },
-
-    calc: function (t: number) {
-      const t2 = t * t
-      const t3 = t2 * t
-      return c0 + c1 * t + c2 * t2 + c3 * t3
     }
   }
 }
 
 interface Options {
-  points: number[][]
   closed: boolean
-  type: 'uniform' | 'centripetal' | 'chordal' | 'catmullrom'
+  points: number[][]
   tension: number
+  type: 'catmullrom' | 'centripetal' | 'chordal' | 'uniform'
 }
 
 // Extracted from ThreeJS, modified to plain arrays
@@ -104,17 +104,17 @@ interface Options {
   */
 
 export function getCatmullRomPoint(
-  opts: Options,
+  options: Options,
   t: number,
   out: number[] = []
 ) {
-  const tmp1: number[] = []
-  const tmp2: number[] = []
+  const temporary1: number[] = []
+  const temporary2: number[] = []
   const px = CubicPoly()
   const py = CubicPoly()
   const pz = CubicPoly()
 
-  const { points, closed = false, type = 'uniform', tension = 0.5 } = opts
+  const { closed = false, points, tension = 0.5, type = 'uniform' } = options
 
   const l = points.length
   const p = (l - (closed ? 0 : 1)) * t
@@ -134,9 +134,9 @@ export function getCatmullRomPoint(
     p0 = points[(intPoint - 1) % l]
   } else {
     // extrapolate first point
-    sub(tmp1, points[0], points[1])
-    add(tmp1, tmp1, points[0])
-    p0 = tmp1
+    sub(temporary1, points[0], points[1])
+    add(temporary1, temporary1, points[0])
+    p0 = temporary1
   }
 
   const p1 = points[intPoint % l]
@@ -146,20 +146,20 @@ export function getCatmullRomPoint(
     p3 = points[(intPoint + 2) % l]
   } else {
     // extrapolate last point
-    sub(tmp2, points[l - 1], points[l - 2])
-    add(tmp2, tmp2, points[l - 1])
-    p3 = tmp2
+    sub(temporary2, points[l - 1], points[l - 2])
+    add(temporary2, temporary2, points[l - 1])
+    p3 = temporary2
   }
 
   if (type === 'centripetal' || type === 'chordal') {
     // init Centripetal / Chordal Catmull-Rom
     const pow = type === 'chordal' ? 0.5 : 0.25
-    let dt0 = Math.pow(distSq(p0, p1), pow)
-    let dt1 = Math.pow(distSq(p1, p2), pow)
-    let dt2 = Math.pow(distSq(p2, p3), pow)
+    let dt0 = Math.pow(distributionSq(p0, p1), pow)
+    let dt1 = Math.pow(distributionSq(p1, p2), pow)
+    let dt2 = Math.pow(distributionSq(p2, p3), pow)
 
     // safety check for repeated points
-    if (dt1 < 1e-4) dt1 = 1.0
+    if (dt1 < 1e-4) dt1 = 1
     if (dt0 < 1e-4) dt0 = dt1
     if (dt2 < 1e-4) dt2 = dt1
 
@@ -185,14 +185,14 @@ interface COptions extends Options {
 
 export function CatmullRomSpline(
   points: number[][] = [],
-  opts: Partial<COptions> = {}
+  options: Partial<COptions> = {}
 ) {
   const {
+    arcLengthDivisions = 200,
     closed = false,
-    type = 'uniform',
     tension = 0.5,
-    arcLengthDivisions = 200
-  } = opts
+    type = 'uniform'
+  } = options
 
   function getArcLengths(
     divisions: number = spline.arcLengthDivisions
@@ -207,7 +207,7 @@ export function CatmullRomSpline(
 
     for (p = 1; p <= divisions; p++) {
       current = getPoint(p / divisions)
-      sum += dist(current, last)
+      sum += distribution(current, last)
       out.push(sum)
       last = current
     }
@@ -219,8 +219,8 @@ export function CatmullRomSpline(
     const arclengths = getArcLengths()
     const paths: number[][] = []
 
-    for (let i = 0; i < n; i++) {
-      const t = spline.closed ? i / n : i / (n - 1)
+    for (let index = 0; index < n; index++) {
+      const t = spline.closed ? index / n : index / (n - 1)
       const p: number[] = spaced
         ? getSpacedPoint(t, undefined, arclengths)
         : getPoint(t)
@@ -248,16 +248,12 @@ export function CatmullRomSpline(
     distance?: number,
     arcLengths: number[] = getArcLengths()
   ) {
-    let i = 0
+    let index = 0
     const il = arcLengths.length
 
-    let targetArcLength: number // The targeted u distance value to get
+    // let targetArcLength: number // The targeted u distance value to get
 
-    if (distance !== undefined) {
-      targetArcLength = distance
-    } else {
-      targetArcLength = u * arcLengths[il - 1]
-    }
+    const targetArcLength = distance ?? u * arcLengths[il - 1]
 
     // binary search for the index with largest value smaller than target u distance
 
@@ -266,32 +262,32 @@ export function CatmullRomSpline(
     let comparison
 
     while (low <= high) {
-      i = Math.floor(low + (high - low) / 2) // less likely to overflow, though probably not issue here, JS doesn't really have integers, all numbers are floats
+      index = Math.floor(low + (high - low) / 2) // less likely to overflow, though probably not issue here, JS doesn't really have integers, all numbers are floats
 
-      comparison = arcLengths[i] - targetArcLength
+      comparison = arcLengths[index] - targetArcLength
 
       if (comparison < 0) {
-        low = i + 1
+        low = index + 1
       } else if (comparison > 0) {
-        high = i - 1
+        high = index - 1
       } else {
-        high = i
+        high = index
         break
 
         // DONE
       }
     }
 
-    i = high
+    index = high
 
-    if (arcLengths[i] === targetArcLength) {
-      return i / (il - 1)
+    if (arcLengths[index] === targetArcLength) {
+      return index / (il - 1)
     }
 
     // we could get finer grain at lengths, or use simple interpolation between two points
 
-    const lengthBefore = arcLengths[i]
-    const lengthAfter = arcLengths[i + 1]
+    const lengthBefore = arcLengths[index]
+    const lengthAfter = arcLengths[index + 1]
 
     const segmentLength = lengthAfter - lengthBefore
 
@@ -301,22 +297,22 @@ export function CatmullRomSpline(
 
     // add that fractional amount to t
 
-    const t = (i + segmentFraction) / (il - 1)
+    const t = (index + segmentFraction) / (il - 1)
 
     return t
   }
 
   const spline = {
-    closed,
-    type,
-    tension,
-    points,
     arcLengthDivisions,
+    closed,
     getArcLengths,
-    getPoints,
     getPoint,
+    getPoints,
     getSpacedPoint,
-    getUtoTMapping
+    getUtoTMapping,
+    points,
+    tension,
+    type
   }
 
   return spline

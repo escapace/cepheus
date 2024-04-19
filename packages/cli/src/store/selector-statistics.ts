@@ -1,5 +1,5 @@
 import { mean, standardDeviation } from 'simple-statistics'
-import { Store } from './create-store'
+import type { Store } from './create-store'
 import { selectorSquares } from './selector-squares'
 
 export const selectorStatistics = (store: Store) => {
@@ -18,11 +18,11 @@ export const selectorStatistics = (store: Store) => {
 
   return {
     colors,
-    squaresRemaining,
-    squaresTotal,
-    costMin,
     costMax,
     costMean,
-    costSd
+    costMin,
+    costSd,
+    squaresRemaining,
+    squaresTotal
   }
 }

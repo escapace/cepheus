@@ -1,5 +1,5 @@
 import { INTERPOLATOR } from './constants'
-import { Interpolator, Subscription, Unsubscribe } from './types'
+import type { Interpolator, Subscription, Unsubscribe } from './types'
 
 export const subscribe = (
   interpolator: Interpolator,

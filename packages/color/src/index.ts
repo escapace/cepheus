@@ -49,7 +49,6 @@ import { clone, getColor } from 'colorjs.io/fn'
 export const fixNaN = (color: Color): Color => {
   if (color.space.id === 'oklch') {
     return {
-      space: color.space,
       alpha: color.alpha,
       coords: color.coords.map((value) => {
         if (isNaN(value)) {
@@ -59,14 +58,15 @@ export const fixNaN = (color: Color): Color => {
         }
 
         return value
-      }) as [number, number, number]
+      }) as [number, number, number],
+      space: color.space
     }
   }
 
   return color
 }
 
-export const parse = (color: string | Color): Color => clone(getColor(color))
+export const parse = (color: Color | string): Color => clone(getColor(color))
 
 // export const convert: typeof to = (color, space, options) =>
 //   to(color, space, options)

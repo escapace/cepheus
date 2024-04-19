@@ -9,7 +9,7 @@ export const unszudzik2 = (z: number): [number, number] => {
 }
 
 export const szudzik = (...number: number[]) =>
-  number.reduce((prev, next) => szudzik2(prev, next))
+  number.reduce((previous, next) => szudzik2(previous, next))
 
 export const unszudzik = (number: number, n: number) => {
   let value: number[] = []

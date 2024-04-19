@@ -1,25 +1,23 @@
-import { ModelUnparsed } from 'cepheus'
+import type { ModelUnparsed } from 'cepheus'
 import { flattenDeep, map } from 'lodash-es'
 import { toPrecision } from '../utilities/to-precision'
-import { Store } from './create-store'
+import type { Store } from './create-store'
 import { selectorSquares } from './selector-squares'
 import { selectorTriangle } from './selector-triangle'
 
 export const selectorModel = (store: Store): ModelUnparsed => {
   const values = new Map(
     Array.from(selectorSquares(store, store.allIterations).entries()).map(
-      ([square, task]): [number, Array<[number, number, number]>] => {
-        return [
-          square,
-          map(
-            task.state.colors,
-            (value) =>
-              map(value, (value) =>
-                toPrecision(value, store.options.precision)
-              ) as [number, number, number]
-          )
-        ]
-      }
+      ([square, task]): [number, Array<[number, number, number]>] => [
+        square,
+        map(
+          task.state.colors,
+          (value) =>
+            map(value, (value) =>
+              toPrecision(value, store.options.precision)
+            ) as [number, number, number]
+        )
+      ]
     )
   )
 

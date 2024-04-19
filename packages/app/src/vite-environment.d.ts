@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/triple-slash-reference */
-/* eslint-disable @typescript-eslint/ban-types */
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /// <reference types="vite/client" />
 

@@ -1,9 +1,9 @@
 import { ColorSpace, LCH, OKLCH, P3, sRGB } from '@cepheus/color'
-import { Iterators, PLUGIN, Plugin } from 'cassiopeia'
+import { type Iterators, PLUGIN, type Plugin } from 'cassiopeia'
 import { subscribe, type Interpolator } from 'cepheus'
 import { createIterator } from './create-iterator'
 import { permutations } from './permutations'
-import { Options, OptionsAdvanced } from './types'
+import type { Options, OptionsAdvanced } from './types'
 
 const filterKeys = <T extends string>(record: Record<T, boolean>): T[] => {
   const keys = Object.keys(record) as T[]
@@ -21,8 +21,8 @@ const intersection = <T extends string>(a: T[], b: T[] | undefined): T[] => {
 
 const createCepheusOptions = (options: Options): OptionsAdvanced => {
   let colorScheme: Array<'dark' | 'light' | 'none'>
-  let colorFormat: Array<'srgb' | 'p3' | 'oklch'>
-  let colorGamut: Array<'srgb' | 'p3'>
+  let colorFormat: Array<'oklch' | 'p3' | 'srgb'>
+  let colorGamut: Array<'p3' | 'srgb'>
 
   if (__BROWSER__) {
     colorScheme = options.flags?.colorScheme ?? ['none']
@@ -63,12 +63,13 @@ const createCepheusOptions = (options: Options): OptionsAdvanced => {
     colorFormat,
     colorGamut,
     colorScheme
-  }).filter((flags) => {
-    return !(
-      (flags.colorFormat === 'p3' && flags.colorGamut === 'srgb') ||
-      (flags.colorFormat === 'srgb' && flags.colorGamut === 'p3')
-    )
-  })
+  }).filter(
+    (flags) =>
+      !(
+        (flags.colorFormat === 'p3' && flags.colorGamut === 'srgb') ||
+        (flags.colorFormat === 'srgb' && flags.colorGamut === 'p3')
+      )
+  )
 
   if (flags.length === 0) {
     throw new Error('[cepheus]: incompatibe options.')
@@ -108,22 +109,20 @@ const setIterators = (
 export const createCepheusPlugin = (
   interpolator: Interpolator,
   options: Options
-): Plugin => {
-  return {
-    [PLUGIN]: (iterators: Iterators, update) => {
-      setIterators(interpolator, iterators, createCepheusOptions(options))
-      subscribe(interpolator, update)
+): Plugin => ({
+  [PLUGIN]: (iterators: Iterators, update) => {
+    setIterators(interpolator, iterators, createCepheusOptions(options))
+    subscribe(interpolator, update)
 
-      if (__BROWSER__) {
-        globalThis
-          .matchMedia('(color-gamut: p3)')
-          .addEventListener('change', () => {
-            setIterators(interpolator, iterators, createCepheusOptions(options))
-            void update(false)
-          })
-      }
+    if (__BROWSER__) {
+      globalThis
+        .matchMedia('(color-gamut: p3)')
+        .addEventListener('change', () => {
+          setIterators(interpolator, iterators, createCepheusOptions(options))
+          void update(false)
+        })
     }
   }
-}
+})
 
 export type { Options }

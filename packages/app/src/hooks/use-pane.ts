@@ -15,9 +15,9 @@ export const usePane = () => {
         two: 'two'
       }
     })
-    pane.addBinding(store, 'lightness', { min: 0, max: 1, step: 0.01 })
-    pane.addBinding(store, 'chroma', { min: 0, max: 1, step: 0.01 })
-    pane.addBinding(store, 'contrast', { min: 0, max: 1, step: 0.01 })
+    pane.addBinding(store, 'lightness', { max: 1, min: 0, step: 0.01 })
+    pane.addBinding(store, 'chroma', { max: 1, min: 0, step: 0.01 })
+    pane.addBinding(store, 'contrast', { max: 1, min: 0, step: 0.01 })
     pane.addBinding(store, 'darkMode', { label: 'dark mode' })
 
     pane.addBinding(store, 'modelState', { label: 'state', readonly: true })
