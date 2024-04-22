@@ -102,7 +102,7 @@ importers:
         specifier: ^0.2.5
         version: 0.2.5
       '@escapace/satie':
-        specifier: ^6.0.2
+        specifier: ^6.0.12
         version: 6.0.13
       '@headlessui/vue':
         specifier: ^1.7.19
