@@ -103,7 +103,7 @@ importers:
         version: 0.2.5
       '@escapace/satie':
         specifier: ^6.0.2
-        version: 6.0.5
+        version: 6.0.13
       '@headlessui/vue':
         specifier: ^1.7.19
         version: 1.7.19(vue@3.4.21(typescript@5.4.3))
@@ -1193,8 +1193,8 @@ packages:
     engines: {node: '>=20.11.1', pnpm: '>=8.15.1'}
     hasBin: true
 
-  '@escapace/satie@6.0.5':
-    resolution: {integrity: sha512-JxU+44aAA/rO/vzaRHMGPP7GH6vkAd6XFFk5+o+75/ot4PoBo6gy75f/mG+pH9i424ocTEAITPQWWjzMHWOQHQ==}
+  '@escapace/satie@6.0.13':
+    resolution: {integrity: sha512-Og2jHpIwV31bboMJeTSsTcuglSfoEPjvcMbXpsmqayEfpU24aWBOQwDFTi/DgMJWoBN6NGN23PMgpJO4rpuzdg==}
 
   '@escapace/typelevel@1.3.5':
     resolution: {integrity: sha512-h+evILRmbIlXQ+YqhEcvCtrXb5WTsOOnpLLYHoPrJqVmDUvlq7apsXvVHglodnr4e8OjD0YKXUkL92SUAJlduQ==}
@@ -4671,7 +4671,7 @@ snapshots:
     transitivePeerDependencies:
       - '@pnpm/logger'
 
-  '@escapace/satie@6.0.5':
+  '@escapace/satie@6.0.13':
     dependencies:
       csstype: 3.1.3
       zod: 3.22.4
