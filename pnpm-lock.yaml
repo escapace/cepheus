@@ -15,8 +15,8 @@ importers:
         specifier: 19.1.0
         version: 19.1.0
       '@escapace/pnpm-pack':
-        specifier: 0.1.0
-        version: 0.1.0(@pnpm/logger@5.0.0)
+        specifier: 0.2.0
+        version: 0.2.0(@pnpm/logger@5.0.0)
       '@ls-lint/ls-lint':
         specifier: 2.2.3
         version: 2.2.3
@@ -36,8 +36,8 @@ importers:
         specifier: 9.0.0
         version: 9.0.0
       eslint-config-escapace:
-        specifier: 4.1.5
-        version: 4.1.5(eslint@9.0.0)(typescript@5.4.3)
+        specifier: 4.1.6
+        version: 4.1.6(eslint@9.0.0)(typescript@5.4.3)
       execa:
         specifier: 8.0.1
         version: 8.0.1
@@ -102,7 +102,7 @@ importers:
         specifier: ^0.2.5
         version: 0.2.5
       '@escapace/satie':
-        specifier: ^6.0.12
+        specifier: ^6.0.13
         version: 6.0.13
       '@headlessui/vue':
         specifier: ^1.7.19
@@ -1188,9 +1188,9 @@ packages:
     resolution: {integrity: sha512-2hfYaXeSnN8yGfJeEtUwaLgGe/xsggI4aM2dr0q7kIfhlvof9Fka1l9EKTq+Ykqf2VslyffEmykfrrFcaXgMiA==}
     engines: {node: '>=18.18.0', pnpm: '>=8.7.6'}
 
-  '@escapace/pnpm-pack@0.1.0':
-    resolution: {integrity: sha512-5pOvIuOjPXTPY9Yy2oHJOJ4Ssw32BFWCH4G5/UXhx8HldTa0qOvzo75HmkE0lhcQWjt8NjcxJ+JCxm4XuyUgjA==}
-    engines: {node: '>=20.11.1', pnpm: '>=8.15.1'}
+  '@escapace/pnpm-pack@0.2.0':
+    resolution: {integrity: sha512-V29HKospMkpbyccq3iOoudYscodUJuyn11ZyONygPABjXBbH8lhIsl49rEcVfwTEjNfhCDKmhSKcGXskkre3DA==}
+    engines: {node: '>=20.12.0', pnpm: '>=8.15.6'}
     hasBin: true
 
   '@escapace/satie@6.0.13':
@@ -2318,8 +2318,8 @@ packages:
     resolution: {integrity: sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA==}
     engines: {node: '>=10'}
 
-  eslint-config-escapace@4.1.5:
-    resolution: {integrity: sha512-1eL612WjvRWiTAg2Y/bWzSHOYX8jW9fCxbs1ZqCqfC/kbmMmQFn09YjDjle00szazTocm4zvU7krkcEZDR7MMA==}
+  eslint-config-escapace@4.1.6:
+    resolution: {integrity: sha512-tOxZ8L+o4YcysYAEsYIBLwlBJDpGQe4qWYlHG8lFnNofDQflbIvTEAVgAAgleuWkZb4yXtPmO3BoAuPXeE5IkQ==}
     engines: {node: '>=20.12.0', pnpm: '>=8.15.6'}
     peerDependencies:
       eslint: '>=8.57.0'
@@ -4658,7 +4658,7 @@ snapshots:
 
   '@escapace/minimum-perimeter-triangle@0.2.5': {}
 
-  '@escapace/pnpm-pack@0.1.0(@pnpm/logger@5.0.0)':
+  '@escapace/pnpm-pack@0.2.0(@pnpm/logger@5.0.0)':
     dependencies:
       '@pnpm/lockfile-file': 8.1.8(@pnpm/logger@5.0.0)
       arg: 5.0.2
@@ -5982,7 +5982,7 @@ snapshots:
 
   escape-string-regexp@4.0.0: {}
 
-  eslint-config-escapace@4.1.5(eslint@9.0.0)(typescript@5.4.3):
+  eslint-config-escapace@4.1.6(eslint@9.0.0)(typescript@5.4.3):
     dependencies:
       '@stylistic/eslint-plugin': 1.7.2(eslint@9.0.0)(typescript@5.4.3)
       eslint: 9.0.0
