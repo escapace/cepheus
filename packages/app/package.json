@@ -12,7 +12,7 @@
     "@cepheus/utilities": "workspace:*",
     "@cepheus/vue": "workspace:*",
     "@escapace/minimum-perimeter-triangle": "^0.2.5",
-    "@escapace/satie": "^6.0.12",
+    "@escapace/satie": "^6.0.13",
     "@headlessui/vue": "^1.7.19",
     "@hono/node-server": "^1.9.1",
     "@js-temporal/polyfill": "^0.4.4",
