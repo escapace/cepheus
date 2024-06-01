@@ -15,8 +15,8 @@ importers:
         specifier: 19.1.0
         version: 19.1.0
       '@escapace/pnpm-pack':
-        specifier: 0.4.1
-        version: 0.4.1(@pnpm/logger@5.0.0)
+        specifier: 0.4.2
+        version: 0.4.2(@pnpm/logger@5.0.0)
       '@ls-lint/ls-lint':
         specifier: 2.2.3
         version: 2.2.3
@@ -66,8 +66,8 @@ importers:
         specifier: 3.2.5
         version: 3.2.5
       prettier-config-escapace:
-        specifier: 1.2.0
-        version: 1.2.0
+        specifier: 1.2.1
+        version: 1.2.1
       semver:
         specifier: 7.6.0
         version: 7.6.0
@@ -81,11 +81,11 @@ importers:
   packages/app:
     dependencies:
       '@cassiopeia/vite':
-        specifier: ^5.3.7
-        version: 5.3.7(@vitejs/plugin-vue@5.0.4(vite@5.2.8(@types/node@20.12.8)(sass@1.72.0))(vue@3.4.21(typescript@5.4.3)))(vite@5.2.8(@types/node@20.12.8)(sass@1.72.0))
+        specifier: ^5.3.8
+        version: 5.3.8(vite@5.2.8(@types/node@20.12.8)(sass@1.72.0))(vue@3.4.21(typescript@5.4.3))
       '@cassiopeia/vue':
-        specifier: ^5.3.7
-        version: 5.3.7(vue@3.4.21(typescript@5.4.3))
+        specifier: ^5.3.8
+        version: 5.3.8(vue@3.4.21(typescript@5.4.3))
       '@cepheus/color':
         specifier: workspace:*
         version: link:../color
@@ -123,8 +123,8 @@ importers:
         specifier: ^10.9.0
         version: 10.9.0(vue@3.4.21(typescript@5.4.3))
       cassiopeia:
-        specifier: ^5.3.7
-        version: 5.3.7
+        specifier: ^5.3.8
+        version: 5.3.8
       cepheus:
         specifier: workspace:*
         version: link:../cepheus
@@ -172,8 +172,8 @@ importers:
         specifier: 3.2.5
         version: 3.2.5
       prettier-config-escapace:
-        specifier: 1.2.0
-        version: 1.2.0
+        specifier: 1.2.1
+        version: 1.2.1
       sass:
         specifier: 1.72.0
         version: 1.72.0
@@ -226,8 +226,8 @@ importers:
         specifier: 3.2.5
         version: 3.2.5
       prettier-config-escapace:
-        specifier: 1.2.0
-        version: 1.2.0
+        specifier: 1.2.1
+        version: 1.2.1
       typescript:
         specifier: 5.4.3
         version: 5.4.3
@@ -314,8 +314,8 @@ importers:
         specifier: 3.2.5
         version: 3.2.5
       prettier-config-escapace:
-        specifier: 1.2.0
-        version: 1.2.0
+        specifier: 1.2.1
+        version: 1.2.1
       tsx:
         specifier: 4.7.1
         version: 4.7.1
@@ -333,8 +333,8 @@ importers:
         specifier: 3.2.5
         version: 3.2.5
       prettier-config-escapace:
-        specifier: 1.2.0
-        version: 1.2.0
+        specifier: 1.2.1
+        version: 1.2.1
       typescript:
         specifier: 5.4.3
         version: 5.4.3
@@ -364,8 +364,8 @@ importers:
         specifier: 9.1.0
         version: 9.1.0
       cassiopeia:
-        specifier: 5.3.7
-        version: 5.3.7
+        specifier: 5.3.8
+        version: 5.3.8
       chai:
         specifier: 5.1.0
         version: 5.1.0
@@ -376,8 +376,8 @@ importers:
         specifier: 3.2.5
         version: 3.2.5
       prettier-config-escapace:
-        specifier: 1.2.0
-        version: 1.2.0
+        specifier: 1.2.1
+        version: 1.2.1
       typescript:
         specifier: 5.4.3
         version: 5.4.3
@@ -416,8 +416,8 @@ importers:
         specifier: 3.2.5
         version: 3.2.5
       prettier-config-escapace:
-        specifier: 1.2.0
-        version: 1.2.0
+        specifier: 1.2.1
+        version: 1.2.1
       typescript:
         specifier: 5.4.3
         version: 5.4.3
@@ -447,8 +447,8 @@ importers:
         specifier: 9.1.0
         version: 9.1.0
       cassiopeia:
-        specifier: 5.3.7
-        version: 5.3.7
+        specifier: 5.3.8
+        version: 5.3.8
       chai:
         specifier: 5.1.0
         version: 5.1.0
@@ -459,8 +459,8 @@ importers:
         specifier: 3.2.5
         version: 3.2.5
       prettier-config-escapace:
-        specifier: 1.2.0
-        version: 1.2.0
+        specifier: 1.2.1
+        version: 1.2.1
       typescript:
         specifier: 5.4.3
         version: 5.4.3
@@ -639,14 +639,13 @@ packages:
   '@bjornlu/colorblind@1.0.3':
     resolution: {integrity: sha512-RG9W0BuFib5xN19R4U1dFK7s26+UPiJqHdwqawpvH7sywXJ6zc37onPpRpnFP0aNuKLhhmuitqPAXxLxOA+HgQ==}
 
-  '@cassiopeia/vite@5.3.7':
-    resolution: {integrity: sha512-Z+gmAFnZrGsUbXLWqkGL/KL3pdS7eiAGhooSNh/xssTrzThHpajtH4d0oJYpkMRdTy1w57PQe+6PAlyNUM3b/w==}
-    peerDependencies:
-      '@vitejs/plugin-vue': '>=5.0.4'
-      vite: '>=5.2.7'
+  '@cassiopeia/vite@5.3.8':
+    resolution: {integrity: sha512-bRrw6gVUykDOD+z1Qi/4ATHhsFrnl+1TBk9eo0PQIkzXCddxDuInuu8+wdU+WFBkf9EKkLOlwNLWQZ5iC/VqbA==}
+    engines: {node: '>=20.12.0', pnpm: '>=9.0.6'}
 
-  '@cassiopeia/vue@5.3.7':
-    resolution: {integrity: sha512-628KSN/WW/nD1zDTGSH8BKaoujRc3gNt4/0IwPK5S+g1hNaEnIEQE3U1hZaDCmww4Dj0rmpoTWqKeey5Z4RetQ==}
+  '@cassiopeia/vue@5.3.8':
+    resolution: {integrity: sha512-AKAmTrkYIkzYiipC977bHKwXZfoZCxNk+oatpqL+67DhVOQ/WhIr21xOoOQlTONnEwuduYCqRPIx5YRWX7gFkA==}
+    engines: {node: '>=20.12.0', pnpm: '>=9.0.6'}
     peerDependencies:
       vue: '>=3.4.21'
 
@@ -1188,8 +1187,8 @@ packages:
     resolution: {integrity: sha512-2hfYaXeSnN8yGfJeEtUwaLgGe/xsggI4aM2dr0q7kIfhlvof9Fka1l9EKTq+Ykqf2VslyffEmykfrrFcaXgMiA==}
     engines: {node: '>=18.18.0', pnpm: '>=8.7.6'}
 
-  '@escapace/pnpm-pack@0.4.1':
-    resolution: {integrity: sha512-DEg8pvIYLuqTsttU8tWS6Aaml9/3LuYrRQrVf8AqBABXSmqCnne3+SRBQZiuEM+f1/A2GyasOMSSQFGPUhxdWQ==}
+  '@escapace/pnpm-pack@0.4.2':
+    resolution: {integrity: sha512-Wjtc6SRYzGFmTPN6e/CrRGCC2/KPFjdIqrQP2MWav9PbMRV3envQUbHGcoHIqk7ZUu1be4IkG16j0d3HDVGRcA==}
     engines: {node: '>=20.12.0', pnpm: '>=9.0.6'}
     hasBin: true
 
@@ -2091,8 +2090,9 @@ packages:
   capnp-ts@0.7.0:
     resolution: {integrity: sha512-XKxXAC3HVPv7r674zP0VC3RTXz+/JKhfyw94ljvF80yynK6VkTnqE3jMuN8b3dUVmmc43TjyxjW4KTsmB3c86g==}
 
-  cassiopeia@5.3.7:
-    resolution: {integrity: sha512-xhBqLqN04do6xs4O3XCJPTzp3twVd4So9VJh/NYAFnrlgomLpFBoEXLXxLqZutrfawX67R/58WBemFgn4/yAng==}
+  cassiopeia@5.3.8:
+    resolution: {integrity: sha512-PwT9jnIxiatk5T2RgWORVJqcA44c2Vm0JUh+eQl3anCFDUhNGChUFMLfpF1he+BBnvQI41d+Fm8aV0AwgaQSBg==}
+    engines: {node: '>=20.12.0', pnpm: '>=9.0.6'}
 
   chai@5.1.0:
     resolution: {integrity: sha512-kDZ7MZyM6Q1DhR9jy7dalKohXQ2yrlXkk59CR52aRKxJrobmlBNqnFQxX9xOX8w+4mz8SYlKJa/7D7ddltFXCw==}
@@ -2694,10 +2694,12 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
+    deprecated: Glob versions prior to v9 are no longer supported
 
   glob@8.1.0:
     resolution: {integrity: sha512-r8hpEjiQEYlF2QU0df3dS+nxxSIreXQS1qRhMJM0Q5NDdR386C7jb7Hwwod8Fgiuex+k0GFjgft18yvxm5XoCQ==}
     engines: {node: '>=12'}
+    deprecated: Glob versions prior to v9 are no longer supported
 
   global-directory@4.0.1:
     resolution: {integrity: sha512-wHTUcDUoZ1H5/0iVqEudYW4/kAlN5cZ3j/bXn0Dpbizl9iaUVeWSHqiOjsgk6OW2bkLclbBjzewBz6weQ1zA2Q==}
@@ -2847,6 +2849,7 @@ packages:
 
   inflight@1.0.6:
     resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
+    deprecated: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
 
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
@@ -3497,8 +3500,8 @@ packages:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
 
-  prettier-config-escapace@1.2.0:
-    resolution: {integrity: sha512-zcMZ1HQWZwaaSadnxOyR1oOHCvMnMZbop7UOtGISEqXbmY2l4Bdgr4HRU2j+OqSI6gTiX5wsZk/yIF0lvVg5rg==}
+  prettier-config-escapace@1.2.1:
+    resolution: {integrity: sha512-piOy4gQTfKum5UV8vnjdB3Ap0sCFtaOvTbo956JXOfpzrTONKb+hM5IO9APweRJPRv8cQFcoRD4hLmWSknJ0ng==}
 
   prettier@3.2.5:
     resolution: {integrity: sha512-3/GWa9aOC0YeD7LUfvOG2NiDyhOWRvt1k+rcKhOuYnMY24iiCphgneUfJDyFXd6rZCAnuLBv6UeAULtrhT/F4A==}
@@ -3624,6 +3627,7 @@ packages:
 
   rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   rollup-plugin-inject@3.0.2:
@@ -4460,17 +4464,19 @@ snapshots:
 
   '@bjornlu/colorblind@1.0.3': {}
 
-  '@cassiopeia/vite@5.3.7(@vitejs/plugin-vue@5.0.4(vite@5.2.8(@types/node@20.12.8)(sass@1.72.0))(vue@3.4.21(typescript@5.4.3)))(vite@5.2.8(@types/node@20.12.8)(sass@1.72.0))':
+  '@cassiopeia/vite@5.3.8(vite@5.2.8(@types/node@20.12.8)(sass@1.72.0))(vue@3.4.21(typescript@5.4.3))':
     dependencies:
       '@vitejs/plugin-vue': 5.0.4(vite@5.2.8(@types/node@20.12.8)(sass@1.72.0))(vue@3.4.21(typescript@5.4.3))
       '@vue/compiler-sfc': 3.4.26
-      cassiopeia: 5.3.7
+      cassiopeia: 5.3.8
       magic-string: 0.30.10
-      vite: 5.2.8(@types/node@20.12.8)(sass@1.72.0)
+    transitivePeerDependencies:
+      - vite
+      - vue
 
-  '@cassiopeia/vue@5.3.7(vue@3.4.21(typescript@5.4.3))':
+  '@cassiopeia/vue@5.3.8(vue@3.4.21(typescript@5.4.3))':
     dependencies:
-      cassiopeia: 5.3.7
+      cassiopeia: 5.3.8
       vue: 3.4.21(typescript@5.4.3)
 
   '@cloudflare/kv-asset-handler@0.3.1':
@@ -4830,7 +4836,7 @@ snapshots:
 
   '@escapace/minimum-perimeter-triangle@0.2.5': {}
 
-  '@escapace/pnpm-pack@0.4.1(@pnpm/logger@5.0.0)':
+  '@escapace/pnpm-pack@0.4.2(@pnpm/logger@5.0.0)':
     dependencies:
       '@pnpm/lockfile-file': 9.0.5(@pnpm/logger@5.0.0)
       arg: 5.0.2
@@ -5959,7 +5965,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  cassiopeia@5.3.7: {}
+  cassiopeia@5.3.8: {}
 
   chai@5.1.0:
     dependencies:
@@ -7411,7 +7417,7 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier-config-escapace@1.2.0: {}
+  prettier-config-escapace@1.2.1: {}
 
   prettier@3.2.5: {}
 

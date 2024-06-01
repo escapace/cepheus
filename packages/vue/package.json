@@ -14,11 +14,11 @@
     "@types/mocha": "10.0.6",
     "@types/node": "20.12.3",
     "c8": "9.1.0",
-    "cassiopeia": "5.3.7",
+    "cassiopeia": "5.3.8",
     "chai": "5.1.0",
     "mocha": "10.4.0",
     "prettier": "3.2.5",
-    "prettier-config-escapace": "1.2.0",
+    "prettier-config-escapace": "1.2.1",
     "typescript": "5.4.3",
     "vue": "3.4.21"
   },
