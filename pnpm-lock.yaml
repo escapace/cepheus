@@ -15,8 +15,8 @@ importers:
         specifier: 19.1.0
         version: 19.1.0
       '@escapace/pnpm-pack':
-        specifier: 0.4.2
-        version: 0.4.2(@pnpm/logger@5.0.0)
+        specifier: 0.5.0
+        version: 0.5.0(@pnpm/logger@5.0.0)
       '@ls-lint/ls-lint':
         specifier: 2.2.3
         version: 2.2.3
@@ -1183,8 +1183,8 @@ packages:
     resolution: {integrity: sha512-2hfYaXeSnN8yGfJeEtUwaLgGe/xsggI4aM2dr0q7kIfhlvof9Fka1l9EKTq+Ykqf2VslyffEmykfrrFcaXgMiA==}
     engines: {node: '>=18.18.0', pnpm: '>=8.7.6'}
 
-  '@escapace/pnpm-pack@0.4.2':
-    resolution: {integrity: sha512-Wjtc6SRYzGFmTPN6e/CrRGCC2/KPFjdIqrQP2MWav9PbMRV3envQUbHGcoHIqk7ZUu1be4IkG16j0d3HDVGRcA==}
+  '@escapace/pnpm-pack@0.5.0':
+    resolution: {integrity: sha512-HKJwm33FVpj/KobQ825w3Bhf/AG8jQ/MNUuCC+PM7Ap65sbQW7ouiyIsO9nfJuDdGCW3GsA4oesiL2Fvg4d9Lg==}
     engines: {node: '>=20.12.0', pnpm: '>=9.0.6'}
     hasBin: true
 
@@ -4826,7 +4826,7 @@ snapshots:
 
   '@escapace/minimum-perimeter-triangle@0.2.5': {}
 
-  '@escapace/pnpm-pack@0.4.2(@pnpm/logger@5.0.0)':
+  '@escapace/pnpm-pack@0.5.0(@pnpm/logger@5.0.0)':
     dependencies:
       '@pnpm/lockfile-file': 9.0.6(@pnpm/logger@5.0.0)
       arg: 5.0.2
