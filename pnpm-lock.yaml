@@ -280,8 +280,8 @@ importers:
         specifier: ^7.8.3
         version: 7.8.3
       tinypool:
-        specifier: ^0.8.3
-        version: 0.8.4
+        specifier: ^1.0.1
+        version: 1.0.1
       utility-types:
         specifier: ^3.11.0
         version: 3.11.0
@@ -3948,9 +3948,9 @@ packages:
     resolution: {integrity: sha512-HHHNYdCAIYwl1jOslQBT455zQpdeSo8/A346xpIb/uuqhSg+tCvYNsP5f11QW+z9VZ3vSX8YIfzTApjjuGH63w==}
     engines: {node: '>=14'}
 
-  tinypool@0.8.4:
-    resolution: {integrity: sha512-i11VH5gS6IFeLY3gMBQ00/MmLncVP7JLXOw1vlgkytLmJK7QnEr7NXf0LBdxfmNPAeyetukOk0bOYrJrFGjYJQ==}
-    engines: {node: '>=14.0.0'}
+  tinypool@1.0.1:
+    resolution: {integrity: sha512-URZYihUbRPcGv95En+sz6MfghfIc2OJ1sv/RmhWZLouPY0/8Vo80viwPvg3dlaS9fuq7fQMEfgRRK7BBZThBEA==}
+    engines: {node: ^18.0.0 || >=20.0.0}
 
   to-fast-properties@2.0.0:
     resolution: {integrity: sha512-/OaKK0xYrs3DmxRYqL/yDc+FxFUVYhDlXMhRmv3z915w2HF1tnN1omB354j8VUGO/hbRzyD6Y3sA7v7GS/ceog==}
@@ -7908,7 +7908,7 @@ snapshots:
 
   tightrope@0.1.0: {}
 
-  tinypool@0.8.4: {}
+  tinypool@1.0.1: {}
 
   to-fast-properties@2.0.0: {}
 
