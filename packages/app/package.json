@@ -42,7 +42,7 @@
     "typescript": "5.4.3",
     "unocss": "0.58.9",
     "unocss-preset-escapace": "0.3.2",
-    "vite": "5.2.8",
+    "vite": "5.2.14",
     "vue": "3.4.21",
     "vue-tsc": "2.0.7",
     "wrangler": "3.44.0",
