@@ -16,7 +16,7 @@
     "@headlessui/vue": "^1.7.19",
     "@hono/node-server": "^1.9.1",
     "@js-temporal/polyfill": "^0.4.4",
-    "@thi.ng/random": "^3.7.1",
+    "@thi.ng/random": "^4.1.2",
     "@tweakpane/core": "^2.0.3",
     "@vueuse/core": "^10.9.0",
     "cassiopeia": "^5.3.8",

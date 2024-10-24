@@ -13,7 +13,7 @@
     "@cepheus/utilities": "workspace:*",
     "@escapace/minimum-perimeter-triangle": "^0.2.5",
     "@sindresorhus/fnv1a": "^3.1.0",
-    "@thi.ng/random": "^3.7.1",
+    "@thi.ng/random": "^4.1.2",
     "arg": "^5.0.2",
     "big-cartesian": "^6.0.0",
     "bignumber.js": "^9.1.2",
