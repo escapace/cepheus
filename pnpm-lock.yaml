@@ -114,8 +114,8 @@ importers:
         specifier: ^0.4.4
         version: 0.4.4
       '@thi.ng/random':
-        specifier: ^3.7.1
-        version: 3.8.0
+        specifier: ^4.1.2
+        version: 4.1.2
       '@tweakpane/core':
         specifier: ^2.0.3
         version: 2.0.3
@@ -250,8 +250,8 @@ importers:
         specifier: ^3.1.0
         version: 3.1.0
       '@thi.ng/random':
-        specifier: ^3.7.1
-        version: 3.8.0
+        specifier: ^4.1.2
+        version: 4.1.2
       arg:
         specifier: ^5.0.2
         version: 5.0.2
@@ -1554,24 +1554,16 @@ packages:
     peerDependencies:
       vue: ^2.7.0 || ^3.0.0
 
-  '@thi.ng/api@8.11.2':
-    resolution: {integrity: sha512-5i00GGTZ2E0JXGdcCuQL9HvA8fIxgYdYog3aFku6zmLh5fJCxfZVNNay5LV87Ev5uj3iuaqz0vbl33JuZc6/iw==}
+  '@thi.ng/api@8.11.11':
+    resolution: {integrity: sha512-/GKDIgyQXA7JKxwgJ6W5xgQVHIWXmoPnWHsNqfg7aIyYNpfMYtjLjao2+nXmZhwjizullMahJPH7Xrrm6o/vyg==}
     engines: {node: '>=18'}
 
-  '@thi.ng/checks@3.6.4':
-    resolution: {integrity: sha512-qZugzKHi6v1W6HenPnOmVWm8Tj2iT6to2X+jtkrpwCrzzp9cdN4zqcfpgWn6FcZUgD+Kl1Jvfu7REuiA0sfOCw==}
+  '@thi.ng/errors@2.5.17':
+    resolution: {integrity: sha512-ohBAZcGNEIEOgJ9BPH4tjIsOjVgsnMGh4a2j63r6El68efr8RRN4G+GNkDaqV/jk9wbHKZZPt2t6suJMliPyxg==}
     engines: {node: '>=18'}
 
-  '@thi.ng/errors@2.5.7':
-    resolution: {integrity: sha512-yha1STRQmkTWEFNMHpTlgXETjwyvZfyDZH6o2nfQ8rBMqco270h4BtOOXA+lFn0afXJAZ9iXmCKbPrlMlJvHuQ==}
-    engines: {node: '>=18'}
-
-  '@thi.ng/hex@2.3.46':
-    resolution: {integrity: sha512-N4tLG+AEmmG55xiOSKn8AMz2jwJMtBHRuZDHu2HkJQqXe9kwthGlkga4hYs46ULqObidU0ZArkaxGhILYcJfHg==}
-    engines: {node: '>=18'}
-
-  '@thi.ng/random@3.8.0':
-    resolution: {integrity: sha512-B8dK0vRCfY7O8vGJpjAjax4j8ruuhroPK6qDkcydDegTq0phEAjWoPVkkwE4Jp4KxPfQkz00/3FhyAUdfXurtg==}
+  '@thi.ng/random@4.1.2':
+    resolution: {integrity: sha512-PEdZlidlWdCisS3U5MH0Wa5sxdB2aRhkc9h9nBeC291OKMTfuGfIK5jh4EUodRskKuJj1H6UTPuyV9DVkw8rgg==}
     engines: {node: '>=18'}
 
   '@tootallnate/once@2.0.0':
@@ -5297,22 +5289,14 @@ snapshots:
       '@tanstack/virtual-core': 3.5.0
       vue: 3.4.21(typescript@5.4.3)
 
-  '@thi.ng/api@8.11.2': {}
+  '@thi.ng/api@8.11.11': {}
 
-  '@thi.ng/checks@3.6.4':
+  '@thi.ng/errors@2.5.17': {}
+
+  '@thi.ng/random@4.1.2':
     dependencies:
-      tslib: 2.6.2
-
-  '@thi.ng/errors@2.5.7': {}
-
-  '@thi.ng/hex@2.3.46': {}
-
-  '@thi.ng/random@3.8.0':
-    dependencies:
-      '@thi.ng/api': 8.11.2
-      '@thi.ng/checks': 3.6.4
-      '@thi.ng/errors': 2.5.7
-      '@thi.ng/hex': 2.3.46
+      '@thi.ng/api': 8.11.11
+      '@thi.ng/errors': 2.5.17
 
   '@tootallnate/once@2.0.0': {}
 
