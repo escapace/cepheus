@@ -9,8 +9,8 @@
             Our Blog
           </h2>
           <p class="sans-serif text-gray-500 sm:text-xl dark:text-gray-400">
-            We use an agile approach to test assumptions and connect with the
-            needs of your audience early and often.
+            We use an agile approach to test assumptions and connect with the needs of your audience
+            early and often.
           </p>
         </div>
         <div class="grid gap-8 lg:grid-cols-2">
@@ -35,16 +35,13 @@
               </span>
               <span class="text-sm">14 days ago</span>
             </div>
-            <h2
-              class="mb-2 text-2xl sans-serif-bold tracking-tight text-gray-900 dark:text-white"
-            >
+            <h2 class="mb-2 text-2xl sans-serif-bold tracking-tight text-gray-900 dark:text-white">
               <a href="#">How to quickly deploy a static website</a>
             </h2>
             <p class="mb-5 sans-serif text-gray-500 dark:text-gray-400">
-              Static websites are now used to bootstrap lots of websites and are
-              becoming the basis for a variety of tools that even influence both
-              web designers and developers influence both web designers and
-              developers.
+              Static websites are now used to bootstrap lots of websites and are becoming the basis
+              for a variety of tools that even influence both web designers and developers influence
+              both web designers and developers.
             </p>
             <div class="flex justify-between items-center">
               <div class="flex items-center space-x-4">
@@ -53,7 +50,7 @@
                   src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/jese-leos.png"
                   alt="Jese Leos avatar"
                 />
-                <span class="sans-serif dark:text-white"> Jese Leos </span>
+                <span class="sans-serif dark:text-white">Jese Leos</span>
               </div>
               <a
                 href="#"
@@ -99,16 +96,13 @@
               </span>
               <span class="text-sm">14 days ago</span>
             </div>
-            <h2
-              class="mb-2 text-2xl sans-serif-bold tracking-tight text-gray-900 dark:text-white"
-            >
+            <h2 class="mb-2 text-2xl sans-serif-bold tracking-tight text-gray-900 dark:text-white">
               <a href="#">Our first project with React</a>
             </h2>
             <p class="mb-5 sans-serif text-gray-500 dark:text-gray-400">
-              Static websites are now used to bootstrap lots of websites and are
-              becoming the basis for a variety of tools that even influence both
-              web designers and developers influence both web designers and
-              developers.
+              Static websites are now used to bootstrap lots of websites and are becoming the basis
+              for a variety of tools that even influence both web designers and developers influence
+              both web designers and developers.
             </p>
             <div class="flex justify-between items-center">
               <div class="flex items-center space-x-4">
@@ -117,7 +111,7 @@
                   src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/bonnie-green.png"
                   alt="Bonnie Green avatar"
                 />
-                <span class="sans-serif dark:text-white"> Bonnie Green </span>
+                <span class="sans-serif dark:text-white">Bonnie Green</span>
               </div>
               <a
                 href="#"

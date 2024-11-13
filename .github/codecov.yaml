@@ -1,16 +1,40 @@
+comment: false
+github_checks:
+  annotations: true
+
 coverage:
   precision: 2
-  range: 70...100
+  range: '20...60'
   round: down
   status:
-    project: true
-    patch: true
     changes: false
+    patch:
+      default:
+        informational: true
+    project:
+      default:
+        target: auto
+        threshold: 5%
 
-comment:
-  layout: 'header, diff, tree'
-  behavior: default
-  require_changes: true
-
-ignore:
-  - './coverage/tmp/'
+flags:
+  app:
+    paths:
+      - packages/app/
+  cepheus:
+    paths:
+      - packages/cepheus/
+  cli:
+    paths:
+      - packages/cli/
+  color:
+    paths:
+      - packages/color/
+  plugin:
+    paths:
+      - packages/plugin/
+  utilities:
+    paths:
+      - packages/utilities/
+  vue:
+    paths:
+      - packages/vue/

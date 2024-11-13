@@ -1,4 +1,4 @@
-import { assert } from 'chai'
+import { assert, describe, it } from 'vitest'
 import { LENGTH as N } from 'cepheus'
 import { isolate } from './isolate'
 import { toPosition } from './to-position'
@@ -10,24 +10,22 @@ describe('./src/isolate.spec.ts', () => {
 
     const groupA = [
       [0, 0],
-      [0, 40]
+      [0, 40],
     ]
 
     const groupB = [
       [40, 80],
       [80, 80],
-      [80, 40]
+      [80, 40],
     ]
 
     assert.deepEqual(
       isolate(
-        [...groupA, ...groupB].map((position) =>
-          toSquare(position as [number, number], interval)
-        ),
+        [...groupA, ...groupB].map((position) => toSquare(position as [number, number], interval)),
         interval,
-        false
+        false,
       ).map((value) => value.map((value) => toPosition(value, interval))),
-      [groupB, groupA]
+      [groupB, groupA],
     )
   })
 
@@ -39,18 +37,16 @@ describe('./src/isolate.spec.ts', () => {
     const groupB = [
       [40, 80],
       [80, 80],
-      [80, 40]
+      [80, 40],
     ]
 
     assert.deepEqual(
       isolate(
-        [...groupA, ...groupB].map((position) =>
-          toSquare(position as [number, number], interval)
-        ),
+        [...groupA, ...groupB].map((position) => toSquare(position as [number, number], interval)),
         interval,
-        true
+        true,
       ).map((value) => value.map((value) => toPosition(value, interval))),
-      [groupB, groupA]
+      [groupB, groupA],
     )
   })
 })

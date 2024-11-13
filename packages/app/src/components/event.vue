@@ -2,23 +2,23 @@
   <div
     class="event-container"
     :style="{
-      gridColumn: `${props.dayOfWeek + 3}`,
-      gridRow: `${props.hour + 1} / span ${hours}`
+      gridColumn: `${properties.dayOfWeek + 3}`,
+      gridRow: `${properties.hour + 1} / span ${hours}`,
     }"
   >
     <div
       class="event"
       :style="{
-        gridRow: `${props.minute + 1} / span ${props.duration}`,
-        borderLeft: `0.3125rem solid ${props.borderColor}`,
-        backgroundColor: `${props.backgroundColor}`
+        gridRow: `${properties.minute + 1} / span ${properties.duration}`,
+        borderLeft: `0.3125rem solid ${properties.borderColor}`,
+        backgroundColor: properties.backgroundColor,
       }"
     >
-      <div class="event-time" :style="{ color: props.textColor }">
+      <div class="event-time" :style="{ color: properties.textColor }">
         {{ time }}
       </div>
-      <div class="event-title" :style="{ color: props.textColor }">
-        {{ props.title }}
+      <div class="event-title" :style="{ color: properties.textColor }">
+        {{ properties.title }}
       </div>
     </div>
   </div>
@@ -28,52 +28,50 @@
 import { isInteger } from 'lodash-es'
 import { computed } from 'vue'
 
-const props = defineProps({
-  title: {
+const properties = defineProps({
+  backgroundColor: {
+    required: true,
     type: String,
-    required: true
-  },
-  hour: {
-    type: Number,
-    required: true,
-    validator: (value: number) => isInteger(value) && value >= 0 && value <= 23
-  },
-  minute: {
-    type: Number,
-    required: true,
-    validator: (value: number) => isInteger(value) && value >= 0 && value <= 59
-  },
-  dayOfWeek: {
-    type: Number,
-    required: true,
-    validator: (value: number) => isInteger(value) && value >= 0 && value <= 6
-  },
-  duration: {
-    type: Number,
-    required: true,
-    validator: (value: number) => isInteger(value) && value >= 10
-  },
-  textColor: {
-    type: String,
-    required: true
   },
   borderColor: {
+    required: true,
     type: String,
-    required: true
   },
-  backgroundColor: {
+  dayOfWeek: {
+    required: true,
+    type: Number,
+    validator: (value: number) => isInteger(value) && value >= 0 && value <= 6,
+  },
+  duration: {
+    required: true,
+    type: Number,
+    validator: (value: number) => isInteger(value) && value >= 10,
+  },
+  hour: {
+    required: true,
+    type: Number,
+    validator: (value: number) => isInteger(value) && value >= 0 && value <= 23,
+  },
+  minute: {
+    required: true,
+    type: Number,
+    validator: (value: number) => isInteger(value) && value >= 0 && value <= 59,
+  },
+  textColor: {
+    required: true,
     type: String,
-    required: true
-  }
+  },
+  title: {
+    required: true,
+    type: String,
+  },
 })
 
-const hours = computed(() => Math.ceil(props.duration / 60) + 1)
+const hours = computed(() => Math.ceil(properties.duration / 60) + 1)
 const hoursInMinutes = computed(() => hours.value * 60)
 const time = computed(
   () =>
-    `${props.hour.toString().padStart(2, '0')}:${props.minute
-      .toString()
-      .padStart(2, '0')}`
+    `${properties.hour.toString().padStart(2, '0')}:${properties.minute.toString().padStart(2, '0')}`,
 )
 </script>
 

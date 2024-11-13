@@ -3,9 +3,7 @@ import type { Store } from './create-store'
 import { selectorSquares } from './selector-squares'
 
 export const selectorStatistics = (store: Store) => {
-  const squares = Array.from(
-    selectorSquares(store, store.allIterations).entries()
-  )
+  const squares = Array.from(selectorSquares(store, store.allIterations).entries())
   const squaresRemaining = squares.length
   const squaresTotal = store.indexSquare.size
   const costs = squares.map(([_, task]) => task.state.cost)
@@ -23,6 +21,6 @@ export const selectorStatistics = (store: Store) => {
     costMin,
     costSd,
     squaresRemaining,
-    squaresTotal
+    squaresTotal,
   }
 }

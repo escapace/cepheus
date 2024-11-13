@@ -1,13 +1,3 @@
-import {
-  ColorSpace,
-  HSL,
-  HSV,
-  LCH,
-  OKLab,
-  OKLCH,
-  P3,
-  sRGB
-} from '@cepheus/color'
 import { assign, isError, map, omit, range } from 'lodash-es'
 import { setMaxListeners } from 'node:events'
 import Tinypool from 'tinypool'
@@ -16,10 +6,7 @@ import { actionUpdateOptimizeTask } from './store/action-update-optimize-task'
 import { actionUpdateStage } from './store/action-update-stage'
 import { createStore } from './store/create-store'
 import { selectorOptimizeTasksPending } from './store/selector-optimize-tasks'
-import {
-  selectorRemainingSquares,
-  selectorSquares
-} from './store/selector-squares'
+import { selectorRemainingSquares, selectorSquares } from './store/selector-squares'
 import { selectorState } from './store/selector-state'
 import {
   TypeCepheusState,
@@ -27,7 +14,7 @@ import {
   type OptimizationState,
   type OptimizeOptions,
   type OptimizeTask,
-  type StoreOptions
+  type StoreOptions,
 } from './types'
 
 export {
@@ -37,7 +24,7 @@ export {
   type CepheusStateDone,
   type CepheusStateError,
   type CepheusStateOptimization,
-  type CepheusStateOptimizationDone
+  type CepheusStateOptimizationDone,
 } from './types'
 
 export interface CepheusOptions extends StoreOptions {
@@ -50,18 +37,10 @@ export interface CepheusReturnType extends PromiseLike<CepheusState> {
 }
 
 export const cepheus = (options: CepheusOptions): CepheusReturnType => {
-  ColorSpace.register(HSL)
-  ColorSpace.register(HSV)
-  ColorSpace.register(P3)
-  ColorSpace.register(OKLab)
-  ColorSpace.register(OKLCH)
-  ColorSpace.register(sRGB)
-  ColorSpace.register(LCH)
-
   const store = createStore(options, options.initialState)
 
   const pool = new Tinypool({
-    filename: new URL('./worker.mjs', import.meta.url).href
+    filename: new URL('./worker.js', import.meta.url).href,
   })
 
   const abortController = new AbortController()
@@ -76,16 +55,16 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
 
         const state = (await pool.run(options, {
           name: 'optimize',
-          signal: abortController.signal
+          signal: abortController.signal,
         })) as OptimizationState
 
         await actionUpdateOptimizeTask(store, key, state)
-      })
+      }),
     )
   }
 
   const promise = actionUpdateStage(store, {
-    type: TypeCepheusState.Optimization
+    type: TypeCepheusState.Optimization,
   })
     .then(async () => {
       for (const iteration of range(store.options.iterations)) {
@@ -98,20 +77,20 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
         throw new Error('No squares available.')
       }
 
-      const attempt = async (bias: number) => {
+      const attempt = async (tolerance: number) => {
         const squares = selectorRemainingSquares(store)
 
         if (squares.size !== 0) {
           for (const iteration of range(store.options.iterations)) {
             actionCreateOptimizeTasks(store, iteration, {
-              hueAngle: store.options.hueAngle * bias,
               squares,
+              tolerance,
               weights: {
                 ...store.options.weights,
-                chroma: store.options.weights.chroma * bias,
-                hue: store.options.weights.hue * bias,
-                lightness: store.options.weights.lightness * bias
-              }
+                chroma: store.options.weights.chroma * tolerance,
+                hue: store.options.weights.hue * tolerance,
+                lightness: store.options.weights.lightness * tolerance,
+              },
             })
           }
 
@@ -119,47 +98,39 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
         }
       }
 
-      for (const bias of [1.25, 1.5, 1.75]) {
-        await attempt(bias)
+      for (const tolerance of [1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3]) {
+        await attempt(tolerance)
       }
 
       const missing = selectorRemainingSquares(store)
 
       if (missing.size !== 0) {
         throw new Error(
-          `Unable to fit triangle, squares ${Array.from(missing.keys()).join(
-            ', '
-          )} missing.`
+          `Unable to fit triangle, squares ${Array.from(missing.keys()).join(', ')} missing.`,
         )
       }
 
       await actionUpdateStage(store, {
-        type: TypeCepheusState.OptimizationDone
+        type: TypeCepheusState.OptimizationDone,
       })
     })
     .catch(async (error) =>
       isError(error) && error.name === 'AbortError'
         ? await actionUpdateStage(store, {
-            type: TypeCepheusState.Abort
+            type: TypeCepheusState.Abort,
           })
         : await actionUpdateStage(store, {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             error,
-            type: TypeCepheusState.Error
-          })
+            type: TypeCepheusState.Error,
+          }),
     )
     .then(async () => await pool.destroy())
     .then(async () => {
       const state = selectorState(store)
 
-      if (
-        !(
-          state.type === TypeCepheusState.Abort ||
-          state.type === TypeCepheusState.Error
-        )
-      ) {
+      if (!(state.type === TypeCepheusState.Abort || state.type === TypeCepheusState.Error)) {
         return await actionUpdateStage(store, {
-          type: TypeCepheusState.Done
+          type: TypeCepheusState.Done,
         })
       }
     })
@@ -167,6 +138,6 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
 
   return assign(promise, {
     abort: () => abortController.abort(),
-    store
+    store,
   })
 }

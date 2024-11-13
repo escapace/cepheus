@@ -1,4 +1,4 @@
-import { assert } from 'chai'
+import { assert, describe, it } from 'vitest'
 import { LENGTH as N } from 'cepheus'
 import { toPosition } from './to-position'
 import { toSquare } from './to-square'

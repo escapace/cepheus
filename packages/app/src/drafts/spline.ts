@@ -47,30 +47,24 @@ export function CubicPoly() {
   }
 
   return {
-    calc: function (t: number) {
+    calc(t: number) {
       const t2 = t * t
       const t3 = t2 * t
       return c0 + c1 * t + c2 * t2 + c3 * t3
     },
 
-    initCatmullRom: function (
-      x0: number,
-      x1: number,
-      x2: number,
-      x3: number,
-      tension: number
-    ) {
+    initCatmullRom(x0: number, x1: number, x2: number, x3: number, tension: number) {
       init(x1, x2, tension * (x2 - x0), tension * (x3 - x1))
     },
 
-    initNonuniformCatmullRom: function (
+    initNonuniformCatmullRom(
       x0: number,
       x1: number,
       x2: number,
       x3: number,
       dt0: number,
       dt1: number,
-      dt2: number
+      dt2: number,
     ) {
       // compute tangents when parameterized in [t1,t2]
       let t1 = (x1 - x0) / dt0 - (x2 - x0) / (dt0 + dt1) + (x2 - x1) / dt1
@@ -81,7 +75,7 @@ export function CubicPoly() {
       t2 *= dt1
 
       init(x1, x2, t1, t2)
-    }
+    },
   }
 }
 
@@ -103,11 +97,7 @@ interface Options {
   which can be placed in CurveUtils.
   */
 
-export function getCatmullRomPoint(
-  options: Options,
-  t: number,
-  out: number[] = []
-) {
+export function getCatmullRomPoint(options: Options, t: number, out: number[] = []) {
   const temporary1: number[] = []
   const temporary2: number[] = []
   const px = CubicPoly()
@@ -183,20 +173,10 @@ interface COptions extends Options {
   arcLengthDivisions: number
 }
 
-export function CatmullRomSpline(
-  points: number[][] = [],
-  options: Partial<COptions> = {}
-) {
-  const {
-    arcLengthDivisions = 200,
-    closed = false,
-    tension = 0.5,
-    type = 'uniform'
-  } = options
+export function CatmullRomSpline(points: number[][] = [], options: Partial<COptions> = {}) {
+  const { arcLengthDivisions = 200, closed = false, tension = 0.5, type = 'uniform' } = options
 
-  function getArcLengths(
-    divisions: number = spline.arcLengthDivisions
-  ): number[] {
+  function getArcLengths(divisions: number = spline.arcLengthDivisions): number[] {
     const out = []
     let last: number[] = getPoint(0)
     let current: number[]
@@ -221,9 +201,7 @@ export function CatmullRomSpline(
 
     for (let index = 0; index < n; index++) {
       const t = spline.closed ? index / n : index / (n - 1)
-      const p: number[] = spaced
-        ? getSpacedPoint(t, undefined, arclengths)
-        : getPoint(t)
+      const p: number[] = spaced ? getSpacedPoint(t, undefined, arclengths) : getPoint(t)
       paths.push(p)
     }
     return paths
@@ -233,21 +211,13 @@ export function CatmullRomSpline(
     return getCatmullRomPoint(spline, t, out)
   }
 
-  function getSpacedPoint(
-    u: number,
-    out: number[] | undefined,
-    arcLengths: number[]
-  ): number[] {
+  function getSpacedPoint(u: number, out: number[] | undefined, arcLengths: number[]): number[] {
     const t = getUtoTMapping(u, undefined, arcLengths)
 
     return getPoint(t, out)
   }
 
-  function getUtoTMapping(
-    u: number,
-    distance?: number,
-    arcLengths: number[] = getArcLengths()
-  ) {
+  function getUtoTMapping(u: number, distance?: number, arcLengths: number[] = getArcLengths()) {
     let index = 0
     const il = arcLengths.length
 
@@ -312,7 +282,7 @@ export function CatmullRomSpline(
     getUtoTMapping,
     points,
     tension,
-    type
+    type,
   }
 
   return spline

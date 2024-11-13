@@ -1,4 +1,4 @@
-import { assert } from 'chai'
+import { assert, describe, it } from 'vitest'
 import { adjustAngle } from './adjust-angle'
 
 describe('./src/adjust-angle.spec.ts', () => {

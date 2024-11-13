@@ -1,4 +1,4 @@
-import { assert } from 'chai'
+import { assert, describe, it } from 'vitest'
 import { createCepheusPlugin } from './index'
 
 describe('src/index.spec.ts', () => {

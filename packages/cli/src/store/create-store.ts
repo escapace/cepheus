@@ -6,7 +6,7 @@ import {
   type RequiredStoreOptions,
   type Square,
   type StoreOptions,
-  TypeCepheusState
+  TypeCepheusState,
 } from '../types'
 import { createStoreOptions } from './create-store-options'
 
@@ -31,7 +31,7 @@ const createEmitter = () =>
 
 export const createStore = (
   options: StoreOptions,
-  initialState: Record<string, OptimizeTask> = {}
+  initialState: Record<string, OptimizeTask> = {},
 ): Store => {
   const log: CepheusState[] = [{ type: TypeCepheusState.Optimization }]
 
@@ -43,9 +43,7 @@ export const createStore = (
 
   const indexState = new Map<string, OptimizeTask>()
 
-  const indexInitialState = new Map<string, OptimizeTask>(
-    Object.entries(initialState)
-  )
+  const indexInitialState = new Map<string, OptimizeTask>(Object.entries(initialState))
 
   const allIterations = range(Math.max(storeOptions.iterations * 2, 4))
 
@@ -55,23 +53,17 @@ export const createStore = (
     indexSquare,
     indexState,
     log,
-    options: storeOptions
+    options: storeOptions,
   }
 
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  // eslint-disable-next-line typescript/consistent-type-assertions
   const storeWithEmitter = { ...store } as Pick<
     typeof emitter,
     'anyEvent' | 'clearListeners' | 'emit' | 'events' | 'on'
   > &
     typeof store
 
-  emitter.bindMethods(storeWithEmitter, [
-    'emit',
-    'on',
-    'events',
-    'anyEvent',
-    'clearListeners'
-  ])
+  emitter.bindMethods(storeWithEmitter, ['emit', 'on', 'events', 'anyEvent', 'clearListeners'])
 
   return storeWithEmitter
 }

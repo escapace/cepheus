@@ -4,7 +4,7 @@ import type { Store } from './create-store'
 export async function actionUpdateOptimizeTask(
   store: Store,
   key: string,
-  state: OptimizationState
+  state: OptimizationState,
 ) {
   const value = store.indexState.get(key)
 
@@ -14,7 +14,7 @@ export async function actionUpdateOptimizeTask(
 
   const task: OptimizeTask = {
     ...value,
-    state
+    state,
   }
 
   store.indexState.set(key, task)

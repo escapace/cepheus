@@ -1,18 +1,18 @@
-/* eslint-disable @typescript-eslint/consistent-type-assertions */
-import { assert } from 'chai'
+/* eslint-disable typescript/consistent-type-assertions */
+import { assert, describe, it } from 'vitest'
 import type { PRNG } from './create-prng'
 import { randomWithin } from './random-within'
 
 const one = {
-  float: () => 1
+  float: () => 1,
 } as PRNG
 
 const half = {
-  float: () => 0.5
+  float: () => 0.5,
 } as PRNG
 
 const zero = {
-  float: () => 0
+  float: () => 0,
 } as PRNG
 
 describe('./src/utilities/random-within.spec.ts', () => {

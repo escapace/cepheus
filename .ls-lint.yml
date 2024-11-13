@@ -1,8 +1,0 @@
-ls:
-  packages/*/src:
-    .ts: kebab-case
-    .d.ts: kebab-case
-    .spec.ts: kebab-case
-    .vue: kebab-case
-  scripts:
-    .mjs: kebab-case

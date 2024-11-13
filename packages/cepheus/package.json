@@ -2,44 +2,74 @@
   "name": "cepheus",
   "description": "",
   "version": "0.0.0",
-  "author": "escapace <opensource@escapace.com>",
+  "author": {
+    "name": "escapace",
+    "email": "opensource@escapace.com"
+  },
   "bugs": "https://github.com/escapace/cepheus/issues",
   "devDependencies": {
-    "@types/chai": "4.3.14",
-    "@types/mocha": "10.0.6",
-    "@types/node": "20.12.3",
-    "c8": "9.1.0",
-    "chai": "5.1.0",
-    "mocha": "10.4.0",
-    "prettier": "3.2.5",
+    "@ls-lint/ls-lint": "2.2.3",
+    "@types/node": "22.9.0",
+    "@vitest/coverage-v8": "2.1.4",
+    "eslint": "9.14.0",
+    "eslint-config-escapace": "5.2.3",
+    "esroll": "0.2.0",
+    "jsdom": "25.0.1",
+    "prettier": "3.3.3",
     "prettier-config-escapace": "1.2.1",
-    "typescript": "5.4.3"
+    "syncpack": "13.0.0",
+    "tsx": "4.19.2",
+    "typescript": "5.6.3",
+    "vitest": "2.1.4"
+  },
+  "engines": {
+    "node": ">=20.15.0",
+    "pnpm": ">=9.11.0"
   },
   "exports": {
     ".": {
-      "types": "./lib/types/index.d.ts",
-      "import": "./lib/esm/index.mjs"
+      "node": {
+        "import": {
+          "types": "./lib/types/index.d.ts",
+          "default": "./lib/node/index.js"
+        }
+      },
+      "browser": {
+        "import": {
+          "types": "./lib/types/index.d.ts",
+          "default": "./lib/browser/index.js"
+        }
+      },
+      "default": {
+        "import": {
+          "types": "./lib/types/index.d.ts",
+          "default": "./lib/node/index.js"
+        }
+      }
     }
   },
   "files": [
-    "lib/esm",
+    "lib/browser",
+    "lib/node",
     "lib/types"
   ],
-  "homepage": "https://github.com/escapace/cepheus",
+  "homepage": "https://github.com/escapace/cepheus/tree/trunk/packages/cepheus#readme",
   "license": "MPL-2.0",
-  "module": "lib/esm/index.mjs",
   "private": false,
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "repository": "escapace/cepheus",
   "scripts": {
-    "build": "node ../../scripts/build.mjs",
-    "lint": "eslint 'src/**/*.ts'",
-    "test": "node ../../scripts/test.mjs && c8 mocha --enable-source-maps 'lib/tests/**/*.spec.js'",
+    "build": "tsx scripts/build.ts",
+    "format": "syncpack format --source package.json && eslint --no-warn-ignored --fix && prettier -uw .",
+    "lint": "ls-lint --config .ls-lint.yaml && eslint",
+    "ls-lint": "ls-lint --config .ls-lint.yaml",
+    "test": "vitest --no-watch --coverage",
     "typecheck": "tsc --noEmit"
   },
   "sideEffects": false,
   "type": "module",
-  "types": "lib/types/index.d.ts"
+  "types": "./lib/types/index.d.ts"
 }

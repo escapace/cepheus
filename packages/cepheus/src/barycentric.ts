@@ -10,7 +10,7 @@ export const barycentric = (
   alpha: number,
   beta: number,
   gamma: number,
-  invert = false
+  invert = false,
 ) => {
   const { state, triangle } = interpolator[INTERPOLATOR]
   const [t0, t1, t2] = triangle

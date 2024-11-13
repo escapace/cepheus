@@ -7,6 +7,6 @@ export const tile = (interval: number): number[] => {
   const tuple = range(60, N + 60, interval)
 
   return cartesianProduct(tuple, tuple).map((value): number =>
-    toSquare(value as [number, number], interval)
+    toSquare(value as [number, number], interval),
   )
 }

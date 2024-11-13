@@ -7,7 +7,7 @@ export const percentile = (
   percent: number,
   min: number,
   max: number,
-  prng: PRNG
+  prng: PRNG,
 ) => {
   const value = percent * (max - min)
 
