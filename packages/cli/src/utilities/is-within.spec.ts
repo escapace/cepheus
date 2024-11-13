@@ -1,4 +1,4 @@
-import { assert } from 'chai'
+import { assert, describe, it } from 'vitest'
 import { isWithin } from './is-within'
 
 describe('./src/utilities/is-within.spec.ts', () => {

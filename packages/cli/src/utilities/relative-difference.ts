@@ -1,9 +1,4 @@
-export const relativeDifference = (
-  a: number,
-  b: number,
-  min: number,
-  max: number
-) => {
+export const relativeDifference = (a: number, b: number, min: number, max: number) => {
   if (a === b && b === min && min === max) {
     return 0
   }

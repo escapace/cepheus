@@ -1,28 +1,12 @@
 import type { Options } from '.'
 import { INTERPOLATOR } from './constants'
-import type {
-  Interpolator,
-  Model,
-  State,
-  Subscription,
-  Triangle
-} from './types'
-import {
-  chroma0,
-  chroma1,
-  getX0,
-  lightness0,
-  lightness1
-} from './utilities/calculations'
+import type { Interpolator, Model, State, Subscription, Triangle } from './types'
+import { chroma0, chroma1, getX0, lightness0, lightness1 } from './utilities/calculations'
 
 const notify = async (subscriptions: Set<Subscription>) =>
   await Promise.all(Array.from(subscriptions).map((value) => value()))
 
-const changeModel = (
-  state: State,
-  triangle: Triangle,
-  model: Model = state.model
-) => {
+const changeModel = (state: State, triangle: Triangle, model: Model = state.model) => {
   const x0 = getX0(model.triangle)
 
   const { p0, p1 } = chroma0(x0, model.triangle, state)
@@ -45,18 +29,13 @@ export const createInterpolator = (options: Options): Interpolator => {
 
   let { p0, p1, state, x0 } = changeModel(
     {
-      chroma:
-        options.chroma === undefined
-          ? [0, 1]
-          : [options.chroma[0], options.chroma[1]],
+      chroma: options.chroma === undefined ? [0, 1] : [options.chroma[0], options.chroma[1]],
       darkMode: options.darkMode ?? false,
       lightness:
-        options.lightness === undefined
-          ? [0, 1]
-          : [options.lightness[0], options.lightness[1]],
-      model: options.model
+        options.lightness === undefined ? [0, 1] : [options.lightness[0], options.lightness[1]],
+      model: options.model,
     },
-    triangle
+    triangle,
   )
 
   const updateModel = async (model: Model) => {
@@ -131,7 +110,7 @@ export const createInterpolator = (options: Options): Interpolator => {
       updateChroma,
       updateDarkMode,
       updateLightness,
-      updateModel
-    }
+      updateModel,
+    },
   }
 }

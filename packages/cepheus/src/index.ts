@@ -19,7 +19,7 @@ export type {
   State,
   Subscription,
   Triangle,
-  Unsubscribe
+  Unsubscribe,
 } from './types'
 export { lerp } from './utilities/lerp'
 export { lerpAngle } from './utilities/lerp-angle'

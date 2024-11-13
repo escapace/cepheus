@@ -1,5 +1,5 @@
 import { LENGTH as N } from 'cepheus'
-import { assert } from 'chai'
+import { assert, describe, it } from 'vitest'
 import { neighbours } from './neighbours'
 import { toPosition } from './to-position'
 import { toSquare } from './to-square'
@@ -16,8 +16,8 @@ describe('./src/neighbours.spec.ts', () => {
         [40, 80],
         [80, 40],
         [40, 0],
-        [0, 40]
-      ]
+        [0, 40],
+      ],
     )
 
     assert.deepStrictEqual(
@@ -32,8 +32,8 @@ describe('./src/neighbours.spec.ts', () => {
         [40, 0],
         [0, 0],
         [0, 40],
-        [0, 80]
-      ]
+        [0, 80],
+      ],
     )
 
     assert.deepStrictEqual(
@@ -42,8 +42,8 @@ describe('./src/neighbours.spec.ts', () => {
         .map((square) => toPosition(square, N / 3)),
       [
         [0, 40],
-        [40, 0]
-      ]
+        [40, 0],
+      ],
     )
 
     assert.deepEqual(
@@ -54,8 +54,8 @@ describe('./src/neighbours.spec.ts', () => {
         [80, 120],
         [120, 80],
         [80, 40],
-        [40, 80]
-      ]
+        [40, 80],
+      ],
     )
   })
 })

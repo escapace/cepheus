@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import arg from 'arg'
 import chalk from 'chalk'
 import { readFileSync } from 'node:fs'
@@ -7,15 +9,16 @@ import ora from 'ora'
 import path, { resolve } from 'node:path'
 import { promisify } from 'node:util'
 import { gzip } from 'node:zlib'
-import { DEFAULT_ITERATIONS, DEFAULT_N_DIVISOR, N_DIVISORS } from './constants'
+import { DEFAULT_ITERATIONS, DEFAULT_N_DIVISOR, N_DIVISORS, DEFAULT_PRECISION } from './constants'
 import { selectorModel } from './store/selector-model'
 import {
   selectorOptimizeTasksCount,
-  selectorOptimizeTasksNotPending
+  selectorOptimizeTasksNotPending,
 } from './store/selector-optimize-tasks'
 import { selectorState } from './store/selector-state'
 import { selectorStatistics } from './store/selector-statistics'
 import { type OptimizeTask, TypeCepheusState } from './types'
+import { isFile } from './utilities/is-file'
 
 const padNumber = (n: number, base: number) => {
   const string = n.toString()
@@ -42,9 +45,8 @@ ${chalk.bold('Options:')}
   --prng          Pseudorandom number generator. [default: xoshiro128++]
   --levels        Number of uniform sampling steps along each square axis. [default: ${DEFAULT_N_DIVISOR}]
   --iterations    Number of iterations. [default: ${DEFAULT_ITERATIONS}]
-  --save          Save session to file.
-  --restore       Restore session from file.
-  --precision     Number of significant digits to round to.
+  --session       Use a session to file.
+  --precision     Number of significant digits to round to. [default: ${DEFAULT_PRECISION}]
 
   -v, --version   Show version.
   -h, --help      Displays this message.
@@ -67,20 +69,20 @@ const run = async () => {
       '--output': String,
       '--precision': Number,
       '--prng': String,
-      '--restore': String,
-      '--save': String,
       '--seed': String,
+      '--session': String,
       '--version': Boolean,
       '-h': '--help',
-      '-v': '--version'
+      '-v': '--version',
     },
-    { argv: process.argv.slice(2), permissive: false }
+    { argv: process.argv.slice(2), permissive: false },
   )
 
   if (arguments_['--version'] === true) {
-    const { version } = JSON.parse(
-      readFileSync(resolve('../../package.json'), 'utf8')
-    ) as Record<'version', string>
+    const { version } = JSON.parse(readFileSync(resolve('../../package.json'), 'utf8')) as Record<
+      'version',
+      string
+    >
 
     console.log(`${chalk.bold('cepheus')} v${version}`)
     process.exit(0)
@@ -140,7 +142,7 @@ const run = async () => {
   ) {
     console.log(HELP)
     console.error(
-      `Option '--prng' must be one of 'xoshiro128++', 'xorwow', 'xorshift128', 'sfc32'.`
+      `Option '--prng' must be one of 'xoshiro128++', 'xorwow', 'xorshift128', 'sfc32'.`,
     )
     process.exit(1)
   }
@@ -153,27 +155,20 @@ const run = async () => {
 
   if (iterations !== undefined && !(isInteger(iterations) && iterations >= 1)) {
     console.log(HELP)
-    console.error(
-      `Option '--iterations' must be an integer greater or equal to 1.`
-    )
+    console.error(`Option '--iterations' must be an integer greater or equal to 1.`)
     process.exit(1)
   }
 
   if (hueAngle !== undefined && !(isInteger(hueAngle) && hueAngle >= 1)) {
     console.log(HELP)
-    console.error(
-      `Option '--hue-angle' must be an integer greater or equal to 1.`
-    )
+    console.error(`Option '--hue-angle' must be an integer greater or equal to 1.`)
     process.exit(1)
   }
 
-  if (
-    precision !== undefined &&
-    !(isInteger(precision) && precision >= 2 && precision <= 10)
-  ) {
+  if (precision !== undefined && !(isInteger(precision) && precision >= 2 && precision <= 10)) {
     console.log(HELP)
     console.error(
-      `Option '--precision' must be an integer greater or equal to 2, and smaller or equal to 10.`
+      `Option '--precision' must be an integer greater or equal to 2, and smaller or equal to 10.`,
     )
     process.exit(1)
   }
@@ -185,21 +180,19 @@ const run = async () => {
 
   const { cepheus } = await import('./index')
 
-  const initialState = isString(arguments_['--restore'])
-    ? (JSON.parse(
-        await readFile(
-          path.resolve(process.cwd(), arguments_['--restore']),
-          'utf8'
-        )
-      ) as Record<string, OptimizeTask>)
+  const session = isString(arguments_['--session'])
+    ? path.resolve(process.cwd(), arguments_['--session'])
     : undefined
+
+  const initialState =
+    session !== undefined && (await isFile(session))
+      ? (JSON.parse(await readFile(session, 'utf8')) as Record<string, OptimizeTask>)
+      : undefined
 
   const spinner = ora({ text: 'Preparing' }).start()
 
   const instance = cepheus({
-    colors: map(colors, (colors) =>
-      colors.split(',').map((value) => value.trim())
-    ),
+    colors: map(colors, (colors) => colors.split(',').map((value) => value.trim())),
     colorSpace,
     hueAngle,
     initialState,
@@ -207,27 +200,27 @@ const run = async () => {
     levels,
     precision,
     randomSeed,
-    randomSource
+    randomSource,
   })
 
   const updateSpinner = throttle(
     (type: TypeCepheusState) => {
       if (type === TypeCepheusState.Optimization) {
-        const { fulfilled, minTotal, pending, rejected } =
-          selectorOptimizeTasksCount(instance.store)
+        const { fulfilled, minTotal, pending, rejected } = selectorOptimizeTasksCount(
+          instance.store,
+        )
         const done = rejected + fulfilled
         const total = Math.max(pending + done, minTotal)
 
         spinner.text = `Palette optimization \t${padNumber(done, total)} / ~${total}`
       } else if (type === TypeCepheusState.OptimizationDone) {
-        const { fulfilled, minTotal, pending, rejected } =
-          selectorOptimizeTasksCount(instance.store)
+        const { fulfilled, minTotal, pending, rejected } = selectorOptimizeTasksCount(
+          instance.store,
+        )
         const done = rejected + fulfilled
         const total = Math.max(pending + done, minTotal)
 
-        spinner.succeed(
-          `Palette optimization \t${padNumber(done, total)} / ~${total}`
-        )
+        spinner.succeed(`Palette optimization \t${padNumber(done, total)} / ~${total}`)
       } else if (type === TypeCepheusState.Abort) {
         spinner.fail()
       } else if (type === TypeCepheusState.Error) {
@@ -235,15 +228,15 @@ const run = async () => {
       }
     },
     200,
-    { leading: true }
+    { leading: true },
   )
 
   instance.store.on('optimizeTask', async () => {
-    if (arguments_['--save'] !== undefined) {
+    if (session !== undefined) {
       await writeFile(
-        path.resolve(process.cwd(), arguments_['--save']),
+        session,
         JSON.stringify(selectorOptimizeTasksNotPending(instance.store)),
-        'utf8'
+        'utf8',
       )
     }
 
@@ -280,31 +273,27 @@ const run = async () => {
 
       console.log(
         `${chalk.white(chalk.bold(relativeFilePath))}${gap}${chalk.grey(
-          `${kibs.toFixed(2)} KiB${compressedSize}`
-        )}`
+          `${kibs.toFixed(2)} KiB${compressedSize}`,
+        )}`,
       )
 
       console.log(
         `${prefix}${chalk.grey(
           `${(
             statistics.colors * statistics.squaresRemaining
-          ).toString()} (${statistics.colors.toString()} * ${statistics.squaresRemaining.toString()}) colors`
-        )}`
+          ).toString()} (${statistics.colors.toString()} * ${statistics.squaresRemaining.toString()}) colors`,
+        )}`,
       )
       console.log(
         `${prefix}${chalk.grey(
-          `∧ ${statistics.costMin.toFixed(5)}  ∨ ${statistics.costMax.toFixed(
-            5
-          )}`
-        )}`
+          `∧ ${statistics.costMin.toFixed(5)}  ∨ ${statistics.costMax.toFixed(5)}`,
+        )}`,
       )
 
       console.log(
         `${prefix}${chalk.grey(
-          `μ ${statistics.costMean.toFixed(5)}  σ ${statistics.costSd.toFixed(
-            5
-          )}`
-        )}`
+          `μ ${statistics.costMean.toFixed(5)}  σ ${statistics.costSd.toFixed(5)}`,
+        )}`,
       )
 
       // console.log(
@@ -339,8 +328,7 @@ const run = async () => {
 
 async function getCompressedSize(code: string | Uint8Array): Promise<string> {
   return ` / gzip: ${(
-    (await compress(typeof code === 'string' ? code : Buffer.from(code)))
-      .length / 1024
+    (await compress(typeof code === 'string' ? code : Buffer.from(code))).length / 1024
   ).toFixed(2)} KiB`
 }
 

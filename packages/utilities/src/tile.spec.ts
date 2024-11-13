@@ -1,5 +1,5 @@
 import { LENGTH as N } from 'cepheus'
-import { assert } from 'chai'
+import { assert, describe, it } from 'vitest'
 import { tile } from './tile'
 import { toPosition } from './to-position'
 
@@ -17,8 +17,8 @@ describe('./src/tile.spec.ts', () => {
         [120, 110],
         [50, 160],
         [90, 160],
-        [130, 160]
-      ]
+        [130, 160],
+      ],
     )
   })
 })

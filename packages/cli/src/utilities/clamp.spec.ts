@@ -1,5 +1,5 @@
 import { clamp } from './clamp'
-import { assert } from 'chai'
+import { assert, describe, it } from 'vitest'
 
 describe('./src/utilities/clamp.spec.ts', () => {
   it('clamp', () => {

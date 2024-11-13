@@ -1,5 +1,5 @@
 <script setup>
-import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 </script>
 
 <template>
@@ -12,8 +12,8 @@ import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
               as="div"
               class="w-12 menu-button inline-flex justify-center rounded-md px-4 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
             >
-              More</MenuButton
-            >
+              More
+            </MenuButton>
             <MenuItems
               class="menu-items absolute left-0 mt-2 w-56 origin-top-right divide-y rounded-md shadow-lg focus:outline-none"
             >
@@ -23,50 +23,55 @@ import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
                     to="/"
                     :class="[
                       active ? 'menu-link menu-link-active' : 'menu-link',
-                      'group flex w-full items-center rounded-md px-2 py-2 text-sm'
+                      'group flex w-full items-center rounded-md px-2 py-2 text-sm',
                     ]"
-                    >Calendar</router-link
                   >
+                    Calendar
+                  </router-link>
                 </MenuItem>
                 <MenuItem v-slot="{ active }">
                   <router-link
                     :class="[
                       active ? 'menu-link menu-link-active' : 'menu-link',
-                      'group flex w-full items-center rounded-md px-2 py-2 text-sm'
+                      'group flex w-full items-center rounded-md px-2 py-2 text-sm',
                     ]"
                     to="/constraint"
-                    >Constraint</router-link
                   >
+                    Constraint
+                  </router-link>
                 </MenuItem>
                 <MenuItem v-slot="{ active }">
                   <router-link
                     :class="[
                       active ? 'menu-link menu-link-active' : 'menu-link',
-                      'group flex w-full items-center rounded-md px-2 py-2 text-sm'
+                      'group flex w-full items-center rounded-md px-2 py-2 text-sm',
                     ]"
                     to="/swatches"
-                    >Swatches</router-link
                   >
+                    Swatches
+                  </router-link>
                 </MenuItem>
                 <MenuItem v-slot="{ active }">
                   <router-link
                     :class="[
                       active ? 'menu-link menu-link-active' : 'menu-link',
-                      'group flex w-full items-center rounded-md px-2 py-2 text-sm'
+                      'group flex w-full items-center rounded-md px-2 py-2 text-sm',
                     ]"
                     to="/triangle"
-                    >Triangle</router-link
                   >
+                    Triangle
+                  </router-link>
                 </MenuItem>
                 <MenuItem v-slot="{ active }">
                   <router-link
                     :class="[
                       active ? 'menu-link menu-link-active' : 'menu-link',
-                      'group flex w-full items-center rounded-md px-2 py-2 text-sm'
+                      'group flex w-full items-center rounded-md px-2 py-2 text-sm',
                     ]"
                     to="/fitting"
-                    >Fitting</router-link
                   >
+                    Fitting
+                  </router-link>
                 </MenuItem>
               </div>
             </MenuItems>
@@ -78,12 +83,12 @@ import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
       </div>
 
       <!-- loading state via #fallback slot -->
-      <template #fallback> Loading... </template>
+      <template #fallback>Loading...</template>
     </Suspense>
   </div>
 </template>
 
-<style>
+<style lang="scss">
 body {
   background-color: var(---color-1-20-1020);
   text-rendering: optimizeLegibility;

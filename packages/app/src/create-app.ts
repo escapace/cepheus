@@ -21,25 +21,25 @@ export async function createApp(context?: SSRContext) {
       { component: Calendar, path: '/' },
       {
         component: async () => await import('./components/constraint.vue'),
-        path: '/constraint'
+        path: '/constraint',
       },
       {
         component: async () => await import('./components/home.vue'),
-        path: '/swatches'
+        path: '/swatches',
       },
       {
         component: async () => await import('./components/canvas.vue'),
-        path: '/fitting'
+        path: '/fitting',
       },
       {
         component: async () => await import('./components/triangle.vue'),
-        path: '/triangle'
+        path: '/triangle',
       },
       {
         component: async () => await import('./components/text.vue'),
-        path: '/text'
-      }
-    ]
+        path: '/text',
+      },
+    ],
   })
 
   const cepheusStore = useCepheusStore(pinia)
@@ -47,24 +47,20 @@ export async function createApp(context?: SSRContext) {
   const cepheus = await cepheusStore.createCepheus(context?.cepheus)
 
   const cassiopeia = createCassiopeia({
-    plugins: [cepheus]
+    plugins: [cepheus],
   })
 
   if (!import.meta.env.SSR) {
-    cassiopeia.subscribe(createBrowserSubscription())
+    cassiopeia.subscribe(createBrowserSubscription({ method: 'insert-discard' }))
   }
 
-  const app = createSSRApp(App)
-    .use(router)
-    .use(pinia)
-    .use(cepheus)
-    .use(cassiopeia)
+  const app = createSSRApp(App).use(router).use(pinia).use(cepheus).use(cassiopeia)
 
   return {
     app,
     cassiopeia,
     cepheusStore,
     pinia,
-    router
+    router,
   }
 }

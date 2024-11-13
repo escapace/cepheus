@@ -3,11 +3,7 @@ import { LENGTH as N } from 'cepheus'
 import { toPosition } from './to-position'
 import { toSquare } from './to-square'
 
-export const neighbours = (
-  square: number,
-  interval: number,
-  intercardinal: boolean
-): number[] => {
+export const neighbours = (square: number, interval: number, intercardinal: boolean): number[] => {
   const [xs, ys] = toPosition(square, interval)
   const index = interval
 

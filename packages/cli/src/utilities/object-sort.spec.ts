@@ -1,4 +1,4 @@
-import { assert } from 'chai'
+import { assert, describe, it } from 'vitest'
 import { objectSort } from './object-sort'
 
 describe('./src/utilities/object-sort.spec.ts', () => {
@@ -6,7 +6,7 @@ describe('./src/utilities/object-sort.spec.ts', () => {
     /* console.log() */
     assert.equal(
       JSON.stringify(objectSort({ a: 'b', c: ['e', 'd'], f: {} })),
-      '{"a":"b","c":["e","d"],"f":{}}'
+      '{"a":"b","c":["e","d"],"f":{}}',
     )
   })
 })

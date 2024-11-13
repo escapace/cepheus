@@ -1,4 +1,4 @@
-import { assert } from 'chai'
+import { assert, describe, it } from 'vitest'
 import { permutations } from './permutations'
 
 describe('src/permutations.spec.ts', () => {
@@ -11,9 +11,9 @@ describe('src/permutations.spec.ts', () => {
       permutations({
         x: [1, 2, 3],
         y: ['a', 'b'],
-        z: []
+        z: [],
       }),
-      []
+      [],
     )
   })
 
@@ -21,7 +21,7 @@ describe('src/permutations.spec.ts', () => {
     const object = {
       x: [1, 2, 3],
       y: ['a', 'b'],
-      z: [20, 30]
+      z: [20, 30],
     }
     const combos = permutations(object)
     assert.deepEqual(combos, [
@@ -36,7 +36,7 @@ describe('src/permutations.spec.ts', () => {
       { x: 3, y: 'a', z: 30 },
       { x: 1, y: 'b', z: 30 },
       { x: 2, y: 'b', z: 30 },
-      { x: 3, y: 'b', z: 30 }
+      { x: 3, y: 'b', z: 30 },
     ])
   })
 })

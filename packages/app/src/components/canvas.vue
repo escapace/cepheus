@@ -1,9 +1,16 @@
+<!-- eslint-disable typescript/no-non-null-assertion -->
 <script setup lang="ts">
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { convert, OKLCH, P3, sRGB } from '@cepheus/color'
-import { onMounted } from 'vue'
-import { cartesian, INTERPOLATOR } from 'cepheus'
 import { useCepheus } from '@cepheus/vue'
+import {
+  DisplayP3,
+  DisplayP3Gamut,
+  floatToByte,
+  gamutMapOKLCH,
+  sRGB,
+  sRGBGamut,
+} from '@texel/color'
+import { cartesian, INTERPOLATOR } from 'cepheus'
+import { onMounted } from 'vue'
 
 const instance = useCepheus()
 const model = instance[INTERPOLATOR].state.model
@@ -22,7 +29,7 @@ onMounted(() => {
     }
   } catch {}
 
-  if (supportsDisplayP3 === false) {
+  if (!supportsDisplayP3) {
     console.log('no support')
     return
   }
@@ -31,11 +38,9 @@ onMounted(() => {
     context = canvas.getContext('2d', { colorSpace: 'srgb' })!
   }
 
-  const img = context.createImageData(
-    context.canvas.width,
-    context.canvas.height,
-    { colorSpace: supportsDisplayP3 ? 'display-p3' : 'srgb' }
-  )
+  const img = context.createImageData(context.canvas.width, context.canvas.height, {
+    colorSpace: supportsDisplayP3 ? 'display-p3' : 'srgb',
+  })
 
   const interpolator = (x: number, y: number) => {
     const coords = cartesian(instance, 0, x, y, true)
@@ -44,15 +49,11 @@ onMounted(() => {
       return [255, 255, 255]
     }
 
-    return convert(
-      {
-        space: OKLCH,
-        alpha: 1,
-        coords
-      },
-      supportsDisplayP3 ? P3 : sRGB,
-      { inGamut: true }
-    ).coords.map((value) => value * 255)
+    return gamutMapOKLCH(
+      coords,
+      supportsDisplayP3 ? DisplayP3Gamut : sRGBGamut,
+      supportsDisplayP3 ? DisplayP3 : sRGB,
+    ).map((value) => floatToByte(value))
   }
 
   const toX = (x: number) => Math.floor((x / 240) * img.width)
@@ -60,16 +61,13 @@ onMounted(() => {
 
   for (let y = 0; y < img.height; y++) {
     for (let x = 0; x < img.width; x++) {
-      const [R, G, B] = interpolator(
-        (240 * x) / img.width,
-        (240 * y) / img.height
-      )
+      const [R, G, B] = interpolator((240 * x) / img.width, (240 * y) / img.height)
 
-      const i = x + y * img.width
-      img.data[i * 4 + 0] = R
-      img.data[i * 4 + 1] = G
-      img.data[i * 4 + 2] = B
-      img.data[i * 4 + 3] = 255
+      const index = x + y * img.width
+      img.data[index * 4 + 0] = R
+      img.data[index * 4 + 1] = G
+      img.data[index * 4 + 2] = B
+      img.data[index * 4 + 3] = 255
     }
   }
 

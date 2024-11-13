@@ -13,12 +13,14 @@ export const selectorModel = (store: Store): ModelUnparsed => {
         map(
           task.state.colors,
           (value) =>
-            map(value, (value) =>
-              toPrecision(value, store.options.precision)
-            ) as [number, number, number]
-        )
-      ]
-    )
+            map(value, (value) => toPrecision(value, store.options.precision)) as [
+              number,
+              number,
+              number,
+            ],
+        ),
+      ],
+    ),
   )
 
   const interval = store.options.interval
@@ -27,9 +29,9 @@ export const selectorModel = (store: Store): ModelUnparsed => {
 
   const colors = flattenDeep(
     squares.map(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      (square): Array<[number, number, number]> => values.get(square)!
-    )
+      // eslint-disable-next-line typescript/no-non-null-assertion
+      (square): Array<[number, number, number]> => values.get(square)!,
+    ),
   )
 
   const triangle = selectorTriangle(store)
@@ -40,7 +42,7 @@ export const selectorModel = (store: Store): ModelUnparsed => {
     number,
     number,
     number,
-    number
+    number,
   ]
 
   const space = store.options.colorSpace as number

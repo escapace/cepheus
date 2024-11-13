@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import { Temporal, Intl } from '@js-temporal/polyfill'
+import { Intl, Temporal } from '@js-temporal/polyfill'
 import { useTimeoutPoll } from '@vueuse/core'
 import { range } from 'lodash-es'
-import { onBeforeUpdate, onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import Event from './event.vue'
 // import { useCepheus } from '@cepheus/vue'
 import { useCassiopeia } from '@cassiopeia/vue'
 import { usePane } from '../hooks/use-pane'
-const { Xoshiro128 } = await import('@thi.ng/random')
-
-const random = new Xoshiro128([123, 123, 123, 123])
+const { SFC32 } = await import('@thi.ng/random')
 
 usePane()
 
@@ -17,30 +15,29 @@ usePane()
 const cassiopeia = useCassiopeia()
 
 const calendar = new Temporal.Calendar('iso8601')
-const timeZone = Temporal.Now.timeZoneId()
 const weekDayFormatter = new Intl.DateTimeFormat('en-GB', {
+  calendar,
   day: '2-digit',
   weekday: 'short',
-  timeZone,
-  calendar
 })
 
 const dateFormatter = new Intl.DateTimeFormat('en-GB', {
+  calendar,
   month: 'long',
   year: 'numeric',
-  timeZone,
-  calendar
 })
 
 interface Data {
-  days: Array<{ title: string; current: boolean }>
-  time: { row: number; hour: number }
-  month: string
-  week: string
+  days: Array<{ current: boolean; title: string }>
   events: Array<InstanceType<typeof Event>['$props']>
+  month: string
+  time: { hour: number; row: number }
+  week: string
 }
 
 const data = ref<Data>()
+
+let called = 0
 
 const createEvents = (): Data['events'] => {
   const titles = [
@@ -57,56 +54,49 @@ const createEvents = (): Data['events'] => {
     'Freedom and Prosperity Research Conference',
     'The future of US-Africa trade',
     'Dog Walk',
-    'Book Club'
+    'Book Club',
   ]
 
   cassiopeia.clear()
 
-  return titles.map((title) => {
+  return titles.map((title, index) => {
+    called = called + 1
+    const random = new SFC32([index + called * 1000])
+
     const bc = random.minmaxInt(0, 4)
 
     const bg = cassiopeia.add(
-      `---color-${bc}-${random.minmaxInt(200, 850)}-${random.minmaxInt(
-        50,
-        100
-      )}`
+      `---color-${bc}-${random.minmaxInt(200, 850)}-${random.minmaxInt(50, 100)}`,
     )
 
     const textColor = cassiopeia.add(
-      `---invert-${random.minmaxInt(0, 3)}-${random.minmaxInt(
-        0,
-        100
-      )}-${random.minmaxInt(0, 23)}`
+      `---invert-${random.minmaxInt(0, 3)}-${random.minmaxInt(0, 100)}-${random.minmaxInt(0, 23)}`,
     )
 
     const borderColor = cassiopeia.add(
-      `---hue-${bc}-${random.minmaxInt(900, 1023)}-${random.minmaxInt(
-        1000,
-        1023
-      )}--20-099`
+      `---hue-${bc}-${random.minmaxInt(900, 1023)}-${random.minmaxInt(1000, 1023)}--20-099`,
     )
 
     return {
+      backgroundColor: `var(${bg}, black)`,
+      borderColor: `var(${borderColor}, black)`,
       dayOfWeek: random.minmaxInt(0, 7),
+      duration: random.minmaxInt(60, 121),
       hour: random.minmaxInt(4, 20),
       minute: random.minmaxInt(0, 41),
-      duration: random.minmaxInt(60, 121),
-      backgroundColor: `var(${bg}, black)`,
       textColor: `var(${textColor}, black)`,
-      borderColor: `var(${borderColor}, black)`,
-      title
+      title,
     }
   })
 }
 
 const update = () => {
-  const now = Temporal.Now.plainDateTime(calendar)
+  const now = Temporal.Now.zonedDateTime(calendar, 'UTC')
   const time = Temporal.PlainTime.from(now)
   const date = Temporal.PlainDate.from(now)
   const events = createEvents()
 
   data.value = {
-    events,
     days: range(1, 8).map((dayOfWeek) => {
       const days = dayOfWeek - now.dayOfWeek
       const sign = Math.sign(days)
@@ -115,34 +105,36 @@ const update = () => {
         sign === -1
           ? date.subtract({ days: Math.abs(days) })
           : sign === 1
-          ? date.add({ days: Math.abs(days) })
-          : date
+            ? date.add({ days: Math.abs(days) })
+            : date
 
       const current = plainDate.equals(date)
 
       return {
+        current,
         title: weekDayFormatter.format(plainDate),
-        current
       }
     }),
+    events,
     month: dateFormatter.format(date),
-    time: { row: time.hour + 1, hour: (time.minute / 60) * 100 },
-    week: `W${date.weekOfYear} `
+    time: { hour: (time.minute / 60) * 100, row: time.hour + 1 },
+    week: `W${date.weekOfYear} `,
   }
+
+  void cassiopeia.update(false)
 }
 
-onBeforeUpdate(() => {
-  cassiopeia.update(false)
-})
+// onBeforeUpdate(() => {
+//   void cassiopeia.update(false)
+// })
 
-update()
-const { pause, resume } = useTimeoutPoll(update, 30 * 1000)
+void update()
+const { pause, resume } = useTimeoutPoll(update, 3 * 1000)
 
-// cassiopeia.update(false)
-cassiopeia.update(false)
+// void cassiopeia.update(false)
 
 onMounted(() => {
-  resume()
+  setTimeout(() => resume(), 3 * 1000)
 })
 
 onUnmounted(() => {
@@ -240,7 +232,7 @@ onUnmounted(() => {
           class="current-time sans-serif-bold"
           :style="{
             gridRow: data?.time.row,
-            top: `calc(${data?.time.hour.toFixed(5)}% - 0.0625rem)`
+            top: `calc(${data?.time.hour.toFixed(5)}% - 0.0625rem)`,
           }"
         ></div>
       </div>

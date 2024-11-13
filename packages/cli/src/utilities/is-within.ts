@@ -1,2 +1,1 @@
-export const isWithin = (x: number, min: number, max: number) =>
-  x >= min && x <= max
+export const isWithin = (x: number, min: number, max: number) => x >= min && x <= max

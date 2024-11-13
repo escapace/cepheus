@@ -12,8 +12,8 @@ export const usePane = () => {
       label: 'theme',
       options: {
         one: 'one',
-        two: 'two'
-      }
+        two: 'two',
+      },
     })
     pane.addBinding(store, 'lightness', { max: 1, min: 0, step: 0.01 })
     pane.addBinding(store, 'chroma', { max: 1, min: 0, step: 0.01 })
@@ -25,7 +25,7 @@ export const usePane = () => {
     onUnmounted(
       store.$subscribe(() => {
         pane.refresh()
-      })
+      }),
     )
 
     onUnmounted(() => pane.dispose())
