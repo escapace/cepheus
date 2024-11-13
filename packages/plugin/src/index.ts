@@ -1,4 +1,4 @@
-import { ColorSpace, LCH, OKLCH, P3, sRGB } from '@cepheus/color'
+// import { ColorSpace, LCH, OKLCH, P3, sRGB } from '@cepheus/color'
 import { type Iterators, PLUGIN, type Plugin } from 'cassiopeia'
 import { subscribe, type Interpolator } from 'cepheus'
 import { createIterator } from './create-iterator'
@@ -24,23 +24,21 @@ const createCepheusOptions = (options: Options): OptionsAdvanced => {
   let colorFormat: Array<'oklch' | 'p3' | 'srgb'>
   let colorGamut: Array<'p3' | 'srgb'>
 
-  if (__BROWSER__) {
+  if (__PLATFORM__ === 'browser') {
     colorScheme = options.flags?.colorScheme ?? ['none']
 
     colorFormat = intersection(
       filterKeys({
         oklch: CSS.supports('(color: oklch(0% 0 0))'),
         p3: CSS.supports('(color: color(display-p3 0 0 0))'),
-        srgb: true
+        srgb: true,
       }),
-      options.flags?.colorFormat
+      options.flags?.colorFormat,
     )
 
     colorGamut = intersection(
-      globalThis.matchMedia('(color-gamut: p3)').matches
-        ? ['p3', 'srgb']
-        : ['srgb'],
-      options.flags?.colorGamut
+      globalThis.matchMedia('(color-gamut: p3)').matches ? ['p3', 'srgb'] : ['srgb'],
+      options.flags?.colorGamut,
     )
 
     if (colorFormat.includes('oklch')) {
@@ -62,13 +60,13 @@ const createCepheusOptions = (options: Options): OptionsAdvanced => {
   const flags = permutations({
     colorFormat,
     colorGamut,
-    colorScheme
+    colorScheme,
   }).filter(
     (flags) =>
       !(
         (flags.colorFormat === 'p3' && flags.colorGamut === 'srgb') ||
         (flags.colorFormat === 'srgb' && flags.colorGamut === 'p3')
-      )
+      ),
   )
 
   if (flags.length === 0) {
@@ -79,23 +77,23 @@ const createCepheusOptions = (options: Options): OptionsAdvanced => {
 
   return {
     darkMode,
-    flags
+    flags,
   }
 }
 
 const setIterators = (
   interpolator: Interpolator,
   iterators: Iterators,
-  options: OptionsAdvanced
+  options: OptionsAdvanced,
 ) => {
-  ColorSpace.register(LCH)
-  ColorSpace.register(sRGB)
-  ColorSpace.register(OKLCH)
-  ColorSpace.register(OKLCH)
+  // ColorSpace.register(LCH)
+  // ColorSpace.register(sRGB)
+  // ColorSpace.register(OKLCH)
+  // ColorSpace.register(OKLCH)
 
-  if (options.flags.some((value) => value.colorFormat.includes('p3'))) {
-    ColorSpace.register(P3)
-  }
+  // if (options.flags.some((value) => value.colorFormat.includes('p3'))) {
+  //   ColorSpace.register(P3)
+  // }
 
   const iteratorColor = createIterator('color', options)
   const iteratorHue = createIterator('hue', options)
@@ -106,23 +104,18 @@ const setIterators = (
   iterators.set('invert', () => iteratorInvert(interpolator))
 }
 
-export const createCepheusPlugin = (
-  interpolator: Interpolator,
-  options: Options
-): Plugin => ({
+export const createCepheusPlugin = (interpolator: Interpolator, options: Options): Plugin => ({
   [PLUGIN]: (iterators: Iterators, update) => {
     setIterators(interpolator, iterators, createCepheusOptions(options))
     subscribe(interpolator, update)
 
-    if (__BROWSER__) {
-      globalThis
-        .matchMedia('(color-gamut: p3)')
-        .addEventListener('change', () => {
-          setIterators(interpolator, iterators, createCepheusOptions(options))
-          void update(false)
-        })
+    if (__PLATFORM__ === 'browser') {
+      globalThis.matchMedia('(color-gamut: p3)').addEventListener('change', () => {
+        setIterators(interpolator, iterators, createCepheusOptions(options))
+        void update(false)
+      })
     }
-  }
+  },
 })
 
 export type { Options }

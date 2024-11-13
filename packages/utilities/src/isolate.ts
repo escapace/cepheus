@@ -1,11 +1,7 @@
 import { pullAll } from 'lodash-es'
 import { neighbours } from './neighbours'
 
-export const isolate = (
-  squares: number[],
-  interval: number,
-  intercardinal: boolean
-) => {
+export const isolate = (squares: number[], interval: number, intercardinal: boolean) => {
   const remaining = [...squares]
 
   const walk = (square: number): number[] => {

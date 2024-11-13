@@ -1,5 +1,12 @@
 import type { Font, Locales } from '@escapace/satie'
-import { arialBold, arialItalic, arialRegular, helveticaBold, helveticaRegular, helveticaOblique } from '@escapace/satie'
+import {
+  arialBold,
+  arialItalic,
+  arialRegular,
+  helveticaBold,
+  helveticaRegular,
+  helveticaOblique,
+} from '@escapace/satie'
 
 const enUnicodeRange =
   'U+20-7E,U+A0-BF,U+2BB,U+2BC,U+2C6,U+2DA,U+2DC,U+303,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'
@@ -15,100 +22,88 @@ const enUnicodeRange =
 // }
 
 const robotoFlex: Font = {
+  display: 'swap',
   name: 'roboto-flex',
+  resourceHint: 'preload',
   source: './src/fonts/roboto-flex.ttf',
   tech: ['variations'],
   unicodeRange: enUnicodeRange,
-  display: 'swap',
-  resourceHint: 'preload'
   // prefer: [robotoMedium]
 }
 
 const robotoRegular: Font = {
+  display: 'swap',
   name: 'roboto-regular',
+  prefer: [robotoFlex],
   source: './src/fonts/roboto-regular.ttf',
   unicodeRange: enUnicodeRange,
-  prefer: [robotoFlex],
-  display: 'swap'
 }
 
 const robotoBold: Font = {
+  display: 'swap',
   name: 'roboto-bold',
+  prefer: [robotoFlex],
   source: './src/fonts/roboto-bold.ttf',
   unicodeRange: enUnicodeRange,
-  prefer: [robotoFlex],
-  display: 'swap'
 }
 
 const robotoItalic: Font = {
+  display: 'swap',
   name: 'roboto-italic',
+  prefer: [robotoFlex],
   source: './src/fonts/roboto-italic.ttf',
   unicodeRange: enUnicodeRange,
-  prefer: [robotoFlex],
-  display: 'swap'
 }
 
 const locales: Locales = {
   en: {
     'sans-serif': {
-      fontFamily: [
-        robotoRegular,
-        arialRegular,
-        helveticaRegular
-      ],
       '@media': {
         'screen and (max-width: 900px)': {
           fontStretch: 50,
           fontVariationSettings: {
-            wdth: 50
-          }
-        }
-      }
+            wdth: 50,
+          },
+        },
+      },
+      'fontFamily': [robotoRegular, arialRegular, helveticaRegular],
     },
     'sans-serif-bold': {
-      fontFamily: [
-        robotoBold,
-        arialBold,
-        helveticaBold,
-      ],
-      fontWeight: 700,
-      fontVariationSettings: {
-        wght: 700
-      },
       '@media': {
         'screen and (max-width: 900px)': {
           fontStretch: 50,
           fontVariationSettings: {
             wdth: 50,
-            wght: 700
-          }
-        }
-      }
+            wght: 700,
+          },
+        },
+      },
+      'fontFamily': [robotoBold, arialBold, helveticaBold],
+      'fontVariationSettings': {
+        wght: 700,
+      },
+      'fontWeight': 700,
     },
     'sans-serif-italic': {
-      fontFamily: [
-        robotoItalic,
-        arialItalic,
-        helveticaOblique
-      ],
+      'fontFamily': [robotoItalic, arialItalic, helveticaOblique],
       // fontStyle: 'italic',
-      fontVariationSettings: {
-        slnt: -10
-      },
       '@media': {
         'screen and (max-width: 900px)': {
           fontStretch: 50,
           fontVariationSettings: {
+            slnt: -10,
             wdth: 50,
-            slnt: -10
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+      'fontVariationSettings': {
+        slnt: -10,
+      },
+    },
     // 'sans-serif-medium': {
     //   fontFamily: [robotoMedium, 'system-ui']
     // }
-  }
+  },
 }
 
 export default locales

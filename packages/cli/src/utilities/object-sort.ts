@@ -1,12 +1,6 @@
 import { isArray, isPlainObject, range } from 'lodash-es'
 
-export type JSONType =
-  | { [key: string]: JSONType }
-  | boolean
-  | JSONType[]
-  | null
-  | number
-  | string
+export type JSONType = boolean | number | string | JSONType[] | { [key: string]: JSONType } | null
 
 /* const compare = (a: string, b: string): number =>  */
 
@@ -30,8 +24,8 @@ export const objectSort = <T extends JSONType>(value: T): T => {
       ...Object.keys(value as Record<string, JSONType>)
         .sort((a, b) => sum(a) - sum(b))
         .map((key) => ({
-          [key]: objectSort((value as Record<string, JSONType>)[key])
-        }))
+          [key]: objectSort((value as Record<string, JSONType>)[key]),
+        })),
     ) as T
   }
 

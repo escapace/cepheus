@@ -1,19 +1,19 @@
-/* eslint-disable @typescript-eslint/consistent-type-assertions */
+/* eslint-disable typescript/consistent-type-assertions */
 import { normalizeAngle } from 'cepheus'
-import { assert } from 'chai'
+import { assert, describe, it } from 'vitest'
 import type { PRNG } from './create-prng'
 import { percentile } from './percentile'
 
 const one = {
-  float: () => 1
+  float: () => 1,
 } as PRNG
 
 const half = {
-  float: () => 0.5
+  float: () => 0.5,
 } as PRNG
 
 const zero = {
-  float: () => 0
+  float: () => 0,
 } as PRNG
 
 describe('./src/utilities/percentlie.spec.ts', () => {

@@ -1,4 +1,4 @@
-import { assert } from 'chai'
+import { assert, describe, it } from 'vitest'
 import { relativeDifference } from './relative-difference'
 
 describe('./src/utilities/relative-difference.spec.ts', () => {

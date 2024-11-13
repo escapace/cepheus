@@ -5,18 +5,18 @@ export function chroma(interpolator: Interpolator): [low: number, high: number]
 export function chroma(
   interpolator: Interpolator,
   a: undefined,
-  b: undefined
+  b: undefined,
 ): [low: number, high: number]
 export function chroma(
   interpolator: Interpolator,
   a?: number,
-  b?: number
+  b?: number,
 ): Promise<[low: number, high: number]>
 export function chroma(
   interpolator: Interpolator,
   a?: number,
-  b?: number
-): [low: number, high: number] | Promise<[low: number, high: number]> {
+  b?: number,
+): Promise<[low: number, high: number]> | [low: number, high: number] {
   const value = interpolator[INTERPOLATOR]
 
   if (!(a === undefined && b === undefined)) {
@@ -26,24 +26,22 @@ export function chroma(
   return value.state.chroma
 }
 
-export function lightness(
-  interpolator: Interpolator
-): [low: number, high: number]
+export function lightness(interpolator: Interpolator): [low: number, high: number]
 export function lightness(
   interpolator: Interpolator,
   a: undefined,
-  b: undefined
+  b: undefined,
 ): [low: number, high: number]
 export function lightness(
   interpolator: Interpolator,
   a?: number,
-  b?: number
+  b?: number,
 ): Promise<[low: number, high: number]>
 export function lightness(
   interpolator: Interpolator,
   a?: number,
-  b?: number
-): [low: number, high: number] | Promise<[low: number, high: number]> {
+  b?: number,
+): Promise<[low: number, high: number]> | [low: number, high: number] {
   const value = interpolator[INTERPOLATOR]
 
   if (!(a === undefined && b === undefined)) {
@@ -53,21 +51,12 @@ export function lightness(
   return value.state.lightness
 }
 
+export function darkMode(interpolator: Interpolator, darkMode?: undefined): boolean
+export function darkMode(interpolator: Interpolator, darkMode?: undefined): boolean
+export function darkMode(interpolator: Interpolator, darkMode: boolean): Promise<boolean>
 export function darkMode(
   interpolator: Interpolator,
-  darkMode?: undefined
-): boolean
-export function darkMode(
-  interpolator: Interpolator,
-  darkMode?: undefined
-): boolean
-export function darkMode(
-  interpolator: Interpolator,
-  darkMode: boolean
-): Promise<boolean>
-export function darkMode(
-  interpolator: Interpolator,
-  darkMode?: boolean
+  darkMode?: boolean,
 ): boolean | Promise<boolean> {
   const value = interpolator[INTERPOLATOR]
 
@@ -81,10 +70,7 @@ export function darkMode(
 export function model(interpolator: Interpolator, model?: undefined): Model
 export function model(interpolator: Interpolator, model?: undefined): Model
 export function model(interpolator: Interpolator, model: Model): Promise<Model>
-export function model(
-  interpolator: Interpolator,
-  model?: Model
-): Model | Promise<Model> {
+export function model(interpolator: Interpolator, model?: Model): Model | Promise<Model> {
   const value = interpolator[INTERPOLATOR]
 
   if (model !== undefined) {

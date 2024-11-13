@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/triple-slash-reference */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable */
 /// <reference types="vite/client" />
 
 declare module '*.vue' {

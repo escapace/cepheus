@@ -1,9 +1,9 @@
 const enumFromTo = (m: number) => (n: number) =>
   Array.from(
     {
-      length: 1 + n - m
+      length: 1 + n - m,
     },
-    (_, index) => m + index
+    (_, index) => m + index,
   )
 
 export const divisors = (n: number) => {
@@ -20,7 +20,7 @@ export const divisors = (n: number) => {
       lows
         .map((x) => n / x)
         .reverse()
-        .slice(blnPerfectSquare ? 1 : 0)
+        .slice(blnPerfectSquare ? 1 : 0),
     )
     .slice(0, -1) // except n itself
 }

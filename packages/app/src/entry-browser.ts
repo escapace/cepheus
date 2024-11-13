@@ -7,5 +7,5 @@ void createApp().then(
       document.documentElement.classList.add('js')
 
       app.mount('#app')
-    })
+    }),
 )

@@ -8,33 +8,27 @@ import { selectorTriangle } from './selector-triangle'
 export const selectorSquares = (
   store: Store,
   // isolate: boolean,
-  iterations: number[] = store.allIterations
+  iterations: number[] = store.allIterations,
 ): Map<number, OptimizeTask<OptimizationStateFulfilled>> => {
-  const bestTasks = new Map(
-    Object.entries(selectorOptimizeTasksFulfilled(store, iterations))
-  )
+  const bestTasks = new Map(Object.entries(selectorOptimizeTasksFulfilled(store, iterations)))
 
   const result = new Map(
     compact(
       Array.from(store.indexSquare.entries()).map(([square, iterationsMap]) => {
-        const keys = compact(
-          iterations.map((iteration) => iterationsMap.get(iteration))
-        )
+        const keys = compact(iterations.map((iteration) => iterationsMap.get(iteration)))
 
-        const key: string | undefined = keys.filter((key) =>
-          bestTasks.has(key)
-        )[0]
+        const key: string | undefined = keys.find((key) => bestTasks.has(key))
 
         if (key !== undefined) {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          // eslint-disable-next-line typescript/no-non-null-assertion
           const task = bestTasks.get(key)!
 
           return [square, task]
         }
 
         return undefined
-      })
-    )
+      }),
+    ),
   )
 
   // const squares = Array.from(result.keys())
@@ -53,8 +47,8 @@ export const selectorRemainingSquares = (store: Store) => {
   return new Map(
     difference(
       Array.from(squares.keys()),
-      Array.from(selectorSquares(store).keys())
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    ).map((value) => [value, squares.get(value)!])
+      Array.from(selectorSquares(store).keys()),
+      // eslint-disable-next-line typescript/no-non-null-assertion
+    ).map((value) => [value, squares.get(value)!]),
   )
 }

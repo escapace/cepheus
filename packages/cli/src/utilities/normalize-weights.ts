@@ -4,7 +4,7 @@ import type { OptimizeOptions } from '../types'
 import { toPrecision } from './to-precision'
 
 export const normalizeWeights = (
-  weights: Required<Exclude<OptimizeOptions['weights'], undefined>>
+  weights: Required<Exclude<OptimizeOptions['weights'], undefined>>,
 ): Required<Exclude<OptimizeOptions['weights'], undefined>> => {
   const total = sum(Object.values(weights))
 

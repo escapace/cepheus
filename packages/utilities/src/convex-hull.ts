@@ -9,11 +9,10 @@ interface Options {
  *
  * @param values - An array of points.
  * @param options - MCCH Algorithm options.
- * @return Coordinates of the convex hull in clockwise order
+ * @returns Coordinates of the convex hull in clockwise order
  */
 export function convexHull(points: Point[], options: Options = {}): Point[] {
-  const values =
-    options.sorted === true ? points : points.slice().sort(byXThenY)
+  const values = options.sorted === true ? points : points.slice().sort(byXThenY)
 
   const n = values.length
   const result = new Array(n * 2) as Point[]

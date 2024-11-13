@@ -1,37 +1,49 @@
-import { convert, fixNaN, OKLCH, parse, clone } from '@cepheus/color'
 import { ColorSpace, normalizeAngle } from 'cepheus'
+import {
+  ColorSpace as _ColorSpace,
+  to as convert,
+  HSL,
+  HSV,
+  LCH,
+  OKLab,
+  OKLCH,
+  P3,
+  parse,
+  sRGB,
+} from 'colorjs.io/fn'
 import { isInteger, isString, omit } from 'lodash-es'
 import {
   DEFAULT_HUE_ANGLE,
   DEFAULT_ITERATIONS,
   DEFAULT_N_DIVISOR,
+  DEFAULT_PRECISION,
   DEFAULT_WEIGHTS,
   N,
-  N_DIVISORS
+  N_DIVISORS,
 } from '../constants'
 import type { RequiredStoreOptions, StoreOptions } from '../types'
+import { fixNaN } from '../utilities/fix-nan'
 
-export function createStoreOptions(
-  options: StoreOptions
-): RequiredStoreOptions {
+export function createStoreOptions(options: StoreOptions): RequiredStoreOptions {
+  _ColorSpace.register(HSL)
+  _ColorSpace.register(HSV)
+  _ColorSpace.register(P3)
+  _ColorSpace.register(OKLab)
+  _ColorSpace.register(OKLCH)
+  _ColorSpace.register(sRGB)
+  _ColorSpace.register(LCH)
   const colors = options.colors.map((colors) =>
-    colors.map(
-      (value) =>
-        fixNaN(
-          convert(isString(value) ? parse(value) : clone(value), OKLCH, {
-            inGamut: true
-          })
-        ).coords
-    )
-  )
-
-  const background = ['#000000', '#030202'].map(
-    (value) =>
+    colors.map((value) =>
       fixNaN(
-        convert(isString(value) ? parse(value) : clone(value), OKLCH, {
-          inGamut: true
-        })
-      ).coords
+        convert(
+          isString(value) ? parse(value) : { alpha: 1, coords: [...value], space: OKLCH },
+          OKLCH,
+          {
+            inGamut: true,
+          },
+        ).coords,
+      ),
+    ),
   )
 
   const interval = N / (options.levels ?? DEFAULT_N_DIVISOR)
@@ -45,25 +57,21 @@ export function createStoreOptions(
     throw new Error(`'iterations' must be an integer greater or equal to 1`)
   }
 
-  const colorSpace =
-    (options.colorSpace ?? 'p3') === 'p3' ? ColorSpace.p3 : ColorSpace.srgb
+  const colorSpace = (options.colorSpace ?? 'p3') === 'p3' ? ColorSpace.p3 : ColorSpace.srgb
 
   const hueAngle =
-    options.hueAngle === undefined
-      ? DEFAULT_HUE_ANGLE
-      : normalizeAngle(options.hueAngle)
+    options.hueAngle === undefined ? DEFAULT_HUE_ANGLE : normalizeAngle(options.hueAngle)
 
-  const precision = options.precision ?? 5
+  const precision = options.precision ?? DEFAULT_PRECISION
 
   return {
     ...omit(options, ['levels']),
-    background,
     colors,
     colorSpace,
     hueAngle,
     interval,
     iterations,
     precision,
-    weights: DEFAULT_WEIGHTS
+    weights: DEFAULT_WEIGHTS,
   }
 }

@@ -1,8 +1,7 @@
-import type { Color, ColorSpace } from '@cepheus/color'
-import type { ColorSpace as ColorSpaceId } from 'cepheus'
+import type { ColorSpace } from 'cepheus'
 import type { DeepRequired } from 'utility-types'
 import type { PRNG, PRNGName } from './utilities/create-prng'
-export { PRNG, PRNGName }
+export type { PRNG, PRNGName }
 
 export type Square = number
 
@@ -16,7 +15,7 @@ export enum TypeCepheusState {
   Done,
   Error,
   Optimization,
-  OptimizationDone
+  OptimizationDone,
 }
 
 export interface CepheusStateOptimization {
@@ -56,13 +55,13 @@ export interface StoreOptions
     | 'colorSpace'
     | 'hueAngle'
     | 'lightness'
+    | 'tolerance'
     | 'weights'
   > {
-  colors: Array<Color[] | string[]>
+  colors: Array<Array<[number, number, number]> | string[]>
   colorSpace?: 'p3' | 'srgb'
   hueAngle?: OptimizeOptions['hueAngle']
   iterations?: number
-  // background: Color[] | string[]
   levels?: number
   precision?: number
   weights?: OptimizeOptions['weights']
@@ -71,17 +70,10 @@ export interface StoreOptions
 export interface RequiredStoreOptions
   extends Omit<
     StoreOptions,
-    | 'background'
-    | 'colors'
-    | 'colorSpace'
-    | 'hueAngle'
-    | 'levels'
-    | 'precision'
-    | 'weights'
+    'colors' | 'colorSpace' | 'hueAngle' | 'levels' | 'precision' | 'weights'
   > {
-  background: Array<[number, number, number]>
   colors: Array<Array<[number, number, number]>>
-  colorSpace: ColorSpaceId
+  colorSpace: ColorSpace
   hueAngle: OptimizeOptions['hueAngle']
   interval: number
   iterations: number
@@ -95,14 +87,30 @@ export interface OptimizeTaskOptions extends OptimizeOptions {
 
 export interface OptimizeOptions {
   background: Array<[number, number, number]>
+  colors: Array<Array<[number, number, number]>>
+  colorSpace: ColorSpace
+  hueAngle: number
+  randomSeed: string
+  weights: {
+    chroma: number
+    contrast: number
+    deuteranopia: number
+    difference: number
+    dispersionDeuteranopia: number
+    dispersionNormal: number
+    dispersionProtanopia: number
+    dispersionTritanopia: number
+    hue: number
+    lightness: number
+    normal: number
+    protanopia: number
+    tritanopia: number
+  }
   chroma?: {
     range?: [number, number]
     // Chroma [0, 0.4]
     target?: number
   }
-  colors: Array<Array<[number, number, number]>>
-  colorSpace: ColorSpaceId
-  hueAngle: number
   hyperparameters?: {
     coolingRate: number
     cutoff: number
@@ -113,20 +121,8 @@ export interface OptimizeOptions {
     // Lightness [0, 1]
     target?: number
   }
-  randomSeed: string
   randomSource?: PRNGName
-  weights: {
-    chroma: number
-    contrast: number
-    deuteranopia: number
-    difference: number
-    dispersion: number
-    hue: number
-    lightness: number
-    normal: number
-    protanopia: number
-    tritanopia: number
-  }
+  tolerance?: number
   // contrast?: {
   //   // APCA [0, 106] or [0, 108]
   //   target?: number
@@ -139,21 +135,18 @@ export interface OptimizeOptions {
 }
 
 export type RequiredOptimizeOptions = {
-  background: Color[]
-  colors: Color[][]
+  background: Array<[number, number, number]>
+  colors: Array<Array<[number, number, number]>>
   colorSpace: ColorSpace
   prng: PRNG
 } & DeepRequired<
-  Omit<
-    OptimizeOptions,
-    'background' | 'colors' | 'colorSpace' | 'randomSeed' | 'randomSource'
-  >
+  Omit<OptimizeOptions, 'background' | 'colors' | 'colorSpace' | 'randomSeed' | 'randomSource'>
 >
 
 export const enum TypeOptimizationState {
   Pending,
   Rejected,
-  Fulfilled
+  Fulfilled,
 }
 
 interface IOptimizationState {

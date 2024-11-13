@@ -1,4 +1,4 @@
-import { assert } from 'chai'
+import { assert, describe, it } from 'vitest'
 import { lerpArray } from './lerp-array'
 
 describe('./src/lerp.spec.ts', () => {

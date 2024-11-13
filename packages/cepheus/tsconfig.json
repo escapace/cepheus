@@ -1,19 +1,22 @@
 {
   "compilerOptions": {
+    "allowArbitraryExtensions": true,
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "declaration": true,
+    "declarationDir": "lib/types",
     "declarationMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "importHelpers": false,
     "isolatedModules": true,
-    "lib": ["esnext", "DOM"],
+    "lib": ["DOM", "DOM.Iterable", "esnext"],
     "module": "esnext",
     "moduleResolution": "bundler",
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
+    "noImplicitThis": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "pretty": true,
@@ -23,9 +26,8 @@
     "target": "esnext",
     "typeRoots": ["node_modules/@types"],
     "useDefineForClassFields": true,
-    "declarationDir": "lib/types",
-    "outDir": "lib/tsc",
-    "rootDir": "src"
+    "verbatimModuleSyntax": true
   },
-  "include": ["src"]
+  "exclude": ["lib"],
+  "include": ["*.ts", "scripts", "src"]
 }

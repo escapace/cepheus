@@ -11,31 +11,17 @@ export const color = (
   color: number | string,
   chroma: number,
   lightness: number,
-  invert = false
+  invert = false,
 ) => {
-  const c =
-    typeof color === 'string'
-      ? isNumeric(color)
-        ? parseInt(color, 10)
-        : color
-      : color
+  const c = typeof color === 'string' ? (isNumeric(color) ? parseInt(color, 10) : color) : color
 
   const function_ = interpolator[INTERPOLATOR].state.model.alias
 
   const n = function_ === undefined ? c : function_(c)
 
   if (typeof n !== 'number') {
-    throw new TypeError(
-      `Unknown color ${typeof n === 'string' ? n : 'undefined'}`
-    )
+    throw new TypeError(`Unknown color ${typeof n === 'string' ? n : 'undefined'}`)
   }
 
-  return barycentric(
-    interpolator,
-    n,
-    MAX - lightness,
-    chroma,
-    lightness,
-    invert
-  )
+  return barycentric(interpolator, n, MAX - lightness, chroma, lightness, invert)
 }

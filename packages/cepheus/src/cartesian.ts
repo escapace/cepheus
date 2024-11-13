@@ -7,20 +7,15 @@ import { lerpAngle } from './utilities/lerp-angle'
 import { normalize } from './utilities/normalize'
 import { szudzik } from './utilities/szudzik'
 
-const toWeight = (
-  x: number,
-  y: number,
-  sx: number,
-  sy: number,
-  interval: number
-) => erfc(distance(x, y, sx + interval / 2, sy + interval / 2) / interval)
+const toWeight = (x: number, y: number, sx: number, sy: number, interval: number) =>
+  erfc(distance(x, y, sx + interval / 2, sy + interval / 2) / interval)
 
 export const cartesian = (
   interpolator: Interpolator,
   color: number,
   x: number,
   y: number,
-  extend = true
+  extend = true,
 ): [number, number, number] | undefined => {
   const { colors, interval } = interpolator[INTERPOLATOR].state.model
 
@@ -65,7 +60,7 @@ export const cartesian = (
     // n, sw, ne, s, nw, se, w, e // !
     // s, nw, se, n, sw, ne, w, e // !
     // n, s, nw, se, w, ne, sw, e // !
-    s, n, sw, ne, w, se, nw, e // !
+    s, n, sw, ne, w, se, nw, e, // !
     // e, nw, se, w, ne, sw, n, s
     // w, ne, sw, e, nw, se, n, s
     // w, e, nw, se, n, sw, ne, s
@@ -99,6 +94,6 @@ export const cartesian = (
   return values.reduce((previous, next, index) => [
     lerp(previous[0], next[0], normalizedWeights[index]),
     lerp(previous[1], next[1], normalizedWeights[index]),
-    lerpAngle(previous[2], next[2], normalizedWeights[index])
+    lerpAngle(previous[2], next[2], normalizedWeights[index]),
   ])
 }
