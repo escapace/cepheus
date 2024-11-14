@@ -10,11 +10,15 @@
     "importHelpers": false,
     "isolatedModules": true,
     "jsx": "preserve",
+    "jsxImportSource": "vue",
     "lib": ["esnext", "dom"],
     "module": "esnext",
+    "moduleDetection": "force",
     "moduleResolution": "bundler",
+    "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
+    "noImplicitThis": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "pretty": true,
@@ -24,7 +28,8 @@
     "strict": true,
     "target": "esnext",
     "typeRoots": ["node_modules/@types"],
-    "useDefineForClassFields": true
+    "useDefineForClassFields": true,
+    "verbatimModuleSyntax": true
   },
   "exclude": ["dist", "node_modules"]
 }

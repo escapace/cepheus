@@ -54,12 +54,12 @@ export const createApp = async (options: Options = YEUX_OPTIONS) => {
     hono.use('*', serveStatic({ root: '../client' }))
   }
 
-  if (import.meta.env.MODE === 'production') {
-    const { serveStatic } = await import('hono/cloudflare-workers')
-    const manifest = await import('__STATIC_CONTENT_MANIFEST')
-
-    hono.use('*', serveStatic({ manifest, root: './' }))
-  }
+  // if (import.meta.env.MODE === 'production') {
+  //   const { serveStatic } = await import('hono/cloudflare-workers')
+  //   const manifest = await import('__STATIC_CONTENT_MANIFEST')
+  //
+  //   hono.use('*', serveStatic({ manifest, root: './' }))
+  // }
 
   hono.post(
     '/preferences',

@@ -4,13 +4,20 @@ import unocss from 'unocss/vite'
 import { defineConfig, splitVendorChunkPlugin } from 'vite'
 
 export default defineConfig(() => ({
-  // ssr: {
-  //   target: 'webworker'
-  // },
   build: {
     rollupOptions: {
       external: ['__STATIC_CONTENT_MANIFEST'],
     },
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler',
+      },
+    },
+  },
+  define: {
+    __VUE_OPTIONS_API__: 'false',
   },
   plugins: [vue(), unocss(), cassiopeia(), splitVendorChunkPlugin()],
 }))

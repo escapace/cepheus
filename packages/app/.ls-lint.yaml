@@ -16,6 +16,7 @@ ignore:
   - .git
   - .github
   - coverage
+  - dist
   - lib
   - node_modules
   - packages

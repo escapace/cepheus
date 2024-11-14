@@ -96,11 +96,9 @@ const setIterators = (
   // }
 
   const iteratorColor = createIterator('color', options)
-  const iteratorHue = createIterator('hue', options)
   const iteratorInvert = createIterator('invert', options)
 
   iterators.set('color', () => iteratorColor(interpolator))
-  iterators.set('hue', () => iteratorHue(interpolator))
   iterators.set('invert', () => iteratorInvert(interpolator))
 }
 

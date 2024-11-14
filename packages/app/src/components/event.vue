@@ -67,6 +67,7 @@ const properties = defineProps({
   },
 })
 
+const borderColor = computed(() => properties.borderColor)
 const hours = computed(() => Math.ceil(properties.duration / 60) + 1)
 const hoursInMinutes = computed(() => hours.value * 60)
 const time = computed(
@@ -75,7 +76,7 @@ const time = computed(
 )
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 * {
   transition: background-color 300ms linear;
 }
@@ -88,6 +89,7 @@ const time = computed(
   margin-right: 0.1875rem;
   margin-left: 0.125rem;
   overflow: hidden;
+  border: 1px v-bind(borderColor) dotted;
 }
 
 .event-container {
@@ -100,10 +102,12 @@ const time = computed(
 
 .event-time {
   font-size: 60%;
+  font-weight: bold;
   margin-bottom: 0.5ex;
 }
 
 .event-title {
-  font-size: 80%;
+  padding-top: 4px;
+  font-size: 90%;
 }
 </style>

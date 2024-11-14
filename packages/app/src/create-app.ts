@@ -24,11 +24,11 @@ export async function createApp(context?: SSRContext) {
         path: '/constraint',
       },
       {
-        component: async () => await import('./components/home.vue'),
+        component: async () => await import('./components/swatches.vue'),
         path: '/swatches',
       },
       {
-        component: async () => await import('./components/canvas.vue'),
+        component: async () => await import('./components/fitting.vue'),
         path: '/fitting',
       },
       {
