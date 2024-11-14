@@ -1,26 +1,19 @@
 // import { OKLCH, P3, convert, sRGB, serialize, toGamut, type Color } from '@cepheus/color'
 import {
-  gamutMapOKLCH,
-  sRGBGamut,
-  OKLCH,
-  DisplayP3Gamut,
-  sRGB,
   DisplayP3,
+  DisplayP3Gamut,
+  gamutMapOKLCH,
+  OKLCH,
   serialize,
+  sRGB,
+  sRGBGamut,
 } from '@texel/color'
 import type { Iterator, StyleSheetPartial } from 'cassiopeia'
-import {
-  ColorSpace,
-  INTERPOLATOR,
-  color as c,
-  darkMode,
-  normalizeAngle,
-  type Interpolator,
-} from 'cepheus'
+import { color as c, ColorSpace, darkMode, INTERPOLATOR, type Interpolator } from 'cepheus'
 import { parseAlpha } from './parse-alpha'
 import type { Flags, OptionsAdvanced } from './types'
-const HUE_REGEX = /^([\da-z]+)-(\d+)-(\d+)-(-?\d+)(-([01]|0\d+))?$/i
-const COLOR_REGEX = /^([\da-z]+)-(\d+)-(\d+)(-([01]|0\d+))?$/i
+
+const COLOR_REGEX = /^([\da-z]+)-(\d{1,3})-(\d{1,3})(-(?:[1-9]?\d|100))?$/i
 
 const template = (
   values: string[],
@@ -72,13 +65,7 @@ const template = (
   return { content, media: mediaString }
 }
 
-export const createIterator = (type: 'color' | 'hue' | 'invert', options: OptionsAdvanced) => {
-  const regex = {
-    color: COLOR_REGEX,
-    hue: HUE_REGEX,
-    invert: COLOR_REGEX,
-  }[type]
-
+export const createIterator = (type: 'color' | 'invert', options: OptionsAdvanced) => {
   const properties = { darkMode: options.darkMode }
 
   function* iteratorColor(interpolator: Interpolator, flags: Flags = options.flags[0]): Iterator {
@@ -95,14 +82,14 @@ export const createIterator = (type: 'color' | 'hue' | 'invert', options: Option
     let cursor: string | true
 
     while ((cursor = yield) !== true) {
-      const string = cursor.match(regex)
+      const string = COLOR_REGEX.exec(cursor)
 
       if (string === null) {
         continue
       }
 
       const colorN = string[1]
-      const [chroma, lightness] = string.slice(2, 4).map((value) => parseInt(value, 10)) as [
+      const [lightness, chroma] = string.slice(2, 4).map((value) => parseInt(value, 10)) as [
         number,
         number,
       ]
@@ -119,25 +106,7 @@ export const createIterator = (type: 'color' | 'hue' | 'invert', options: Option
         continue
       }
 
-      let alpha: number
-
-      if (type === 'color') {
-        alpha = parseAlpha(string[5])
-      } else if (type === 'hue') {
-        coords[2] = normalizeAngle(coords[2] + parseInt(string[4]))
-        alpha = parseAlpha(string[6])
-      } else {
-        // const chroma = 0.4 - coords[1]
-        // coords[1] = chroma
-        alpha = parseAlpha(string[5])
-      }
-
-      // const color: Color = {
-      //   alpha,
-      //   coords,
-      //   space: OKLCH,
-      // }
-      //
+      const alpha = parseAlpha(string[5])
 
       const name = `---${type}-${cursor}`
       const value = serialize(

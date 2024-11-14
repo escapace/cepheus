@@ -88,42 +88,38 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
   </div>
 </template>
 
-<style lang="scss">
+<style>
 body {
-  background-color: var(---color-1-20-1020);
+  background-color: var(---color-1-998-20);
   text-rendering: optimizeLegibility;
   text-rendering: geometricPrecision;
 }
 
 .menu-button {
-  color: var(---color-1-20-1000);
+  color: var(---color-1-998-20);
   background-color: var(---color-2-20-20);
-  border: var(---color-2-20-50);
+  border: var(---color-2-50-20);
   border-radius: 5px;
   border-style: solid;
 }
 
 .menu-items {
-  border: black;
-  border-color: black;
+  border: var(---color-2-20-20);
+  border-color: var(---color-2-20-20);
   border-style: solid;
-  background-color: var(---color-1-20-1000);
+  background-color: var(---color-1-993-20);
   color: var(---color-2-20-20);
 }
 
 .menu-items a {
   color: var(---color-2-20-20);
-  border-color: black;
+  border-color: var(---color-2-20-20);
   text-decoration: none;
 }
 
 .menu-wrapper {
   z-index: 1;
-  background-color: var(---color-1-20-1000);
+  background-color: var(---color-1-980-20);
   color: var(---color-2-20-20);
 }
-
-/* * { */
-/*   margin: 0; */
-/* } */
 </style>

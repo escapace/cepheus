@@ -1,0 +1,18 @@
+{
+  "builds": {
+    "node": {
+      "define": {
+        "__PLATFORM__": "\"neutral\"",
+        "__VUE_OPTIONS_API__": "true",
+        "__VUE_PROD_DEVTOOLS__": "false",
+        "__VUE_PROD_HYDRATION_MISMATCH_DETAILS__": "false"
+      },
+      "entryPoints": ["./dist/server/entry-server.js"],
+      "external": ["__STATIC_CONTENT_MANIFEST"],
+      "mainFields": ["module", "main"],
+      "outdir": "dist/worker",
+      "platform": "neutral",
+      "target": ["es2022"]
+    }
+  }
+}

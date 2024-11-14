@@ -2,7 +2,6 @@
 <script setup lang="ts">
 import { INTERPOLATOR, type Triangle } from 'cepheus'
 import { onMounted, onUnmounted } from 'vue'
-// import { convert, OKLCH, P3, sRGB } from '@cepheus/color'
 import { useCepheus } from '@cepheus/vue'
 import { useCepheusStore } from '../hooks/use-cepheus-store'
 import { usePane } from '../hooks/use-pane'

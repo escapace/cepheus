@@ -35,15 +35,15 @@ export const useCepheusStore = defineStore('cepheus', () => {
   const darkMode = ref(
     import.meta.env.SSR ? false : window.matchMedia('prefers-color-scheme: dark').matches,
   )
-  const lightness = ref(0.5)
+  const lightness = ref(0.75)
   const contrast = ref(
     import.meta.env.SSR
-      ? 0.5
+      ? 0.75
       : window.matchMedia('prefers-color-scheme: more').matches
         ? 1
         : window.matchMedia('prefers-color-scheme: less').matches
-          ? 0
-          : 0.5,
+          ? 0.5
+          : 0.75,
   )
   const model = ref<Preferences['model']>('one')
   const modelState = ref<ModelState>(ModelState.Pending)

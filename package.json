@@ -47,7 +47,7 @@
     "workspaces:ls-lint": "pnpm run --if-present --workspace-concurrency=4 -r --filter '*' ls-lint",
     "workspaces:test": "pnpm run --if-present --workspace-concurrency=4 -r --filter '*' test",
     "workspaces:typecheck": "pnpm run --if-present --workspace-concurrency=4 -r --filter '*' typecheck",
-    "workspaces:update": "pnpm --workspace-concurrency=4 -w -r --filter '*' exec ncu -s -u && pnpm run syncpack"
+    "workspaces:update": "pnpm --workspace-concurrency=4 -w -r --filter '*' exec ncu -u --dep prod,dev,peer,optional && pnpm run syncpack"
   },
   "sideEffects": false,
   "type": "module"

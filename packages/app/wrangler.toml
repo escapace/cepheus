@@ -1,11 +1,11 @@
 name = "app"
-main = "./dist/worker/index.js"
+main = "./dist/worker/entry-server.js"
 compatibility_flags = ["nodejs_compat_v2"]
 compatibility_date = "2024-09-23"
 no_bundle = false
+preserve_file_names = true
+assets = { directory = "dist/client" }
 
 [build]
-command = "node ./scripts/build.js"
-
-[site]
-bucket = "./dist/client/"
+command = "pnpm exec tsx ./scripts/build.js"
+watch_dir = ["./src"]
