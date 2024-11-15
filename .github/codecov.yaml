@@ -26,9 +26,6 @@ flags:
   cli:
     paths:
       - packages/cli/
-  color:
-    paths:
-      - packages/color/
   plugin:
     paths:
       - packages/plugin/

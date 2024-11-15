@@ -4,7 +4,7 @@
       "define": {
         "__PLATFORM__": "\"node\""
       },
-      "entryPoints": ["src/index.ts", "src/cli.ts", "src/worker.ts"],
+      "entryPoints": ["src/cli.ts", "src/index.ts", "src/worker.ts"],
       "mainFields": ["module", "main"],
       "outdir": "lib/node",
       "platform": "node",
