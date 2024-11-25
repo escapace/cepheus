@@ -24,8 +24,8 @@ importers:
         specifier: 9.14.0
         version: 9.14.0(jiti@2.4.0)
       eslint-config-escapace:
-        specifier: 5.2.3
-        version: 5.2.3(eslint@9.14.0(jiti@2.4.0))(typescript@5.6.3)
+        specifier: 5.3.0
+        version: 5.3.0(eslint@9.14.0(jiti@2.4.0))(typescript@5.6.3)
       knip:
         specifier: 5.36.7
         version: 5.36.7(@types/node@22.9.0)(typescript@5.6.3)
@@ -136,8 +136,8 @@ importers:
         specifier: 9.14.0
         version: 9.14.0(jiti@2.4.0)
       eslint-config-escapace:
-        specifier: 5.2.3
-        version: 5.2.3(eslint@9.14.0(jiti@2.4.0))(typescript@5.6.3)
+        specifier: 5.3.0
+        version: 5.3.0(eslint@9.14.0(jiti@2.4.0))(typescript@5.6.3)
       esroll:
         specifier: 0.3.0
         version: 0.3.0
@@ -193,8 +193,8 @@ importers:
         specifier: 9.14.0
         version: 9.14.0(jiti@2.4.0)
       eslint-config-escapace:
-        specifier: 5.2.3
-        version: 5.2.3(eslint@9.14.0(jiti@2.4.0))(typescript@5.6.3)
+        specifier: 5.3.0
+        version: 5.3.0(eslint@9.14.0(jiti@2.4.0))(typescript@5.6.3)
       esroll:
         specifier: 0.3.0
         version: 0.3.0
@@ -290,8 +290,8 @@ importers:
         specifier: 9.14.0
         version: 9.14.0(jiti@2.4.0)
       eslint-config-escapace:
-        specifier: 5.2.3
-        version: 5.2.3(eslint@9.14.0(jiti@2.4.0))(typescript@5.6.3)
+        specifier: 5.3.0
+        version: 5.3.0(eslint@9.14.0(jiti@2.4.0))(typescript@5.6.3)
       esroll:
         specifier: 0.3.0
         version: 0.3.0
@@ -339,8 +339,8 @@ importers:
         specifier: 9.14.0
         version: 9.14.0(jiti@2.4.0)
       eslint-config-escapace:
-        specifier: 5.2.3
-        version: 5.2.3(eslint@9.14.0(jiti@2.4.0))(typescript@5.6.3)
+        specifier: 5.3.0
+        version: 5.3.0(eslint@9.14.0(jiti@2.4.0))(typescript@5.6.3)
       esroll:
         specifier: 0.3.0
         version: 0.3.0
@@ -391,8 +391,8 @@ importers:
         specifier: 9.14.0
         version: 9.14.0(jiti@2.4.0)
       eslint-config-escapace:
-        specifier: 5.2.3
-        version: 5.2.3(eslint@9.14.0(jiti@2.4.0))(typescript@5.6.3)
+        specifier: 5.3.0
+        version: 5.3.0(eslint@9.14.0(jiti@2.4.0))(typescript@5.6.3)
       esroll:
         specifier: 0.3.0
         version: 0.3.0
@@ -443,8 +443,8 @@ importers:
         specifier: 9.14.0
         version: 9.14.0(jiti@2.4.0)
       eslint-config-escapace:
-        specifier: 5.2.3
-        version: 5.2.3(eslint@9.14.0(jiti@2.4.0))(typescript@5.6.3)
+        specifier: 5.3.0
+        version: 5.3.0(eslint@9.14.0(jiti@2.4.0))(typescript@5.6.3)
       esroll:
         specifier: 0.3.0
         version: 0.3.0
@@ -2675,11 +2675,11 @@ packages:
     peerDependencies:
       eslint: '>=6.0.0'
 
-  eslint-config-escapace@5.2.3:
-    resolution: {integrity: sha512-dPTJXpKsrPjcbfFkVcmb/kIfJI6zNBOSnxiofzlGefifnl5M99Mk2mbVkcMVLzViAbPOuoV78LWNc1z27THHtw==}
+  eslint-config-escapace@5.3.0:
+    resolution: {integrity: sha512-5yUByueG8v+5rnXG3g1TtsYeU+LEw+28X/dJ8bx6Y4sGOGgAoarI9/dQWpphiN8oEFNvGaW4+dFrPTObjTieMQ==}
     engines: {node: '>=20.15.0', pnpm: '>=9.4.0'}
     peerDependencies:
-      eslint: '>=9.13.0'
+      eslint: '>=9.14.0'
 
   eslint-config-flat-gitignore@0.3.0:
     resolution: {integrity: sha512-0Ndxo4qGhcewjTzw52TK06Mc00aDtHNTdeeW2JfONgDcLkRO/n/BteMRzNVpLQYxdCC/dFEilfM9fjjpGIJ9Og==}
@@ -6894,7 +6894,7 @@ snapshots:
       eslint: 9.14.0(jiti@2.4.0)
       semver: 7.6.3
 
-  eslint-config-escapace@5.2.3(eslint@9.14.0(jiti@2.4.0))(typescript@5.6.3):
+  eslint-config-escapace@5.3.0(eslint@9.14.0(jiti@2.4.0))(typescript@5.6.3):
     dependencies:
       '@stylistic/eslint-plugin': 2.10.1(eslint@9.14.0(jiti@2.4.0))(typescript@5.6.3)
       eslint: 9.14.0(jiti@2.4.0)
