@@ -183,7 +183,7 @@ const distances = (colors: Color[], deficiency?: Deficiency): number[] => {
 
     return {
       alpha: 1,
-      coords: map([r, g, b], (value) => value / 255) as [number, number, number],
+      coords: map([r, g, b], (value) => value / 255),
       space: sRGB,
     }
   })
@@ -339,7 +339,10 @@ const normalizeLightness = (
   value: Required<Exclude<OptimizeOptions['lightness'], undefined>>,
   tolerance: number,
 ): Required<Exclude<OptimizeOptions['lightness'], undefined>> => ({
-  range: normalizeRange(map(value.range, (value) => value / N) as [number, number], tolerance),
+  range: normalizeRange(
+    map(value.range, (value) => value / N),
+    tolerance,
+  ),
   target: value.target / N,
 })
 
@@ -347,7 +350,10 @@ const normalizeChroma = (
   value: Required<Exclude<OptimizeOptions['chroma'], undefined>>,
   tolerance: number,
 ): Required<Exclude<OptimizeOptions['chroma'], undefined>> => ({
-  range: normalizeRange(map(value.range, (v) => (v / N) * 0.4) as [number, number], tolerance),
+  range: normalizeRange(
+    map(value.range, (v) => (v / N) * 0.4),
+    tolerance,
+  ),
   target: (value.target / N) * 0.4,
 })
 

@@ -9,8 +9,8 @@ const RANDOM_SOURCES = {
   'xoshiro128++': Xoshiro128,
 }
 
-export type PRNGName = keyof typeof RANDOM_SOURCES
 export type PRNG = InstanceType<ValuesType<typeof RANDOM_SOURCES>>
+export type PRNGName = keyof typeof RANDOM_SOURCES
 
 const EMPTY_FNV1A = Number(fnv1a('', { size: 32 }))
 

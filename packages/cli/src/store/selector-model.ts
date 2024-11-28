@@ -10,14 +10,8 @@ export const selectorModel = (store: Store): ModelUnparsed => {
     Array.from(selectorSquares(store, store.allIterations).entries()).map(
       ([square, task]): [number, Array<[number, number, number]>] => [
         square,
-        map(
-          task.state.colors,
-          (value) =>
-            map(value, (value) => toPrecision(value, store.options.precision)) as [
-              number,
-              number,
-              number,
-            ],
+        map(task.state.colors, (value) =>
+          map(value, (value) => toPrecision(value, store.options.precision)),
         ),
       ],
     ),
