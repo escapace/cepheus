@@ -73,11 +73,11 @@ export const selectorOptimizeTasksCount = (store: Store) =>
   Array.from(store.indexState.values()).reduce(
     (counts, task) => {
       switch (task.state.type) {
-        case TypeOptimizationState.Rejected:
-          counts.rejected++
-          break
         case TypeOptimizationState.Fulfilled:
           counts.fulfilled++
+          break
+        case TypeOptimizationState.Rejected:
+          counts.rejected++
           break
         case TypeOptimizationState.Pending:
           counts.pending++

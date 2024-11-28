@@ -1,8 +1,8 @@
 import type { INTERPOLATOR } from './constants'
 
+export type Line = [Point, Point]
 export type Point = [x: number, y: number]
 export type Triangle = [Point, Point, Point]
-export type Line = [Point, Point]
 
 export enum ColorSpace {
   p3 = 1,
@@ -28,9 +28,9 @@ export interface Model {
   alias?: (value: number | string) => number | undefined
 }
 
-export type Unsubscribe = () => unknown
 // eslint-disable-next-line typescript/no-redundant-type-constituents
 export type Subscription = () => unknown | Promise<unknown>
+export type Unsubscribe = () => unknown
 
 export interface State {
   chroma: [low: number, high: number]

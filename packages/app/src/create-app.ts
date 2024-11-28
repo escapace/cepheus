@@ -1,7 +1,7 @@
 import { createBrowserSubscription, createCassiopeia } from '@cassiopeia/vue'
 import '@unocss/reset/normalize.css'
 import { createPinia, type StateTree } from 'pinia'
-import 'uno.css'
+import 'virtual:uno.css'
 import { createSSRApp } from 'vue'
 import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router'
 import App from './components/app.vue'

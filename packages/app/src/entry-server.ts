@@ -46,7 +46,7 @@ export const createSession = async (cookieHeader?: string) => {
   return session
 }
 
-export const createApp = async (options: Options = YEUX_OPTIONS) => {
+export const createApp = async (options: Options = POINTE_OPTIONS) => {
   const hono = new Hono()
 
   if (import.meta.env.MODE === 'staging') {
