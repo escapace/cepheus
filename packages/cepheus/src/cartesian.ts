@@ -51,6 +51,7 @@ export const cartesian = (
 
   // prettier-ignore
   const order = [
+    n, s, e, w, ne, sw, se, nw,
     // long walk
     //
     // n, s, ne, sw, e, nw, se, w // !
@@ -60,7 +61,7 @@ export const cartesian = (
     // n, sw, ne, s, nw, se, w, e // !
     // s, nw, se, n, sw, ne, w, e // !
     // n, s, nw, se, w, ne, sw, e // !
-    s, n, sw, ne, w, se, nw, e, // !
+    // s, n, sw, ne, w, se, nw, e, // !
     // e, nw, se, w, ne, sw, n, s
     // w, ne, sw, e, nw, se, n, s
     // w, e, nw, se, n, sw, ne, s
