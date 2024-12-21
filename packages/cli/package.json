@@ -13,7 +13,7 @@
   "dependencies": {
     "@bjornlu/colorblind": "^1.0.3",
     "@cepheus/utilities": "workspace:*",
-    "@escapace/minimum-perimeter-triangle": "^0.2.5",
+    "@escapace/minimum-perimeter-triangle": "^0.2.6",
     "@sindresorhus/fnv1a": "^3.1.0",
     "@texel/color": "^1.1.4",
     "@thi.ng/random": "^4.1.4",
@@ -35,7 +35,7 @@
     "@types/node": "22.10.1",
     "@vitest/coverage-v8": "2.1.6",
     "eslint": "9.15.0",
-    "eslint-config-escapace": "5.3.1",
+    "eslint-config-escapace": "5.4.0",
     "esroll": "0.3.0",
     "prettier": "3.4.1",
     "prettier-config-escapace": "1.2.1",
