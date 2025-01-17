@@ -4,7 +4,7 @@
     "**/*.{test,spec}.?(c|m)[jt]s?(x)",
     "**/test/**/*.?(c|m)[jt]s?(x)",
     "eslint.config.mjs",
-    "satie.config.ts",
+    "pangram.config.ts",
     "src/entry-server.ts!",
     "src/entry-browser.ts!",
     "src/create-app.ts!",
