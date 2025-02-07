@@ -1,12 +1,4 @@
-import type { Font, Locales } from 'pangram'
-import {
-  arialBold,
-  arialItalic,
-  arialRegular,
-  helveticaBold,
-  helveticaRegular,
-  helveticaOblique,
-} from 'pangram'
+import { fallback, type Font, type Locales } from 'pangram'
 
 const enUnicodeRange =
   'U+20-7E,U+A0-BF,U+2BB,U+2BC,U+2C6,U+2DA,U+2DC,U+303,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'
@@ -66,7 +58,7 @@ const locales: Locales = {
           },
         },
       },
-      'fontFamily': [robotoRegular, arialRegular, helveticaRegular],
+      'fontFamily': [robotoRegular, ...(await fallback('arial'))],
     },
     'sans-serif-bold': {
       '@media': {
@@ -78,14 +70,14 @@ const locales: Locales = {
           },
         },
       },
-      'fontFamily': [robotoBold, arialBold, helveticaBold],
+      'fontFamily': [robotoBold, ...(await fallback('arial-bold'))],
       'fontVariationSettings': {
         wght: 700,
       },
       'fontWeight': 700,
     },
     'sans-serif-italic': {
-      'fontFamily': [robotoItalic, arialItalic, helveticaOblique],
+      'fontFamily': [robotoItalic, ...(await fallback('arial-italic'))],
       // fontStyle: 'italic',
       '@media': {
         'screen and (max-width: 900px)': {
