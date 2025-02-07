@@ -19,7 +19,7 @@
     "cassiopeia": "^5.4.0",
     "cepheus": "workspace:*",
     "devalue": "^5.1.1",
-    "hono": "^4.6.20",
+    "hono": "^4.7.0",
     "lodash-es": "^4.17.21",
     "pinia": "^2.3.1",
     "seedpods": "^1.1.1",
