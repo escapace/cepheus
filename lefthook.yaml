@@ -21,7 +21,7 @@ pre-commit:
     knip:
       glob: '{package.json,**/package.json,pnpm-lock.yaml}'
       priority: 1
-      run: pnpm exec knip --no-config-hints
+      run: pnpm exec knip --no-config-hints && bash -c 'for file in packages/*/knip.json; do cd "$(dirname "${file}")" && pnpm exec knip --no-config-hints; done;'
 
     ls-lint:
       priority: 1
