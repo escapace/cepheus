@@ -15,8 +15,8 @@ importers:
         specifier: 19.7.1
         version: 19.7.1
       '@escapace/pnpm-pack':
-        specifier: 0.5.4
-        version: 0.5.4(@pnpm/logger@5.2.0)
+        specifier: 0.6.0
+        version: 0.6.0(@pnpm/logger@5.2.0)
       '@ls-lint/ls-lint':
         specifier: 2.2.3
         version: 2.2.3
@@ -118,8 +118,8 @@ importers:
         specifier: 2.2.3
         version: 2.2.3
       '@pointe/types':
-        specifier: 5.13.2
-        version: 5.13.2(vite@6.1.1(@types/node@22.13.4)(jiti@2.4.2)(sass@1.85.0)(tsx@4.19.3)(yaml@2.7.0))
+        specifier: 5.13.4
+        version: 5.13.4(vite@6.1.1(@types/node@22.13.4)(jiti@2.4.2)(sass@1.85.0)(tsx@4.19.3)(yaml@2.7.0))
       '@types/lodash-es':
         specifier: 4.17.12
         version: 4.17.12
@@ -142,8 +142,8 @@ importers:
         specifier: 0.3.0
         version: 0.3.0
       pointe:
-        specifier: 5.13.2
-        version: 5.13.2(vite@6.1.1(@types/node@22.13.4)(jiti@2.4.2)(sass@1.85.0)(tsx@4.19.3)(yaml@2.7.0))
+        specifier: 5.13.4
+        version: 5.13.4(vite@6.1.1(@types/node@22.13.4)(jiti@2.4.2)(sass@1.85.0)(tsx@4.19.3)(yaml@2.7.0))
       prettier:
         specifier: 3.5.1
         version: 3.5.1
@@ -721,6 +721,7 @@ packages:
 
   '@effect/schema@0.75.5':
     resolution: {integrity: sha512-TQInulTVCuF+9EIbJpyLP6dvxbQJMphrnRqgexm/Ze39rSjfhJuufF7XvU3SxTgg3HnL7B/kpORTJbHhlE6thw==}
+    deprecated: this package has been merged into the main effect package
     peerDependencies:
       effect: ^3.9.2
 
@@ -1177,9 +1178,9 @@ packages:
     resolution: {integrity: sha512-Yz/kFZGVWTx2KcxKl5bf0nPNoksxzTMudztheiG74gYZDFzkg26Zluvv7F7r55M/91+HDqy8SChXy90drLt7UQ==}
     engines: {pnpm: '>=9.14.4'}
 
-  '@escapace/pnpm-pack@0.5.4':
-    resolution: {integrity: sha512-HiCiEaLLVfn+f8tQn0cLfLWOjTv47ktGQCkhWN1dcB6IGF0svvEfrrcOrs4nT3nJVQquOl1Ib+DJ0aDEjWCu4g==}
-    engines: {node: '>=22.11.0', pnpm: '>=9.14.4'}
+  '@escapace/pnpm-pack@0.6.0':
+    resolution: {integrity: sha512-ZkIbwXm7SpUu17Ju/GpZ37OD5nSN0g4uE9a9rgHVL+IQcqykSiJHJyEUFA0UyJhE6TaOgBKtBO73BE+gONqRIQ==}
+    engines: {node: '>=22.13.1', pnpm: '>=10.4.1'}
     hasBin: true
 
   '@escapace/typelevel@2.0.2':
@@ -1656,15 +1657,15 @@ packages:
     resolution: {integrity: sha512-ead+l3IiuVXwKDf/QJPX6G93cwhXki3yOVEA/VdAO7AhZ5vUuSBxHe6gQKEbB0QacJ4H5VsYxeM1xUgwjjOO/Q==}
     engines: {node: '>=18.12'}
 
-  '@pointe/plugin-write-assets@5.13.2':
-    resolution: {integrity: sha512-mCTFhfeVwdqkO1BWM6t+Qijolst04/lQEqml3rQXUIo5Jbnp78UI9VoVEdi//FKptVgYHHAZ0Rx+XWWPP2lsOQ==}
-    engines: {node: '>=22.13.1', pnpm: '>=9.15.4'}
+  '@pointe/plugin-write-assets@5.13.4':
+    resolution: {integrity: sha512-QMiC5pRPzNUBKMW4XPIY1MggUGTJY71BN323+3FhWAfN4a+wNKac2tW/DLb3MoHWAhSTAEYUr1m2w3ofGoHAgA==}
+    engines: {node: '>=22.13.1', pnpm: '>=10.4.1'}
 
-  '@pointe/types@5.13.2':
-    resolution: {integrity: sha512-63fblJ+EA8/vrOrwSjSi1QxDrup5lrJIX8XLXEdBnnyv/g1xAMZk47gtNJntGP21OFEIkpK2dXeyEqfpJ3ezVg==}
-    engines: {pnpm: '>=9.15.4'}
+  '@pointe/types@5.13.4':
+    resolution: {integrity: sha512-yT0YLBDPtqPd2ipJ7cpXbDMTNdUh7B1kvRnL3dLTSdHoPvBR1qxdCKHR1OBcMDnMkzCMOernenB6bPvAJxznLw==}
+    engines: {pnpm: '>=10.4.1'}
     peerDependencies:
-      vite: '>=6.1.0'
+      vite: '>=6.1.1'
 
   '@polka/url@1.0.0-next.28':
     resolution: {integrity: sha512-8LduaNlMZGwdZ6qWrKlfa+2M4gahzFkprZiAt2TF8uS0qQgBizKXpXURqvTJ4WtmupWxaLqjRb2UCTe72mu+Aw==}
@@ -3867,9 +3868,9 @@ packages:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
     engines: {node: '>=4'}
 
-  pointe@5.13.2:
-    resolution: {integrity: sha512-xrMrGg9qZIiWcAttvY74HMd2iMzQTbHOTglRZZCUTckFNB56/tFunH1mMen+qn+kdO0036+1s/fbysJsgcnvqw==}
-    engines: {node: '>=22.13.1', pnpm: '>=9.15.4'}
+  pointe@5.13.4:
+    resolution: {integrity: sha512-s6OuZ7QyAY46UC0EUkPbTMPUsybI4OabcgebiqwmsrH5bRlQTHh7OYXHEaesNzz8roSyIZhsAyeie51xk1PpbQ==}
+    engines: {node: '>=22.13.1', pnpm: '>=10.4.1'}
     hasBin: true
 
   postcss-selector-parser@6.1.2:
@@ -5278,7 +5279,7 @@ snapshots:
 
   '@escapace/minimum-perimeter-triangle@0.2.6': {}
 
-  '@escapace/pnpm-pack@0.5.4(@pnpm/logger@5.2.0)':
+  '@escapace/pnpm-pack@0.6.0(@pnpm/logger@5.2.0)':
     dependencies:
       '@pnpm/lockfile-file': 9.1.3(@pnpm/logger@5.2.0)
       arg: 5.0.2
@@ -5771,9 +5772,9 @@ snapshots:
 
   '@pnpm/util.lex-comparator@3.0.0': {}
 
-  '@pointe/plugin-write-assets@5.13.2': {}
+  '@pointe/plugin-write-assets@5.13.4': {}
 
-  '@pointe/types@5.13.2(vite@6.1.1(@types/node@22.13.4)(jiti@2.4.2)(sass@1.85.0)(tsx@4.19.3)(yaml@2.7.0))':
+  '@pointe/types@5.13.4(vite@6.1.1(@types/node@22.13.4)(jiti@2.4.2)(sass@1.85.0)(tsx@4.19.3)(yaml@2.7.0))':
     dependencies:
       vite: 6.1.1(@types/node@22.13.4)(jiti@2.4.2)(sass@1.85.0)(tsx@4.19.3)(yaml@2.7.0)
 
@@ -8176,11 +8177,11 @@ snapshots:
 
   pluralize@8.0.0: {}
 
-  pointe@5.13.2(vite@6.1.1(@types/node@22.13.4)(jiti@2.4.2)(sass@1.85.0)(tsx@4.19.3)(yaml@2.7.0)):
+  pointe@5.13.4(vite@6.1.1(@types/node@22.13.4)(jiti@2.4.2)(sass@1.85.0)(tsx@4.19.3)(yaml@2.7.0)):
     dependencies:
       '@pnpm/read-package-json': 1000.0.3
-      '@pointe/plugin-write-assets': 5.13.2
-      '@pointe/types': 5.13.2(vite@6.1.1(@types/node@22.13.4)(jiti@2.4.2)(sass@1.85.0)(tsx@4.19.3)(yaml@2.7.0))
+      '@pointe/plugin-write-assets': 5.13.4
+      '@pointe/types': 5.13.4(vite@6.1.1(@types/node@22.13.4)(jiti@2.4.2)(sass@1.85.0)(tsx@4.19.3)(yaml@2.7.0))
       arg: 5.0.2
       body-parser: 1.20.3(supports-color@10.0.0)
       builtin-modules: 4.0.0
