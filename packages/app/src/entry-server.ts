@@ -91,7 +91,7 @@ export const createApp = async (options: Options = POINTE_OPTIONS) => {
 
     const context: SSRContext = {
       cepheus: {
-        darkMode: preferences === undefined ? 'media' : 'class',
+        colorSchemeStrategy: preferences === undefined ? 'media' : 'class',
         preferences,
       },
     }

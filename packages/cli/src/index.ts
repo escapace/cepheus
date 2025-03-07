@@ -27,6 +27,17 @@ export {
   type CepheusStateOptimizationDone,
 } from './types'
 
+import { ColorSpace, HSL, HSV, LCH, OKLab, OKLCH, OKLrCH, P3, sRGB } from 'colorjs.io/fn'
+
+ColorSpace.register(HSL)
+ColorSpace.register(HSV)
+ColorSpace.register(P3)
+ColorSpace.register(OKLab)
+ColorSpace.register(OKLCH)
+ColorSpace.register(OKLrCH)
+ColorSpace.register(sRGB)
+ColorSpace.register(LCH)
+
 export interface CepheusOptions extends StoreOptions {
   initialState?: Record<string, OptimizeTask>
 }
@@ -41,6 +52,7 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
 
   const pool = new Tinypool({
     filename: new URL('./worker.js', import.meta.url).href,
+    runtime: 'child_process',
   })
 
   const abortController = new AbortController()
@@ -48,6 +60,8 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
 
   const runTasks = async () => {
     const tasks = selectorOptimizeTasksPending(store)
+
+    await pool.recycleWorkers()
 
     await Promise.all(
       map(Object.entries(tasks), async ([key, task]) => {
@@ -69,9 +83,9 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
     .then(async () => {
       for (const iteration of range(store.options.iterations)) {
         actionCreateOptimizeTasks(store, iteration)
-      }
 
-      await runTasks()
+        await runTasks()
+      }
 
       if (Array.from(selectorSquares(store)).length === 0) {
         throw new Error('No squares available.')

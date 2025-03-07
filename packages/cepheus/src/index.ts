@@ -9,7 +9,7 @@ export { isModel } from './is-model'
 export { parse } from './parse'
 export { chroma, darkMode, lightness, model } from './setters'
 export { subscribe } from './subscribe'
-export { ColorSpace } from './types'
+export { ColorGamut } from './types'
 export type {
   Interpolator,
   Model,

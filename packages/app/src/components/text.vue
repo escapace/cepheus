@@ -141,6 +141,6 @@
 
 <style scoped>
 .text-container {
-  background-color: var(---color-1-0-1023);
+  background-color: var(---color-1-0-254);
 }
 </style>

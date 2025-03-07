@@ -4,14 +4,14 @@ import { intersection } from './intersection'
 import { lerpArray } from './lerp-array'
 
 export const lightness1 = (p0: Point, p1: Point, state: Pick<State, 'lightness'>) =>
-  lerpArray(p0, p1, state.lightness[1]) as Point
+  lerpArray(p0, p1, state.lightness.max) as Point
 export const lightness0 = (p0: Point, p1: Point, state: Pick<State, 'lightness'>) =>
-  lerpArray(p1, p0, 1 - state.lightness[0]) as Point
+  lerpArray(p1, p0, 1 - state.lightness.min) as Point
 export const chroma1 = (x0: Point, v1: Point, state: Pick<State, 'chroma'>) =>
-  lerpArray(x0, v1, state.chroma[1]) as Point
+  lerpArray(x0, v1, state.chroma.max) as Point
 
 export const chroma0 = (x0: Point, triangle: Triangle, state: Pick<State, 'chroma'>) => {
-  const x1 = lerpArray(x0, triangle[1], state.chroma[0]) as Point
+  const x1 = lerpArray(x0, triangle[1], state.chroma.min) as Point
 
   let p0: Point
   let p1: Point

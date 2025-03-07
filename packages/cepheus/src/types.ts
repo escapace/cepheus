@@ -4,13 +4,13 @@ export type Line = [Point, Point]
 export type Point = [x: number, y: number]
 export type Triangle = [Point, Point, Point]
 
-export enum ColorSpace {
+export enum ColorGamut {
   p3 = 1,
   srgb = 0,
 }
 
 export type ModelUnparsed = [
-  colorSpace: number,
+  colorGamut: number,
   interval: number,
   length: number,
   triangle: [...Point, ...Point, ...Point],
@@ -19,8 +19,8 @@ export type ModelUnparsed = [
 ]
 
 export interface Model {
+  colorGamut: ColorGamut
   colors: Map<number, Array<[number, number, number]>>
-  colorSpace: ColorSpace
   interval: number
   length: number
   squares: number[]
@@ -33,9 +33,9 @@ export type Subscription = () => unknown | Promise<unknown>
 export type Unsubscribe = () => unknown
 
 export interface State {
-  chroma: [low: number, high: number]
+  chroma: { max: number; min: number }
   darkMode: boolean
-  lightness: [low: number, high: number]
+  lightness: { max: number; min: number }
   model: Model
 }
 

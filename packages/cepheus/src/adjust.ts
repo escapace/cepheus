@@ -2,10 +2,10 @@ import type { Model, State, Triangle } from './types'
 import { chroma0, chroma1, getX0, lightness0, lightness1 } from './utilities/calculations'
 
 export const adjust = (model: Model, options: Partial<State> = {}): Model => {
-  if (Array.isArray(options?.lightness) || Array.isArray(options?.chroma)) {
+  if (options?.lightness !== undefined || options?.chroma !== undefined) {
     const state = {
-      chroma: options.chroma ?? [0, 1],
-      lightness: options.lightness ?? [0, 1],
+      chroma: options.chroma ?? { max: 1, min: 0 },
+      lightness: options.lightness ?? { max: 1, min: 0 },
     }
 
     const x0 = getX0(model.triangle)

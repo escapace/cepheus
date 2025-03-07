@@ -8,22 +8,21 @@
   },
   "bugs": "https://github.com/escapace/cepheus/issues",
   "dependencies": {
-    "@texel/color": "^1.1.9",
     "cepheus": "workspace:*"
   },
   "devDependencies": {
     "@ls-lint/ls-lint": "2.2.3",
-    "@types/node": "22.13.5",
+    "@types/node": "22.13.9",
     "@vitest/coverage-v8": "3.0.7",
     "eslint": "9.21.0",
-    "eslint-config-escapace": "5.4.6",
+    "eslint-config-escapace": "5.5.1",
     "esroll": "0.4.1",
     "jsdom": "26.0.0",
-    "prettier": "3.5.2",
+    "prettier": "3.5.3",
     "prettier-config-escapace": "1.2.1",
     "syncpack": "13.0.2",
     "tsx": "4.19.3",
-    "typescript": "5.7.3",
+    "typescript": "5.8.2",
     "vitest": "3.0.7"
   },
   "engines": {
@@ -60,7 +59,8 @@
   "homepage": "https://github.com/escapace/cepheus/tree/trunk/packages/plugin#readme",
   "license": "MPL-2.0",
   "peerDependencies": {
-    "cassiopeia": ">=5.4.1"
+    "@texel/color": ">=1.1.9",
+    "cassiopeia": ">=5.5.0"
   },
   "private": false,
   "publishConfig": {

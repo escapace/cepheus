@@ -90,36 +90,36 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 
 <style>
 body {
-  background-color: var(---color-1-998-20);
+  background-color: var(---color-primary-250-5);
   text-rendering: optimizeLegibility;
   text-rendering: geometricPrecision;
 }
 
 .menu-button {
-  color: var(---color-1-998-20);
-  background-color: var(---color-2-20-20);
+  color: var(---color-primary-254-1);
+  background-color: var(---color-2-20-5);
   border: var(---color-2-50-20);
   border-radius: 5px;
   border-style: solid;
 }
 
 .menu-items {
-  border: var(---color-2-20-20);
-  border-color: var(---color-2-20-20);
+  border: var(---color-2-5-5);
+  border-color: var(---color-2-5-5);
   border-style: solid;
-  background-color: var(---color-1-993-20);
+  background-color: var(---color-primary-249-5);
   color: var(---color-2-20-20);
 }
 
 .menu-items a {
   color: var(---color-2-20-20);
-  border-color: var(---color-2-20-20);
+  border-color: var(---color-2-5-5);
   text-decoration: none;
 }
 
 .menu-wrapper {
   z-index: 1;
-  background-color: var(---color-1-980-20);
-  color: var(---color-2-20-20);
+  background-color: var(---color-primary-254-5);
+  color: var(---color-2-5-5);
 }
 </style>

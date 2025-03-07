@@ -1,16 +1,5 @@
-import { ColorSpace, normalizeAngle } from 'cepheus'
-import {
-  ColorSpace as _ColorSpace,
-  to as convert,
-  HSL,
-  HSV,
-  LCH,
-  OKLab,
-  OKLCH,
-  P3,
-  parse,
-  sRGB,
-} from 'colorjs.io/fn'
+import { ColorGamut, normalizeAngle } from 'cepheus'
+import { to as convert, OKLCH, OKLrCH, parse } from 'colorjs.io/fn'
 import { isInteger, isString, omit } from 'lodash-es'
 import {
   DEFAULT_HUE_ANGLE,
@@ -25,19 +14,14 @@ import type { RequiredStoreOptions, StoreOptions } from '../types'
 import { fixNaN } from '../utilities/fix-nan'
 
 export function createStoreOptions(options: StoreOptions): RequiredStoreOptions {
-  _ColorSpace.register(HSL)
-  _ColorSpace.register(HSV)
-  _ColorSpace.register(P3)
-  _ColorSpace.register(OKLab)
-  _ColorSpace.register(OKLCH)
-  _ColorSpace.register(sRGB)
-  _ColorSpace.register(LCH)
+  const colorSpace = options.colorSpace ?? 'oklrch'
+
   const colors = options.colors.map((colors) =>
     colors.map((value) =>
       fixNaN(
         convert(
           isString(value) ? parse(value) : { alpha: 1, coords: [...value], space: OKLCH },
-          OKLCH,
+          colorSpace === 'oklch' ? OKLCH : OKLrCH,
           {
             inGamut: true,
           },
@@ -57,7 +41,7 @@ export function createStoreOptions(options: StoreOptions): RequiredStoreOptions 
     throw new Error(`'iterations' must be an integer greater or equal to 1`)
   }
 
-  const colorSpace = (options.colorSpace ?? 'p3') === 'p3' ? ColorSpace.p3 : ColorSpace.srgb
+  const colorGamut = (options.colorGamut ?? 'p3') === 'p3' ? ColorGamut.p3 : ColorGamut.srgb
 
   const hueAngle =
     options.hueAngle === undefined ? DEFAULT_HUE_ANGLE : normalizeAngle(options.hueAngle)
@@ -66,6 +50,7 @@ export function createStoreOptions(options: StoreOptions): RequiredStoreOptions 
 
   return {
     ...omit(options, ['levels']),
+    colorGamut,
     colors,
     colorSpace,
     hueAngle,

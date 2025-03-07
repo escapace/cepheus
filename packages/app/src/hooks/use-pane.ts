@@ -20,8 +20,6 @@ export const usePane = () => {
     pane.addBinding(store, 'contrast', { max: 1, min: 0, step: 0.01 })
     pane.addBinding(store, 'darkMode', { label: 'dark mode' })
 
-    pane.addBinding(store, 'modelState', { label: 'state', readonly: true })
-
     onUnmounted(
       store.$subscribe(() => {
         pane.refresh()

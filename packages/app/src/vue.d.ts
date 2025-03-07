@@ -6,7 +6,7 @@ declare module 'vue/server-renderer' {
   export interface SSRContext {
     cepheus?: {
       preferences?: Preferences
-    } & Omit<CepheusOptions, 'state'>
+    } & Pick<CepheusOptions, 'colorSchemeStrategy'>
     modules?: string[]
     teleports?: Record<string, string>
   }

@@ -1,9 +1,12 @@
-import type { ColorSpace } from 'cepheus'
+import type { ColorGamut } from 'cepheus'
+import type { ColorSpace } from 'colorjs.io/fn'
 import type { DeepRequired } from 'utility-types'
 import type { PRNG, PRNGName } from './utilities/create-prng'
 export type { PRNG, PRNGName }
 
 export type Square = number
+
+type ColorSpaceLiteral = 'oklch' | 'oklrch'
 
 export interface OptimizeTask<T extends OptimizationState = OptimizationState> {
   options: OptimizeTaskOptions
@@ -51,6 +54,7 @@ export interface StoreOptions
     OptimizeOptions,
     | 'background'
     | 'chroma'
+    | 'colorGamut'
     | 'colors'
     | 'colorSpace'
     | 'hueAngle'
@@ -59,7 +63,8 @@ export interface StoreOptions
     | 'weights'
   > {
   colors: Array<Array<[number, number, number]> | string[]>
-  colorSpace?: 'p3' | 'srgb'
+  colorGamut?: 'p3' | 'srgb'
+  colorSpace?: ColorSpaceLiteral
   hueAngle?: OptimizeOptions['hueAngle']
   iterations?: number
   levels?: number
@@ -70,10 +75,11 @@ export interface StoreOptions
 export interface RequiredStoreOptions
   extends Omit<
     StoreOptions,
-    'colors' | 'colorSpace' | 'hueAngle' | 'levels' | 'precision' | 'weights'
+    'colorGamut' | 'colors' | 'colorSpace' | 'hueAngle' | 'levels' | 'precision' | 'weights'
   > {
+  colorGamut: ColorGamut
   colors: Array<Array<[number, number, number]>>
-  colorSpace: ColorSpace
+  colorSpace: ColorSpaceLiteral
   hueAngle: OptimizeOptions['hueAngle']
   interval: number
   iterations: number
@@ -87,8 +93,9 @@ export interface OptimizeTaskOptions extends OptimizeOptions {
 
 export interface OptimizeOptions {
   background: Array<[number, number, number]>
+  colorGamut: ColorGamut
   colors: Array<Array<[number, number, number]>>
-  colorSpace: ColorSpace
+  colorSpace: ColorSpaceLiteral
   hueAngle: number
   randomSeed: string
   weights: {
@@ -136,11 +143,15 @@ export interface OptimizeOptions {
 
 export type RequiredOptimizeOptions = {
   background: Array<[number, number, number]>
+  colorGamut: ColorGamut
   colors: Array<Array<[number, number, number]>>
   colorSpace: ColorSpace
   prng: PRNG
 } & DeepRequired<
-  Omit<OptimizeOptions, 'background' | 'colors' | 'colorSpace' | 'randomSeed' | 'randomSource'>
+  Omit<
+    OptimizeOptions,
+    'background' | 'colorGamut' | 'colors' | 'colorSpace' | 'randomSeed' | 'randomSource'
+  >
 >
 
 export const enum TypeOptimizationState {

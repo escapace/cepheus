@@ -32,6 +32,7 @@ export function actionCreateOptimizeTasks(store: Store, iteration: number, optio
           options.squares.get(square)!
 
     const optimizeTaskOptions: OptimizeTaskOptions = {
+      colorGamut: store.options.colorGamut,
       colors: store.options.colors,
       colorSpace: store.options.colorSpace,
       hueAngle: normalizeAngle(options.hueAngle ?? store.options.hueAngle),

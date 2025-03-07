@@ -1,7 +1,7 @@
 import { cassiopeia } from '@cassiopeia/vite'
 import vue from '@vitejs/plugin-vue'
 import unocss from 'unocss/vite'
-import { defineConfig, splitVendorChunkPlugin } from 'vite'
+import { defineConfig } from 'vite'
 
 export default defineConfig(() => ({
   build: {
@@ -19,5 +19,8 @@ export default defineConfig(() => ({
   define: {
     __VUE_OPTIONS_API__: 'false',
   },
-  plugins: [vue(), unocss(), cassiopeia(), splitVendorChunkPlugin()],
+  plugins: [vue(), unocss(), cassiopeia()],
+  server: {
+    allowedHosts: true as const,
+  },
 }))

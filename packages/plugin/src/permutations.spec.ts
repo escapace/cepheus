@@ -39,4 +39,21 @@ describe('src/permutations.spec.ts', () => {
       { x: 3, y: 'b', z: 30 },
     ])
   })
+
+  it('generates permutations', () => {
+    const object = {
+      x: [1, 2, 3],
+      y: ['a', undefined],
+    }
+    const combos = permutations(object)
+
+    assert.deepEqual(combos, [
+      { x: 1, y: 'a' },
+      { x: 2, y: 'a' },
+      { x: 3, y: 'a' },
+      { x: 1, y: undefined },
+      { x: 2, y: undefined },
+      { x: 3, y: undefined },
+    ])
+  })
 })

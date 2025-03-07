@@ -2,14 +2,14 @@
 
 import arg from 'arg'
 import chalk from 'chalk'
+import { isError, isInteger, isString, map, repeat, throttle } from 'lodash-es'
 import { readFileSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
-import { isError, isInteger, isString, map, repeat, throttle } from 'lodash-es'
-import ora from 'ora'
 import path, { resolve } from 'node:path'
 import { promisify } from 'node:util'
 import { gzip } from 'node:zlib'
-import { DEFAULT_ITERATIONS, DEFAULT_N_DIVISOR, N_DIVISORS, DEFAULT_PRECISION } from './constants'
+import ora from 'ora'
+import { DEFAULT_ITERATIONS, DEFAULT_N_DIVISOR, DEFAULT_PRECISION, N_DIVISORS } from './constants'
 import { selectorModel } from './store/selector-model'
 import {
   selectorOptimizeTasksCount,
@@ -30,7 +30,7 @@ const compress = promisify(gzip)
 
 const HELP = `${chalk.bold('Usage:')}
   cepheus --seed <string> (--color <color>)...
-        [--color-space p3|srgb] [--prng xoshiro128++|xorwow|xorshift128|sfc32]
+        [--color-gamut p3|srgb] [--color-space oklch|oklrch] [--prng xoshiro128++|xorwow|xorshift128|sfc32]
         [--iterations <number>] [--levels ${N_DIVISORS.join('|')}]
         [--restore <file>] [--save <file>]
   cepheus -h | --help
@@ -40,7 +40,8 @@ ${chalk.bold('Options:')}
   --seed          Pseudorandom number generator seed.
   --color         Foreground color.
   --output        Write output palette model to file.
-  --color-space   Ensure that colors are inside the color space gamut. [default: p3]
+  --color-gamut   Ensure that colors are inside the color gamut. [default: p3]
+  --color-space   Preferred iteration color space. [default: oklrch]
   --hue-angle     Hue angle for each sampling step. [default: 30]
   --prng          Pseudorandom number generator. [default: xoshiro128++]
   --levels        Number of uniform sampling steps along each square axis. [default: ${DEFAULT_N_DIVISOR}]
@@ -61,6 +62,7 @@ const run = async () => {
   const arguments_ = arg(
     {
       '--color': [String],
+      '--color-gamut': String,
       '--color-space': String,
       '--help': Boolean,
       '--hue-angle': Number,
@@ -93,7 +95,8 @@ const run = async () => {
     process.exit(0)
   }
 
-  const colorSpace = arguments_['--color-space'] as 'p3' | 'srgb' | undefined
+  const colorGamut = arguments_['--color-gamut'] as 'p3' | 'srgb' | undefined
+  const colorSpace = arguments_['--color-space'] as 'oklch' | 'oklrch' | undefined
   const colors = arguments_['--color']
   const levels = arguments_['--levels']
   const randomSource = arguments_['--prng'] as
@@ -130,9 +133,15 @@ const run = async () => {
 
   // optional
 
-  if (colorSpace !== undefined && !['p3', 'srgb'].includes(colorSpace)) {
+  if (colorGamut !== undefined && !['p3', 'srgb'].includes(colorGamut)) {
     console.log(HELP)
-    console.error(`Option '--color-space' must be either 'p3' or 'srgb'.`)
+    console.error(`Option '--color-gamut' must be either 'p3' or 'srgb'.`)
+    process.exit(1)
+  }
+
+  if (colorSpace !== undefined && !['oklch', 'oklrch'].includes(colorSpace)) {
+    console.log(HELP)
+    console.error(`Option '--color-gamut' must be either 'oklch' or 'oklrch'.`)
     process.exit(1)
   }
 
@@ -192,6 +201,7 @@ const run = async () => {
   const spinner = ora({ text: 'Preparing' }).start()
 
   const instance = cepheus({
+    colorGamut,
     colors: map(colors, (colors) => colors.split(',').map((value) => value.trim())),
     colorSpace,
     hueAngle,

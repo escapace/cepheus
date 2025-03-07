@@ -66,15 +66,15 @@ const createEvents = (): Data['events'] => {
     const bc = random.minmaxInt(0, 4)
 
     const bg = cassiopeia.add(
-      `---color-${bc}-${random.minmaxInt(50, 100)}-${random.minmaxInt(600, 700)}`,
+      `---color-${bc}-${random.minmaxInt(12, 25)}-${random.minmaxInt(150, 175)}`,
     )
 
     const textColor = cassiopeia.add(
-      `---invert-${random.minmaxInt(0, 3)}-${random.minmaxInt(0, 20)}-${random.minmaxInt(0, 20)}`,
+      `---invert-${random.minmaxInt(0, 3)}-${random.minmaxInt(0, 5)}-${random.minmaxInt(0, 5)}`,
     )
 
     const borderColor = cassiopeia.add(
-      `---color-${random.minmaxInt(0, 3)}-${random.minmaxInt(900, 999)}-${random.minmaxInt(900, 999)}-95`,
+      `---color-${random.minmaxInt(0, 3)}-${random.minmaxInt(225, 249)}-${random.minmaxInt(225, 249)}-95`,
     )
 
     return {
@@ -246,13 +246,13 @@ $days-height: 3rem;
 $time-width: 3rem;
 $time-height: 3rem;
 $calendar-template: $time-width 0.625rem repeat(7, 1fr);
-$current-time-color: var(---color-3-999-999);
-$grid-color: var(---color-2-900-0);
-$background-weekday: var(---color-primary-990-20);
-$background-weekend: var(---color-primary-980-75);
+$current-time-color: var(---color-3-254-254);
+$grid-color: var(---color-2-225-0);
+$background-weekday: var(---color-primary-252-5);
+$background-weekend: var(---color-primary-249-9);
 
-$header-color: var(---color-primary-900-25);
-$subheader-color: var(---color-primary-900-20);
+$header-color: var(---color-primary-250-8);
+$subheader-color: var(---color-primary-253-15);
 
 * {
   transition: background-color 30ms linear;
@@ -277,7 +277,7 @@ $subheader-color: var(---color-primary-900-20);
   top: $title-height;
   border-bottom: 0.125rem solid $header-color;
   background-color: $subheader-color;
-  color: var(---color-2-2-100);
+  color: var(---color-2-2-25);
 }
 
 .day {
@@ -298,7 +298,7 @@ $subheader-color: var(---color-primary-900-20);
   font-size: 80%;
   position: relative;
   bottom: -1ex;
-  color: var(---color-3-100-1);
+  color: var(---color-3-25-1);
   padding-right: 0.125rem;
 }
 

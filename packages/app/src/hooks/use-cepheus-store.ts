@@ -1,34 +1,14 @@
-/* eslint-disable vue/no-ref-object-reactivity-loss */
-/* eslint-disable typescript/no-non-null-assertion */
 import { createCepheus as _createCepheus, type Cepheus } from '@cepheus/vue'
-import {
-  lerp,
-  chroma as updateChroma,
-  darkMode as updateDarkMode,
-  lightness as updateLightness,
-  model as updateModel,
-  type Model,
-} from 'cepheus'
+import { computedAsync } from '@vueuse/core'
+import { lerp } from 'cepheus'
 import { throttle } from 'lodash-es'
-import { defineStore, skipHydrate } from 'pinia'
+import { defineStore } from 'pinia'
 import type { Preferences } from 'src/types'
 import { computed, ref, watch } from 'vue'
 import type { SSRContext } from 'vue/server-renderer'
 
 const MAX = 0.25
 const MIN = 0.1
-
-const enum ModelState {
-  Active = 'active',
-  Pending = 'pending',
-}
-
-const importModel = async (model: Preferences['model']): Promise<Model> => {
-  const value =
-    model === 'one' ? await import('../models/model-one') : await import('../models/model-two')
-
-  return value.model
-}
 
 export const useCepheusStore = defineStore('cepheus', () => {
   const chroma = ref(1)
@@ -45,8 +25,7 @@ export const useCepheusStore = defineStore('cepheus', () => {
           ? 0.5
           : 0.75,
   )
-  const model = ref<Preferences['model']>('one')
-  const modelState = ref<ModelState>(ModelState.Pending)
+  const modelName = ref<Preferences['model']>('one')
   let cepheus: Cepheus | undefined
 
   const createCepheus = async (options?: SSRContext['cepheus']): Promise<Cepheus> => {
@@ -55,49 +34,46 @@ export const useCepheusStore = defineStore('cepheus', () => {
       lightness.value = options?.preferences?.lightness ?? lightness.value
       contrast.value = options?.preferences?.contrast ?? contrast.value
       darkMode.value = options?.preferences?.darkMode ?? darkMode.value
-      model.value = options?.preferences?.model ?? model.value
+      modelName.value = options?.preferences?.model ?? modelName.value
 
-      const cepheusChroma = computed((): [low: number, high: number] => {
+      const cepheusChroma = computed(() => {
         const low = lerp(0.025, 0, contrast.value)
 
         const high = chroma.value
 
-        return [lerp(0, low, high), high]
+        return { max: high, min: lerp(0, low, high) }
       })
 
-      const cepheusLightness = computed((): [low: number, high: number] => {
+      const cepheusLightness = computed(() => {
         const l = lightness.value
         const c = lerp(MAX, MIN, contrast.value) /*  - lerp(0, MIN, l) */
 
-        return [lerp(0, c, l), lerp(1 - c, 1, l)]
+        return { max: lerp(1 - c, 1, l), min: lerp(0, c, l) }
       })
+
+      const model = computedAsync(
+        async () => {
+          const value =
+            modelName.value === 'one'
+              ? await import('../models/model-one')
+              : await import('../models/model-two')
+
+          return value.model
+        },
+        (modelName.value === 'one'
+          ? await import('../models/model-one')
+          : await import('../models/model-two')
+        ).model,
+        { lazy: true },
+      )
 
       cepheus = _createCepheus({
-        darkMode: options?.darkMode,
-        flags: options?.flags,
-        state: {
-          chroma: cepheusChroma.value,
-          darkMode: darkMode.value,
-          lightness: cepheusLightness.value,
-          model: await importModel(model.value),
-        },
+        ...options,
+        chroma: cepheusChroma,
+        darkMode,
+        lightness: cepheusLightness,
+        model,
       })
-
-      modelState.value = ModelState.Active
-
-      watch(model, async (value) => {
-        modelState.value = ModelState.Pending
-
-        void updateModel(cepheus!.interpolator, await importModel(value)).then(
-          () => (modelState.value = ModelState.Active),
-        )
-      })
-
-      watch(cepheusLightness, (value) => void updateLightness(cepheus!.interpolator, ...value))
-
-      watch(cepheusChroma, (value) => void updateChroma(cepheus!.interpolator, ...value))
-
-      watch(darkMode, (value) => void updateDarkMode(cepheus!.interpolator, value))
 
       const update = throttle(
         () => {
@@ -106,7 +82,7 @@ export const useCepheusStore = defineStore('cepheus', () => {
             contrast: contrast.value,
             darkMode: darkMode.value,
             lightness: lightness.value,
-            model: model.value,
+            model: modelName.value,
           }
 
           void fetch('/preferences', {
@@ -123,7 +99,7 @@ export const useCepheusStore = defineStore('cepheus', () => {
       )
 
       if (!import.meta.env.SSR) {
-        watch([lightness, chroma, contrast, darkMode, model], update, {
+        watch([lightness, chroma, contrast, darkMode, modelName], update, {
           immediate: true,
         })
 
@@ -143,7 +119,6 @@ export const useCepheusStore = defineStore('cepheus', () => {
     createCepheus,
     darkMode,
     lightness,
-    model,
-    modelState: skipHydrate(modelState),
+    model: modelName,
   }
 })

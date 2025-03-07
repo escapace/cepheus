@@ -29,17 +29,22 @@ export const createInterpolator = (options: Options): Interpolator => {
 
   let { p0, p1, state, x0 } = changeModel(
     {
-      chroma: options.chroma === undefined ? [0, 1] : [options.chroma[0], options.chroma[1]],
+      chroma:
+        options.chroma === undefined
+          ? { max: 1, min: 0 }
+          : { max: options.chroma.max, min: options.chroma.min },
       darkMode: options.darkMode ?? false,
       lightness:
-        options.lightness === undefined ? [0, 1] : [options.lightness[0], options.lightness[1]],
+        options.lightness === undefined
+          ? { max: 1, min: 0 }
+          : { max: options.lightness.max, min: options.lightness.min },
       model: options.model,
     },
     triangle,
   )
 
-  const updateModel = async (model: Model) => {
-    if (state.model !== model) {
+  const updateModel = async (model?: Model) => {
+    if (model !== undefined && state.model !== model) {
       const properties = changeModel(state, triangle, model)
 
       x0 = properties.x0
@@ -53,8 +58,8 @@ export const createInterpolator = (options: Options): Interpolator => {
   const updateChroma = async (a?: number, b?: number) => {
     let changed = false
 
-    if (a !== undefined && a !== state.chroma[0]) {
-      state.chroma[0] = a
+    if (a !== undefined && a !== state.chroma.min) {
+      state.chroma.min = a
       const temporary = chroma0(x0, state.model.triangle, state)
       p0 = temporary.p0
       p1 = temporary.p1
@@ -63,8 +68,8 @@ export const createInterpolator = (options: Options): Interpolator => {
       changed = true
     }
 
-    if (b !== undefined && b !== state.chroma[1]) {
-      state.chroma[1] = b
+    if (b !== undefined && b !== state.chroma.max) {
+      state.chroma.max = b
       triangle[1] = chroma1(x0, state.model.triangle[1], state)
       changed = true
     }
@@ -77,14 +82,14 @@ export const createInterpolator = (options: Options): Interpolator => {
   const updateLightness = async (a?: number, b?: number) => {
     let changed = false
 
-    if (b !== undefined && b !== state.lightness[1]) {
-      state.lightness[1] = b
+    if (b !== undefined && b !== state.lightness.max) {
+      state.lightness.max = b
       triangle[2] = lightness1(p0, p1, state)
       changed = true
     }
 
-    if (a !== undefined && a !== state.lightness[0]) {
-      state.lightness[0] = a
+    if (a !== undefined && a !== state.lightness.min) {
+      state.lightness.min = a
       triangle[0] = lightness0(p0, p1, state)
       changed = true
     }
@@ -94,7 +99,11 @@ export const createInterpolator = (options: Options): Interpolator => {
     }
   }
 
-  const updateDarkMode = async (value: boolean) => {
+  const updateDarkMode = async (value?: boolean) => {
+    if (value === undefined) {
+      return
+    }
+
     if (value !== state.darkMode) {
       state.darkMode = value
 

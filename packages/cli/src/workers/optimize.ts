@@ -1,20 +1,15 @@
 import { type Deficiency, simulate as simulateDeficiency } from '@bjornlu/colorblind'
-import {
-  floatToByte,
-  gamutMapOKLCH,
-  sRGB as texelSRGB,
-  sRGBGamut as texelSRGBGamut,
-} from '@texel/color'
-import { ColorSpace, normalizeAngle } from 'cepheus'
+import { ColorGamut, normalizeAngle } from 'cepheus'
 import {
   type PlainColorObject,
-  ColorSpace as _ColorSpace,
+  ColorSpace,
   contrastAPCA,
-  // to as convert,
   deltaEJz,
   inGamut,
   LCH,
+  to as convert,
   OKLCH,
+  OKLrCH,
   P3,
   sRGB,
 } from 'colorjs.io/fn'
@@ -29,10 +24,12 @@ import {
 } from '../types'
 import { createPRNG } from '../utilities/create-prng'
 import { isWithin } from '../utilities/is-within'
+import { normalizeRange } from '../utilities/normalize-range'
 import { percentile } from '../utilities/percentile'
 import { randomWithin } from '../utilities/random-within'
 import { relativeDifference } from '../utilities/relative-difference'
-import { normalizeRange } from '../utilities/normalize-range'
+import { fixNaN } from '../utilities/fix-nan'
+import { clamp } from '../utilities/clamp'
 
 class IterationError extends Error {
   constructor(message: string) {
@@ -111,7 +108,7 @@ function randomColor(
   let iterations = 10_000
 
   const isInitial = temperature === undefined || referenceColor === undefined
-  const space = options.colorSpace === ColorSpace.p3 ? sRGB : P3
+  const colorGamut = options.colorGamut === ColorGamut.p3 ? sRGB : P3
 
   while (iterations !== 0) {
     let accumulator: Color | undefined
@@ -121,7 +118,7 @@ function randomColor(
       ? randomColorOneShot(options, color)
       : randomColorIterative(options, temperature, referenceColor, accumulator ?? [...color])
 
-    if (inGamut({ alpha: 1, coords: accumulator, space: OKLCH }, space)) {
+    if (inGamut({ alpha: 1, coords: accumulator, space: options.colorSpace }, colorGamut)) {
       if (!isWithin(accumulator[0], options.lightness.range[0], options.lightness.range[1])) {
         throw new Error(
           `Lightness out of range! ${JSON.stringify([
@@ -155,18 +152,28 @@ function randomColor(
 // applications requiring accurate color comparison and differentiation across diverse viewing
 // conditions.
 const distanceColorOjbect = (a: PlainColorObject, b: PlainColorObject) => deltaEJz(a, b)
-const distance = (a: Color, b: Color) =>
-  deltaEJz({ alpha: 1, coords: a, space: OKLCH }, { alpha: 1, coords: b, space: OKLCH })
+const distance = (a: Color, b: Color, space: RequiredOptimizeOptions['colorSpace']) =>
+  deltaEJz({ alpha: 1, coords: a, space }, { alpha: 1, coords: b, space })
 
-const distances = (colors: Color[], deficiency?: Deficiency): number[] => {
+const floatToByte = (value: number) => clamp(Math.round(255 * value), 0, 255)
+
+const distances = (
+  colors: Color[],
+  colorSpace: RequiredOptimizeOptions['colorSpace'],
+  deficiency?: Deficiency,
+): number[] => {
   const distances: number[] = []
 
   const convertedColors = map(colors, (color): PlainColorObject => {
     if (deficiency === undefined) {
-      return { alpha: 1, coords: color, space: OKLCH }
+      return { alpha: 1, coords: color, space: colorSpace }
     }
 
-    const sRGBColor = gamutMapOKLCH(color, texelSRGBGamut, texelSRGB)
+    const sRGBColor = fixNaN(
+      convert({ alpha: 1, coords: color, space: colorSpace }, sRGB, {
+        inGamut: { method: 'css', space: sRGB },
+      }).coords,
+    )
 
     const { b, g, r } = simulateDeficiency(
       {
@@ -205,7 +212,7 @@ const createCosts = (
   // penalize the increase in the mean distance from initial colors
   const differenceCost = mean(
     flatMap(state, (value, index) =>
-      map(options.colors[index], (initial) => distance(value, initial)),
+      map(options.colors[index], (initial) => distance(value, initial, options.colorSpace)),
     ),
   )
 
@@ -254,8 +261,8 @@ const createCosts = (
             (value) =>
               Math.abs(
                 contrastAPCA(
-                  { alpha: 1, coords: background, space: OKLCH },
-                  { alpha: 1, coords: value, space: OKLCH },
+                  { alpha: 1, coords: background, space: options.colorSpace },
+                  { alpha: 1, coords: value, space: options.colorSpace },
                 ),
               ) / 108,
           ),
@@ -264,10 +271,10 @@ const createCosts = (
     )
 
   // calculate distances under different vision conditions
-  const normalDistances = distances(state)
-  const protanopiaDistances = distances(state, 'protanopia')
-  const deuteranopiaDistances = distances(state, 'deuteranopia')
-  const tritanopiaDistances = distances(state, 'tritanopia')
+  const normalDistances = distances(state, options.colorSpace)
+  const protanopiaDistances = distances(state, options.colorSpace, 'protanopia')
+  const deuteranopiaDistances = distances(state, options.colorSpace, 'deuteranopia')
+  const tritanopiaDistances = distances(state, options.colorSpace, 'tritanopia')
 
   // penalize lower mean distances between colors (want colors to be more distinguishable)
   const normalCost = 1 - mean(normalDistances)
@@ -374,8 +381,9 @@ const normalizeOptions = (options: OptimizeOptions): RequiredOptimizeOptions => 
       },
       tolerance,
     ),
+    colorGamut: options.colorGamut,
     colors: options.colors,
-    colorSpace: options.colorSpace,
+    colorSpace: options.colorSpace === 'oklch' ? OKLCH : OKLrCH,
     hueAngle: hueAngle * tolerance,
     hyperparameters: {
       coolingRate: 0.99,
@@ -482,10 +490,11 @@ export const optimize = async (
   options: OptimizeOptions,
   // eslint-disable-next-line typescript/require-await
 ): Promise<OptimizationState> => {
-  _ColorSpace.register(LCH)
-  _ColorSpace.register(OKLCH)
-  _ColorSpace.register(sRGB)
-  _ColorSpace.register(P3)
+  ColorSpace.register(LCH)
+  ColorSpace.register(OKLCH)
+  ColorSpace.register(OKLrCH)
+  ColorSpace.register(sRGB)
+  ColorSpace.register(P3)
 
   try {
     const normalizedOptions = normalizeOptions(options)

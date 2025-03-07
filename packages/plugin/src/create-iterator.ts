@@ -9,32 +9,30 @@ import {
   sRGBGamut,
 } from '@texel/color'
 import type { Iterator, StyleSheetPartial } from 'cassiopeia'
-import { color as c, ColorSpace, darkMode, INTERPOLATOR, type Interpolator } from 'cepheus'
+import { color as c, ColorGamut, darkMode, INTERPOLATOR, type Interpolator } from 'cepheus'
 import { parseAlpha } from './parse-alpha'
-import type { Flags, OptionsAdvanced } from './types'
+import type { Flags, IteratorOptions } from './types'
 
 const COLOR_REGEX = /^([\da-z]+)-(\d{1,3})-(\d{1,3})(-(?:[1-9]?\d|100))?$/i
 
 const template = (
   values: string[],
   flags: Flags,
-  options: Omit<OptionsAdvanced, 'flags'>,
+  colorSchemeStrategy: IteratorOptions['colorSchemeStrategy'],
 ): StyleSheetPartial | undefined => {
   if (values.length === 0) {
     return undefined
   }
 
-  // TODO: :root, ::backdrop, ::selection { }
-  // https://kilianvalkhof.com/2023/css-html/root-isnt-global/
-  let selector = ':root'
+  let selector = ':where(:root,:host,::backdrop,::selection)'
   const media: string[] = []
   const supports: string[] = []
 
-  if (flags.colorScheme !== 'none') {
-    if (options.darkMode === 'media') {
+  if (flags.colorScheme !== undefined) {
+    if (colorSchemeStrategy === 'media') {
       media.push(`(prefers-color-scheme: ${flags.colorScheme})`)
     } else {
-      selector = `:root.${flags.colorScheme}`
+      selector = `${selector}.${flags.colorScheme}`
     }
   }
 
@@ -65,19 +63,17 @@ const template = (
   return { content, media: mediaString }
 }
 
-export const createIterator = (type: 'color' | 'invert', options: OptionsAdvanced) => {
-  const properties = { darkMode: options.darkMode }
-
+export const createIterator = (type: 'color' | 'invert', options: IteratorOptions) => {
   function* iteratorColor(interpolator: Interpolator, flags: Flags = options.flags[0]): Iterator {
     const modelColorSpace: Flags['colorGamut'] =
-      interpolator[INTERPOLATOR].state.model.colorSpace === ColorSpace.p3 ? 'p3' : 'srgb'
+      interpolator[INTERPOLATOR].state.model.colorGamut === ColorGamut.p3 ? 'p3' : 'srgb'
 
     const isGamutMismatch = flags.colorGamut !== modelColorSpace
 
     const state: string[] = []
 
     const mode =
-      flags.colorScheme === 'none' || (flags.colorScheme === 'dark') === darkMode(interpolator)
+      flags.colorScheme === undefined || (flags.colorScheme === 'dark') === darkMode(interpolator)
 
     let cursor: string | true
 
@@ -123,7 +119,7 @@ export const createIterator = (type: 'color' | 'invert', options: OptionsAdvance
       state.push(`${name}: ${value};`)
     }
 
-    return template(state, flags, properties)
+    return template(state, flags, options.colorSchemeStrategy)
   }
 
   return options.flags.length === 1
