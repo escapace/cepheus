@@ -7,9 +7,8 @@ export { INTERPOLATOR, LENGTH } from './constants'
 export { createInterpolator } from './create-interpolator'
 export { isModel } from './is-model'
 export { parse } from './parse'
-export { chroma, darkMode, lightness, model } from './setters'
+export { chroma, lightness, model } from './setters'
 export { subscribe } from './subscribe'
-export { ColorGamut } from './types'
 export type {
   Interpolator,
   Model,

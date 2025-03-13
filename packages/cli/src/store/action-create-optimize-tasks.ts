@@ -35,6 +35,7 @@ export function actionCreateOptimizeTasks(store: Store, iteration: number, optio
       colorGamut: store.options.colorGamut,
       colors: store.options.colors,
       colorSpace: store.options.colorSpace,
+      deltaE: store.options.deltaE,
       hueAngle: normalizeAngle(options.hueAngle ?? store.options.hueAngle),
       hyperparameters: store.options.hyperparameters,
       key: hash(square, store.options.interval, store.options.randomSeed),

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { tile } from '@cepheus/utilities'
-import { useCepheus } from '@cepheus/vue'
+import { useInterpolator } from '@cepheus/vue'
 import {
   DisplayP3,
   DisplayP3Gamut,
@@ -13,7 +13,7 @@ import {
 import { INTERPOLATOR, LENGTH as N } from 'cepheus'
 import { range } from 'lodash-es'
 
-const interpolator = useCepheus()
+const interpolator = useInterpolator()
 const model = interpolator[INTERPOLATOR].state.model
 
 const levels = N / model.interval

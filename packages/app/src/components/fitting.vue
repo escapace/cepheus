@@ -1,6 +1,6 @@
 <!-- eslint-disable typescript/no-non-null-assertion -->
 <script setup lang="ts">
-import { useCepheus } from '@cepheus/vue'
+import { useInterpolator } from '@cepheus/vue'
 import {
   DisplayP3,
   DisplayP3Gamut,
@@ -12,7 +12,7 @@ import {
 import { cartesian, INTERPOLATOR } from 'cepheus'
 import { onMounted } from 'vue'
 
-const instance = useCepheus()
+const instance = useInterpolator()
 const model = instance[INTERPOLATOR].state.model
 
 onMounted(() => {

@@ -1,11 +1,11 @@
-import type { ColorGamut } from 'cepheus'
-import type { ColorSpace } from 'colorjs.io/fn'
+import type { ColorSpace, PlainColorObject } from 'colorjs.io/fn'
 import type { DeepRequired } from 'utility-types'
 import type { PRNG, PRNGName } from './utilities/create-prng'
 export type { PRNG, PRNGName }
 
 export type Square = number
 
+type ColorGamut = 'p3' | 'srgb'
 type ColorSpaceLiteral = 'oklch' | 'oklrch'
 
 export interface OptimizeTask<T extends OptimizationState = OptimizationState> {
@@ -57,6 +57,7 @@ export interface StoreOptions
     | 'colorGamut'
     | 'colors'
     | 'colorSpace'
+    | 'deltaE'
     | 'hueAngle'
     | 'lightness'
     | 'tolerance'
@@ -65,6 +66,7 @@ export interface StoreOptions
   colors: Array<Array<[number, number, number]> | string[]>
   colorGamut?: 'p3' | 'srgb'
   colorSpace?: ColorSpaceLiteral
+  deltaE?: 'jzczhz' | 'ok2'
   hueAngle?: OptimizeOptions['hueAngle']
   iterations?: number
   levels?: number
@@ -80,6 +82,7 @@ export interface RequiredStoreOptions
   colorGamut: ColorGamut
   colors: Array<Array<[number, number, number]>>
   colorSpace: ColorSpaceLiteral
+  deltaE: 'jzczhz' | 'ok2'
   hueAngle: OptimizeOptions['hueAngle']
   interval: number
   iterations: number
@@ -96,6 +99,7 @@ export interface OptimizeOptions {
   colorGamut: ColorGamut
   colors: Array<Array<[number, number, number]>>
   colorSpace: ColorSpaceLiteral
+  deltaE: 'jzczhz' | 'ok2'
   hueAngle: number
   randomSeed: string
   weights: {
@@ -142,10 +146,14 @@ export interface OptimizeOptions {
 }
 
 export type RequiredOptimizeOptions = {
+  distance: (a: [number, number, number], b: [number, number, number]) => number
+  distanceColorOjbect: (a: PlainColorObject, b: PlainColorObject) => number
+
   background: Array<[number, number, number]>
   colorGamut: ColorGamut
   colors: Array<Array<[number, number, number]>>
   colorSpace: ColorSpace
+  costs: Partial<Record<keyof OptimizeOptions['weights'], [number, number]>>
   prng: PRNG
 } & DeepRequired<
   Omit<

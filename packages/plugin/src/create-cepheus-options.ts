@@ -1,4 +1,4 @@
-import { permutations } from './permutations'
+import { createCombinations } from './create-combinations'
 import type { IteratorOptions, Options } from './types'
 
 const filterKeys = <T extends string>(record: Record<T, boolean>): T[] => {
@@ -18,25 +18,25 @@ const intersection = <T extends string>(a: T[], b: T[] | undefined): T[] => {
 export const createCepheusOptions = (
   options: { displayP3Support?: boolean } & Options,
 ): IteratorOptions => {
-  let colorScheme: Array<'dark' | 'light' | undefined>
   let colorFormat: Array<'oklch' | 'p3' | 'srgb'>
   let colorGamut: Array<'p3' | 'srgb'>
 
-  if (__PLATFORM__ === 'browser') {
-    colorScheme = options.flags?.colorScheme ?? [undefined]
+  const colorScheme: Array<'dark' | 'light'> =
+    options.colorScheme === undefined ? ['dark', 'light'] : [options.colorScheme]
 
+  if (__PLATFORM__ === 'browser') {
     colorFormat = intersection(
       filterKeys({
         oklch: CSS.supports('(color: oklch(0% 0 0))'),
         p3: CSS.supports('(color: color(display-p3 0 0 0))'),
         srgb: true,
       }),
-      options.flags?.colorFormat,
+      options.colorFormat,
     )
 
     colorGamut = intersection(
       options.displayP3Support === true ? ['p3', 'srgb'] : ['srgb'],
-      options.flags?.colorGamut,
+      options.colorGamut,
     )
 
     if (colorFormat.includes('oklch')) {
@@ -50,31 +50,25 @@ export const createCepheusOptions = (
       colorFormat = ['srgb']
     }
   } else {
-    colorScheme = options.flags?.colorScheme ?? ['light', 'dark']
-    colorFormat = options.flags?.colorFormat ?? ['srgb']
-    colorGamut = options.flags?.colorGamut ?? ['srgb']
+    colorFormat = options.colorFormat ?? ['srgb']
+    colorGamut = options.colorGamut ?? ['srgb']
   }
 
-  const flags = permutations({
+  const combinations = createCombinations({
     colorFormat,
     colorGamut,
     colorScheme,
-  }).filter(
-    (flags) =>
-      !(
-        (flags.colorFormat === 'p3' && flags.colorGamut === 'srgb') ||
-        (flags.colorFormat === 'srgb' && flags.colorGamut === 'p3')
-      ),
-  )
+  })
 
-  if (flags.length === 0) {
+  if (combinations.length === 0) {
     throw new Error('[cepheus]: incompatibe options.')
   }
 
-  const colorSchemeStrategy = options.colorSchemeStrategy ?? 'media'
+  const colorSchemeStrategy =
+    options.colorSchemeStrategy ?? (colorScheme.length === 2 ? 'media' : 'class')
 
   return {
     colorSchemeStrategy,
-    flags,
+    combinations,
   }
 }

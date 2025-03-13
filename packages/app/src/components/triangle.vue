@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { barycentric, INTERPOLATOR, type Point, type Triangle } from 'cepheus'
-import { useCepheus } from '@cepheus/vue'
+import { useInterpolator } from '@cepheus/vue'
 import { range } from 'lodash-es'
 import {
   DisplayP3,
@@ -18,7 +18,7 @@ function cross(a: Point, b: Point, c: Point) {
 }
 
 onMounted(() => {
-  const instance = useCepheus()
+  const instance = useInterpolator()
 
   range(0, 4).forEach((palette) => {
     // eslint-disable-next-line typescript/no-unnecessary-type-assertion

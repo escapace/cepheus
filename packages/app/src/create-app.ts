@@ -4,10 +4,10 @@ import { createPinia, type StateTree } from 'pinia'
 import 'virtual:uno.css'
 import { createSSRApp } from 'vue'
 import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router'
+import type { SSRContext } from 'vue/server-renderer'
 import App from './components/app.vue'
 import Calendar from './components/calendar.vue'
-import { useCepheusStore } from './hooks/use-cepheus-store'
-import type { SSRContext } from 'vue/server-renderer'
+import { createPluginCepheus } from './composables/use-cepheus-store'
 
 declare const INITIAL_STATE: Record<string, StateTree>
 
@@ -42,15 +42,15 @@ export async function createApp(context?: SSRContext) {
     ],
   })
 
-  const cepheusStore = useCepheusStore(pinia)
-
-  const cepheus = await cepheusStore.createCepheus(context?.cepheus)
+  const cepheus = await createPluginCepheus({ pinia, preferences: context?.cepheus?.preferences })
 
   const cassiopeia = createCassiopeia({
+    deferEvery: 8,
     plugins: [cepheus],
   })
 
   if (!import.meta.env.SSR) {
+    // TODO: cleanup
     cassiopeia.subscribe(createBrowserSubscription({ method: 'insert-discard' }))
   }
 
@@ -59,7 +59,7 @@ export async function createApp(context?: SSRContext) {
   return {
     app,
     cassiopeia,
-    cepheusStore,
+    cepheus,
     pinia,
     router,
   }

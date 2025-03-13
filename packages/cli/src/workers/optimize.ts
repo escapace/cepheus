@@ -1,13 +1,14 @@
 import { type Deficiency, simulate as simulateDeficiency } from '@bjornlu/colorblind'
-import { ColorGamut, normalizeAngle } from 'cepheus'
+import { normalizeAngle } from 'cepheus'
 import {
   type PlainColorObject,
   ColorSpace,
   contrastAPCA,
+  to as convert,
   deltaEJz,
+  deltaEOK2,
   inGamut,
   LCH,
-  to as convert,
   OKLCH,
   OKLrCH,
   P3,
@@ -22,14 +23,63 @@ import {
   type RequiredOptimizeOptions,
   TypeOptimizationState,
 } from '../types'
+import { clamp } from '../utilities/clamp'
 import { createPRNG } from '../utilities/create-prng'
+import { fixNaN } from '../utilities/fix-nan'
 import { isWithin } from '../utilities/is-within'
 import { normalizeRange } from '../utilities/normalize-range'
 import { percentile } from '../utilities/percentile'
 import { randomWithin } from '../utilities/random-within'
 import { relativeDifference } from '../utilities/relative-difference'
-import { fixNaN } from '../utilities/fix-nan'
-import { clamp } from '../utilities/clamp'
+
+/*
+ * Calculates the (0 to 1) normalized coefficient of variation (CV)
+ * of consecutive differences in a sorted list of numbers in [0,1].
+ *
+ * Steps:
+ *   1. Compute diffs[i] = x[i+1] - x[i].
+ *   2. CV = std(diffs) / mean(diffs).
+ *   3. Normalize by dividing by sqrt(diffs.length - 1)
+ *      (which equals sqrt(n - 2) for original array length n).
+ *
+ * The result is guaranteed to be <= 1, with 0 indicating perfectly
+ * consistent spacing and 1 indicating the maximum possible inconsistency.
+ *
+ * @param x - Sorted array of numbers in [0,1] (length >= 2)
+ * @returns The normalized CV in [0,1], or NaN if invalid.
+ */
+function normalizedCVD(x: number[]): number {
+  if (x.length < 2) {
+    throw new Error('Need at least 2 points to form a difference')
+  }
+
+  // 1. Compute consecutive differences
+  const diffs = x.slice(1).map((value, index) => value - x[index])
+
+  // 2. Compute mean of differences
+  const avgDiff = mean(diffs)
+
+  // Avoid dividing by zero if the mean difference is 0
+  if (avgDiff === 0) {
+    return 1
+  }
+
+  // 3. Compute standard deviation (sample-based by default in simple-statistics)
+  const stdDiff = standardDeviation(diffs)
+
+  // 4. CV of diffs = stdDiff / avgDiff
+  const cvDiffs = stdDiff / avgDiff
+
+  // 5. Normalize by dividing by sqrt((n-1) - 1) = sqrt(diffs.length - 1).
+  const denom = Math.sqrt(diffs.length - 1)
+
+  if (denom === 0) {
+    // This could happen if x.length = 2 => diffs.length = 1 => sqrt(0).
+    return 1
+  }
+
+  return cvDiffs / denom
+}
 
 class IterationError extends Error {
   constructor(message: string) {
@@ -108,7 +158,7 @@ function randomColor(
   let iterations = 10_000
 
   const isInitial = temperature === undefined || referenceColor === undefined
-  const colorGamut = options.colorGamut === ColorGamut.p3 ? sRGB : P3
+  const colorGamut = options.colorGamut === 'p3' ? P3 : sRGB
 
   while (iterations !== 0) {
     let accumulator: Color | undefined
@@ -142,35 +192,22 @@ function randomColor(
   throw new IterationError('Iteration limit exceeded.')
 }
 
-// JzCzhz is a preferred color model for distance calculation due to its strong perceptual uniformity
-// and ability to maintain color accuracy over a wide luminance range, making it particularly effective
-// for handling high-dynamic-range (HDR) and wide color gamut (WCG) applications. This model is
-// designed to approximate human visual perception more closely, especially across different brightness
-// levels, allowing for more consistent and meaningful distance measurements between colors as
-// perceived by the human eye. The JzCzhz color space also simplifies gamut mapping operations, which
-// supports efficient processing when calculating color differences, making it a reliable choice for
-// applications requiring accurate color comparison and differentiation across diverse viewing
-// conditions.
-const distanceColorOjbect = (a: PlainColorObject, b: PlainColorObject) => deltaEJz(a, b)
-const distance = (a: Color, b: Color, space: RequiredOptimizeOptions['colorSpace']) =>
-  deltaEJz({ alpha: 1, coords: a, space }, { alpha: 1, coords: b, space })
-
 const floatToByte = (value: number) => clamp(Math.round(255 * value), 0, 255)
 
 const distances = (
   colors: Color[],
-  colorSpace: RequiredOptimizeOptions['colorSpace'],
+  options: RequiredOptimizeOptions,
   deficiency?: Deficiency,
 ): number[] => {
   const distances: number[] = []
 
   const convertedColors = map(colors, (color): PlainColorObject => {
     if (deficiency === undefined) {
-      return { alpha: 1, coords: color, space: colorSpace }
+      return { alpha: 1, coords: color, space: options.colorSpace }
     }
 
     const sRGBColor = fixNaN(
-      convert({ alpha: 1, coords: color, space: colorSpace }, sRGB, {
+      convert({ alpha: 1, coords: color, space: options.colorSpace }, sRGB, {
         inGamut: { method: 'css', space: sRGB },
       }).coords,
     )
@@ -197,7 +234,7 @@ const distances = (
 
   for (let index = 0; index < colors.length; index++) {
     for (let index_ = index + 1; index_ < colors.length; index_++) {
-      distances.push(distanceColorOjbect(convertedColors[index], convertedColors[index_]))
+      distances.push(options.distanceColorOjbect(convertedColors[index], convertedColors[index_]))
     }
   }
 
@@ -212,7 +249,7 @@ const createCosts = (
   // penalize the increase in the mean distance from initial colors
   const differenceCost = mean(
     flatMap(state, (value, index) =>
-      map(options.colors[index], (initial) => distance(value, initial, options.colorSpace)),
+      map(options.colors[index], (initial) => options.distance(value, initial)),
     ),
   )
 
@@ -271,10 +308,10 @@ const createCosts = (
     )
 
   // calculate distances under different vision conditions
-  const normalDistances = distances(state, options.colorSpace)
-  const protanopiaDistances = distances(state, options.colorSpace, 'protanopia')
-  const deuteranopiaDistances = distances(state, options.colorSpace, 'deuteranopia')
-  const tritanopiaDistances = distances(state, options.colorSpace, 'tritanopia')
+  const normalDistances = distances(state, options)
+  const protanopiaDistances = distances(state, options, 'protanopia')
+  const deuteranopiaDistances = distances(state, options, 'deuteranopia')
+  const tritanopiaDistances = distances(state, options, 'tritanopia')
 
   // penalize lower mean distances between colors (want colors to be more distinguishable)
   const normalCost = 1 - mean(normalDistances)
@@ -282,13 +319,11 @@ const createCosts = (
   const deuteranopiaCost = 1 - mean(deuteranopiaDistances)
   const tritanopiaCost = 1 - mean(tritanopiaDistances)
 
-  // penalize higher standard deviation of distances (want consistent differences)
-  const dispersionNormalCost = standardDeviation([...normalDistances].sort((a, b) => a - b))
-  const dispersionProtanopiaCost = standardDeviation([...protanopiaDistances].sort((a, b) => a - b))
-  const dispersionDeuteranopiaCost = standardDeviation(
-    [...deuteranopiaDistances].sort((a, b) => a - b),
-  )
-  const dispersionTritanopiaCost = standardDeviation([...tritanopiaDistances].sort((a, b) => a - b))
+  // penalize higher highly uneven distances between colors (want consistent differences)
+  const dispersionNormalCost = normalizedCVD([...normalDistances].sort((a, b) => a - b))
+  const dispersionProtanopiaCost = normalizedCVD([...protanopiaDistances].sort((a, b) => a - b))
+  const dispersionDeuteranopiaCost = normalizedCVD([...deuteranopiaDistances].sort((a, b) => a - b))
+  const dispersionTritanopiaCost = normalizedCVD([...tritanopiaDistances].sort((a, b) => a - b))
 
   const issues = Object.entries({
     chromaCost,
@@ -310,6 +345,18 @@ const createCosts = (
   })
 
   if (issues.length !== 0) {
+    console.log({
+      dispersionDeuteranopiaCost,
+      dispersionNormalCost,
+      dispersionProtanopiaCost,
+      dispersionTritanopiaCost,
+
+      deuteranopiaDistances,
+      normalDistances,
+      protanopiaDistances,
+      tritanopiaDistances,
+    })
+
     throw new Error(
       `Out of bounds: ${map(issues, ([key, value]) => `${key}=${value}`).join(', ')}.`,
     )
@@ -334,6 +381,13 @@ const createCosts = (
 
 const cost = (options: RequiredOptimizeOptions, state: Color[]) => {
   const costs = createCosts(options, state)
+
+  Object.entries(costs).forEach(([_key, value]) => {
+    const key = _key as keyof RequiredOptimizeOptions['costs']
+    const [min, max] = options.costs[key] ?? [value, value]
+
+    options.costs[key] = [Math.min(min, value), Math.max(max, value)]
+  })
 
   return sum(
     (Object.keys(options.weights) as Array<keyof typeof costs>).map(
@@ -364,6 +418,51 @@ const normalizeChroma = (
   target: (value.target / N) * 0.4,
 })
 
+const createDistanceFunction = (options: OptimizeOptions) => {
+  const space = options.colorSpace === 'oklch' ? OKLCH : OKLrCH
+
+  // JzCzhz is a preferred color model for distance calculation due to its strong perceptual uniformity
+  // and ability to maintain color accuracy over a wide luminance range, making it particularly effective
+  // for handling high-dynamic-range (HDR) and wide color gamut (WCG) applications. This model is
+  // designed to approximate human visual perception more closely, especially across different brightness
+  // levels, allowing for more consistent and meaningful distance measurements between colors as
+  // perceived by the human eye. The JzCzhz color space also simplifies gamut mapping operations, which
+  // supports efficient processing when calculating color differences, making it a reliable choice for
+  // applications requiring accurate color comparison and differentiation across diverse viewing
+  // conditions.
+  //
+  // The maximum possible value for deltaEJz is determined by analyzing how the individual components
+  // of the color difference formula interact. The lightness difference (ΔJ) can reach up to 1, as
+  // lightness values range between 0 and 1. The hue difference (ΔH) depends on chroma values: to
+  // maximize it, both colors must have maximum chroma (1), but this forces their chroma difference
+  // (ΔC) to zero. Conversely, achieving the maximum chroma difference (ΔC = 1) requires one chroma to
+  // be 0, which eliminates the hue difference (ΔH = 0). Thus, the largest combined contribution
+  // occurs when ΔJ is maximized (1) alongside the largest achievable ΔH (2), calculated using the
+  // formula for hue difference. Squaring and summing these values (1² + 2² = 5) and taking the square
+  // root yields the theoretical upper bound of √5 (~2.236), ensuring mutual exclusivity of maxima
+  // between ΔC and ΔH due to shared dependencies.
+
+  const distanceEJzColorOjbect = (a: PlainColorObject, b: PlainColorObject) =>
+    deltaEJz(a, b) / (options.colorGamut === 'srgb' ? 0.34 : 0.37)
+  const distanceEJz = (a: Color, b: Color) =>
+    distanceEJzColorOjbect({ alpha: 1, coords: a, space }, { alpha: 1, coords: b, space })
+
+  const distanceEOK2ColorOjbect = (a: PlainColorObject, b: PlainColorObject) =>
+    deltaEOK2(a, b) / (options.colorGamut === 'srgb' ? 1.3 : 1.5)
+  const distanceEOK2 = (a: Color, b: Color) =>
+    distanceEOK2ColorOjbect({ alpha: 1, coords: a, space }, { alpha: 1, coords: b, space })
+
+  return options.deltaE === 'jzczhz'
+    ? {
+        distance: distanceEJz,
+        distanceColorOjbect: distanceEJzColorOjbect,
+      }
+    : {
+        distance: distanceEOK2,
+        distanceColorOjbect: distanceEOK2ColorOjbect,
+      }
+}
+
 const normalizeOptions = (options: OptimizeOptions): RequiredOptimizeOptions => {
   const prng = createPRNG(options.randomSeed, options.randomSource)
 
@@ -372,6 +471,7 @@ const normalizeOptions = (options: OptimizeOptions): RequiredOptimizeOptions => 
 
   // eslint-disable-next-line typescript/consistent-type-assertions
   const value = {
+    ...createDistanceFunction(options),
     background: options.background,
     chroma: normalizeChroma(
       {
@@ -384,6 +484,8 @@ const normalizeOptions = (options: OptimizeOptions): RequiredOptimizeOptions => 
     colorGamut: options.colorGamut,
     colors: options.colors,
     colorSpace: options.colorSpace === 'oklch' ? OKLCH : OKLrCH,
+    costs: {},
+    deltaE: options.deltaE,
     hueAngle: hueAngle * tolerance,
     hyperparameters: {
       coolingRate: 0.99,
@@ -479,6 +581,8 @@ const iterate = (options: RequiredOptimizeOptions) => {
   if (!changed) {
     throw new IterationError('No Changes')
   }
+
+  console.log(options.costs)
 
   return {
     colors: map(bestColors, (value): [number, number, number] => value),

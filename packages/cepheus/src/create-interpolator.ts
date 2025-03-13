@@ -33,7 +33,6 @@ export const createInterpolator = (options: Options): Interpolator => {
         options.chroma === undefined
           ? { max: 1, min: 0 }
           : { max: options.chroma.max, min: options.chroma.min },
-      darkMode: options.darkMode ?? false,
       lightness:
         options.lightness === undefined
           ? { max: 1, min: 0 }
@@ -99,25 +98,12 @@ export const createInterpolator = (options: Options): Interpolator => {
     }
   }
 
-  const updateDarkMode = async (value?: boolean) => {
-    if (value === undefined) {
-      return
-    }
-
-    if (value !== state.darkMode) {
-      state.darkMode = value
-
-      await notify(subscriptions)
-    }
-  }
-
   return {
     [INTERPOLATOR]: {
       state,
       subscriptions,
       triangle,
       updateChroma,
-      updateDarkMode,
       updateLightness,
       updateModel,
     },

@@ -1,14 +1,14 @@
 import { assert, describe, it } from 'vitest'
-import { permutations } from './permutations'
+import { createCombinations } from './create-combinations'
 
-describe('src/permutations.spec.ts', () => {
-  it('generates permutations for an empty object', () => {
-    assert.deepEqual(permutations({}), [])
+describe('src/combinations.spec.ts', () => {
+  it('generates combinations for an empty object', () => {
+    assert.deepEqual(createCombinations({}), [])
   })
 
-  it('generates permutations for a partially empty object', () => {
+  it('generates combinations for a partially empty object', () => {
     assert.deepEqual(
-      permutations({
+      createCombinations({
         x: [1, 2, 3],
         y: ['a', 'b'],
         z: [],
@@ -17,13 +17,13 @@ describe('src/permutations.spec.ts', () => {
     )
   })
 
-  it('generates permutations', () => {
+  it('generates combinations', () => {
     const object = {
       x: [1, 2, 3],
       y: ['a', 'b'],
       z: [20, 30],
     }
-    const combos = permutations(object)
+    const combos = createCombinations(object)
     assert.deepEqual(combos, [
       { x: 1, y: 'a', z: 20 },
       { x: 2, y: 'a', z: 20 },
@@ -40,12 +40,12 @@ describe('src/permutations.spec.ts', () => {
     ])
   })
 
-  it('generates permutations', () => {
+  it('generates combinations', () => {
     const object = {
       x: [1, 2, 3],
       y: ['a', undefined],
     }
-    const combos = permutations(object)
+    const combos = createCombinations(object)
 
     assert.deepEqual(combos, [
       { x: 1, y: 'a' },

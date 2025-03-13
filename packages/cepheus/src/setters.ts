@@ -51,21 +51,6 @@ export function lightness(
   return value.state.lightness
 }
 
-export function darkMode(interpolator: Interpolator, darkMode?: undefined): boolean
-export function darkMode(interpolator: Interpolator, darkMode: boolean): Promise<boolean>
-export function darkMode(
-  interpolator: Interpolator,
-  darkMode?: boolean,
-): boolean | Promise<boolean> {
-  const value = interpolator[INTERPOLATOR]
-
-  if (darkMode !== undefined) {
-    return value.updateDarkMode(darkMode).then(() => value.state.darkMode)
-  }
-
-  return value.state.darkMode
-}
-
 export function model(interpolator: Interpolator, model?: undefined): Model
 export function model(interpolator: Interpolator, model?: undefined): Model
 export function model(interpolator: Interpolator, model: Model): Promise<Model>

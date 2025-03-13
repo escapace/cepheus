@@ -1,12 +1,12 @@
 import { mapValues } from 'lodash-es'
 import { sum } from 'simple-statistics'
-import type { OptimizeOptions } from '../types'
 import { toPrecision } from './to-precision'
 
-export const normalizeWeights = (
-  weights: Required<Exclude<OptimizeOptions['weights'], undefined>>,
-): Required<Exclude<OptimizeOptions['weights'], undefined>> => {
+export const normalizeWeights = <T extends Record<string, number>>(
+  weights: T,
+  multiplier = 1,
+): T => {
   const total = sum(Object.values(weights))
 
-  return mapValues(weights, (value) => toPrecision(value / total))
+  return mapValues(weights, (value) => toPrecision((value / total) * multiplier)) as T
 }

@@ -2,11 +2,11 @@
 <script setup lang="ts">
 import { INTERPOLATOR, type Triangle } from 'cepheus'
 import { onMounted, onUnmounted } from 'vue'
-import { useCepheus } from '@cepheus/vue'
-import { useCepheusStore } from '../hooks/use-cepheus-store'
-import { usePane } from '../hooks/use-pane'
+import { useInterpolator } from '@cepheus/vue'
+import { useCepheusStore } from '../composables/use-cepheus-store'
+import { usePane } from '../composables/use-pane'
 
-const instance = useCepheus()
+const instance = useInterpolator()
 const model = instance[INTERPOLATOR].state.model
 
 usePane()
@@ -41,7 +41,7 @@ onMounted(() => {
 
   const strokeTriangle = (triangle: Triangle) => {
     context.lineWidth = 2
-    context.strokeStyle = store.darkMode ? 'white' : 'black'
+    context.strokeStyle = 'green'
     context.beginPath()
     context.moveTo(triangle[0][0], triangle[0][1])
     context.lineTo(triangle[1][0], triangle[1][1])

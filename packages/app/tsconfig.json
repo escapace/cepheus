@@ -1,9 +1,12 @@
 {
   "compilerOptions": {
+    "allowArbitraryExtensions": true,
     "allowJs": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "baseUrl": ".",
+    "declaration": false,
+    "declarationMap": false,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
@@ -11,7 +14,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "jsxImportSource": "vue",
-    "lib": ["esnext", "dom"],
+    "lib": ["esnext", "dom", "webworker"],
     "module": "esnext",
     "moduleDetection": "force",
     "moduleResolution": "bundler",

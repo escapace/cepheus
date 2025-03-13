@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { asyncExitHook, gracefulExit } from 'exit-hook'
 import arg from 'arg'
 import chalk from 'chalk'
 import { isError, isInteger, isString, map, repeat, throttle } from 'lodash-es'
@@ -9,7 +10,14 @@ import path, { resolve } from 'node:path'
 import { promisify } from 'node:util'
 import { gzip } from 'node:zlib'
 import ora from 'ora'
-import { DEFAULT_ITERATIONS, DEFAULT_N_DIVISOR, DEFAULT_PRECISION, N_DIVISORS } from './constants'
+import {
+  DEFAULT_DELTA_E,
+  DEFAULT_HUE_ANGLE,
+  DEFAULT_ITERATIONS,
+  DEFAULT_N_DIVISOR,
+  DEFAULT_PRECISION,
+  N_DIVISORS,
+} from './constants'
 import { selectorModel } from './store/selector-model'
 import {
   selectorOptimizeTasksCount,
@@ -31,7 +39,7 @@ const compress = promisify(gzip)
 const HELP = `${chalk.bold('Usage:')}
   cepheus --seed <string> (--color <color>)...
         [--color-gamut p3|srgb] [--color-space oklch|oklrch] [--prng xoshiro128++|xorwow|xorshift128|sfc32]
-        [--iterations <number>] [--levels ${N_DIVISORS.join('|')}]
+        [--delta-e jzczhz|ok2] [--iterations <number>] [--levels ${N_DIVISORS.join('|')}]
         [--restore <file>] [--save <file>]
   cepheus -h | --help
   cepheus --version
@@ -42,12 +50,13 @@ ${chalk.bold('Options:')}
   --output        Write output palette model to file.
   --color-gamut   Ensure that colors are inside the color gamut. [default: p3]
   --color-space   Preferred iteration color space. [default: oklrch]
-  --hue-angle     Hue angle for each sampling step. [default: 30]
+  --hue-angle     Hue angle for each sampling step. [default: ${DEFAULT_HUE_ANGLE}]
   --prng          Pseudorandom number generator. [default: xoshiro128++]
   --levels        Number of uniform sampling steps along each square axis. [default: ${DEFAULT_N_DIVISOR}]
   --iterations    Number of iterations. [default: ${DEFAULT_ITERATIONS}]
   --session       Use a session to file.
   --precision     Number of significant digits to round to. [default: ${DEFAULT_PRECISION}]
+  --delta-e       DeltaE algorithm. [default: ${DEFAULT_DELTA_E}]
 
   -v, --version   Show version.
   -h, --help      Displays this message.
@@ -64,6 +73,7 @@ const run = async () => {
       '--color': [String],
       '--color-gamut': String,
       '--color-space': String,
+      '--delta-e': String,
       '--help': Boolean,
       '--hue-angle': Number,
       '--iterations': Number,
@@ -87,16 +97,17 @@ const run = async () => {
     >
 
     console.log(`${chalk.bold('cepheus')} v${version}`)
-    process.exit(0)
+    return gracefulExit(0)
   }
 
   if (arguments_['--help'] === true) {
     console.log(HELP)
-    process.exit(0)
+    return gracefulExit(0)
   }
 
   const colorGamut = arguments_['--color-gamut'] as 'p3' | 'srgb' | undefined
   const colorSpace = arguments_['--color-space'] as 'oklch' | 'oklrch' | undefined
+  const deltaE = arguments_['--delta-e'] as 'jzczhz' | 'ok2' | undefined
   const colors = arguments_['--color']
   const levels = arguments_['--levels']
   const randomSource = arguments_['--prng'] as
@@ -116,33 +127,39 @@ const run = async () => {
   if (randomSeed === undefined) {
     console.log(HELP)
     console.error(`Option '--seed' must be defined.`)
-    process.exit(1)
+    return gracefulExit(1)
   }
 
   if (output === undefined) {
     console.log(HELP)
     console.error(`Option '--output' must be defined.`)
-    process.exit(1)
+    return gracefulExit(1)
   }
 
   if (colors === undefined || colors.length <= 1) {
     console.log(HELP)
     console.error(`At lest two '--color' options must be provided.`)
-    process.exit(1)
+    return gracefulExit(1)
   }
 
   // optional
 
+  if (deltaE !== undefined && !['jzczhz', 'ok2'].includes(deltaE)) {
+    console.log(HELP)
+    console.error(`Option '--delta-e' must be either 'jzczhz' or 'ok2'.`)
+    return gracefulExit(1)
+  }
+
   if (colorGamut !== undefined && !['p3', 'srgb'].includes(colorGamut)) {
     console.log(HELP)
     console.error(`Option '--color-gamut' must be either 'p3' or 'srgb'.`)
-    process.exit(1)
+    return gracefulExit(1)
   }
 
   if (colorSpace !== undefined && !['oklch', 'oklrch'].includes(colorSpace)) {
     console.log(HELP)
     console.error(`Option '--color-gamut' must be either 'oklch' or 'oklrch'.`)
-    process.exit(1)
+    return gracefulExit(1)
   }
 
   if (
@@ -153,25 +170,25 @@ const run = async () => {
     console.error(
       `Option '--prng' must be one of 'xoshiro128++', 'xorwow', 'xorshift128', 'sfc32'.`,
     )
-    process.exit(1)
+    return gracefulExit(1)
   }
 
   if (levels !== undefined && !N_DIVISORS.includes(levels)) {
     console.log(HELP)
     console.error(`Option '--levels' must be one of ${N_DIVISORS.join(', ')}.`)
-    process.exit(1)
+    return gracefulExit(1)
   }
 
   if (iterations !== undefined && !(isInteger(iterations) && iterations >= 1)) {
     console.log(HELP)
     console.error(`Option '--iterations' must be an integer greater or equal to 1.`)
-    process.exit(1)
+    return gracefulExit(1)
   }
 
   if (hueAngle !== undefined && !(isInteger(hueAngle) && hueAngle >= 1)) {
     console.log(HELP)
     console.error(`Option '--hue-angle' must be an integer greater or equal to 1.`)
-    process.exit(1)
+    return gracefulExit(1)
   }
 
   if (precision !== undefined && !(isInteger(precision) && precision >= 2 && precision <= 10)) {
@@ -179,12 +196,12 @@ const run = async () => {
     console.error(
       `Option '--precision' must be an integer greater or equal to 2, and smaller or equal to 10.`,
     )
-    process.exit(1)
+    return gracefulExit(1)
   }
 
   if (arguments_._.length !== 0) {
     console.log(HELP)
-    process.exit(1)
+    return gracefulExit(1)
   }
 
   const { cepheus } = await import('./index')
@@ -204,6 +221,7 @@ const run = async () => {
     colorGamut,
     colors: map(colors, (colors) => colors.split(',').map((value) => value.trim())),
     colorSpace,
+    deltaE,
     hueAngle,
     initialState,
     iterations,
@@ -257,6 +275,15 @@ const run = async () => {
     updateSpinner.cancel()
     updateSpinner(type)
   })
+
+  asyncExitHook(
+    () => {
+      instance.abort()
+    },
+    {
+      wait: 300,
+    },
+  )
 
   return await instance.then(async () => {
     updateSpinner.flush()
@@ -327,7 +354,7 @@ const run = async () => {
         console.error(`${chalk.bgRed('ERROR')} ${error.message}`)
       }
 
-      process.exit(1)
+      return gracefulExit(1)
     }
 
     // Array.from(store.cubes().entries()).map(([num, task]) => {

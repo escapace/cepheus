@@ -1,26 +1,14 @@
-// import { OKLCH, P3, convert, sRGB, serialize, toGamut, type Color } from '@cepheus/color'
-import {
-  DisplayP3,
-  DisplayP3Gamut,
-  gamutMapOKLCH,
-  OKLCH,
-  serialize,
-  sRGB,
-  sRGBGamut,
-} from '@texel/color'
+import { DisplayP3, OKLCH, serialize, sRGB, type Vector } from '@texel/color'
 import type { Iterator, StyleSheetPartial } from 'cassiopeia'
-import { color as c, ColorGamut, darkMode, INTERPOLATOR, type Interpolator } from 'cepheus'
-import { parseAlpha } from './parse-alpha'
-import type { Flags, IteratorOptions } from './types'
+import { color } from './color'
+import type { CreateIteratorOptions } from './types'
+import { INTERPOLATOR } from 'cepheus'
 
-const COLOR_REGEX = /^([\da-z]+)-(\d{1,3})-(\d{1,3})(-(?:[1-9]?\d|100))?$/i
-
-const template = (
-  values: string[],
-  flags: Flags,
-  colorSchemeStrategy: IteratorOptions['colorSchemeStrategy'],
+const createStyleSheet = (
+  variables: string[],
+  options: CreateIteratorOptions,
 ): StyleSheetPartial | undefined => {
-  if (values.length === 0) {
+  if (variables.length === 0) {
     return undefined
   }
 
@@ -28,23 +16,21 @@ const template = (
   const media: string[] = []
   const supports: string[] = []
 
-  if (flags.colorScheme !== undefined) {
-    if (colorSchemeStrategy === 'media') {
-      media.push(`(prefers-color-scheme: ${flags.colorScheme})`)
-    } else {
-      selector = `${selector}.${flags.colorScheme}`
-    }
+  if (options.colorSchemeStrategy === 'media') {
+    media.push(`(prefers-color-scheme: ${options.colorScheme})`)
+  } else {
+    selector = `${selector}.${options.colorScheme}`
   }
 
-  if (flags.colorGamut !== 'srgb') {
-    media.push(`(color-gamut: ${flags.colorGamut})`)
+  if (options.colorGamut !== 'srgb') {
+    media.push(`(color-gamut: ${options.colorGamut})`)
   }
 
-  if (flags.colorFormat === 'oklch') {
+  if (options.colorFormat === 'oklch') {
     supports.push('(color: oklch(0% 0 0))')
   }
 
-  if (flags.colorFormat === 'p3') {
+  if (options.colorFormat === 'p3') {
     supports.push('(color: color(display-p3 0 0 0))')
   }
 
@@ -53,7 +39,7 @@ const template = (
   const content = [
     mediaString === undefined ? undefined : `@media ${mediaString} {`,
     supports.length === 0 ? undefined : `@supports ${supports.join(' and ')} {`,
-    `${selector} { ${values.join(' ')} }`,
+    `${selector} { ${variables.join(' ')} }`,
     supports.length === 0 ? undefined : `}`,
     mediaString === undefined ? undefined : `}`,
   ]
@@ -63,96 +49,36 @@ const template = (
   return { content, media: mediaString }
 }
 
-export const createIterator = (type: 'color' | 'invert', options: IteratorOptions) => {
-  function* iteratorColor(interpolator: Interpolator, flags: Flags = options.flags[0]): Iterator {
-    const modelColorSpace: Flags['colorGamut'] =
-      interpolator[INTERPOLATOR].state.model.colorGamut === ColorGamut.p3 ? 'p3' : 'srgb'
+export function* createIterator(options: CreateIteratorOptions): Iterator {
+  const variables: string[] = []
 
-    const isGamutMismatch = flags.colorGamut !== modelColorSpace
-
-    const state: string[] = []
-
-    const mode =
-      flags.colorScheme === undefined || (flags.colorScheme === 'dark') === darkMode(interpolator)
-
-    let cursor: string | true
-
-    while ((cursor = yield) !== true) {
-      const string = COLOR_REGEX.exec(cursor)
-
-      if (string === null) {
-        continue
-      }
-
-      const colorN = string[1]
-      const [lightness, chroma] = string.slice(2, 4).map((value) => parseInt(value, 10)) as [
-        number,
-        number,
-      ]
-
-      const coords = c(
-        interpolator,
-        colorN,
-        chroma,
-        lightness,
-        mode ? type === 'invert' : type !== 'invert',
-      )
-
-      if (coords === undefined) {
-        continue
-      }
-
-      const alpha = parseAlpha(string[5])
-
-      const name = `---${type}-${cursor}`
-      const value = serialize(
-        [
-          ...(isGamutMismatch
-            ? gamutMapOKLCH(coords, flags.colorGamut === 'p3' ? DisplayP3Gamut : sRGBGamut, OKLCH)
-            : coords),
-          alpha,
-        ],
-        OKLCH,
-        flags.colorFormat === 'p3' ? DisplayP3 : flags.colorFormat === 'oklch' ? OKLCH : sRGB,
-      )
-
-      state.push(`${name}: ${value};`)
-    }
-
-    return template(state, flags, options.colorSchemeStrategy)
+  const properties = {
+    ...options,
+    colorGamutMapping:
+      options.colorGamut !== options.interpolator[INTERPOLATOR].state.model.colorGamut,
   }
 
-  return options.flags.length === 1
-    ? iteratorColor
-    : function* wrapper(interpolator: Interpolator): Iterator {
-        const iterators = options.flags.map((value) => {
-          const iterator = iteratorColor(interpolator, value)
-          // A value passed to the first invocation of next() is always ignored.
-          iterator.next()
-          return iterator
-        })
+  let variable: string | true
 
-        let cursor: string | true
+  while ((variable = yield) !== true) {
+    const coords = color(variable, properties)
 
-        while ((cursor = yield) !== true) {
-          for (const iterator of iterators) {
-            iterator.next(cursor)
-          }
-        }
+    if (coords === undefined) {
+      continue
+    }
 
-        const accumulator: StyleSheetPartial[] = []
+    const value = serialize(
+      coords as Vector,
+      OKLCH,
+      properties.colorFormat === 'p3'
+        ? DisplayP3
+        : properties.colorFormat === 'oklch'
+          ? OKLCH
+          : sRGB,
+    )
 
-        for (const [index, iterator] of iterators.entries()) {
-          const { done, value } = iterator.next(true)
+    variables.push(`${variable}: ${value};`)
+  }
 
-          if (done === true && value !== undefined) {
-            accumulator.push({
-              ...(value as StyleSheetPartial),
-              index,
-            })
-          }
-        }
-
-        return accumulator
-      }
+  return createStyleSheet(variables, properties)
 }

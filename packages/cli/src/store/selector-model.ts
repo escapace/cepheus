@@ -20,6 +20,7 @@ export const selectorModel = (store: Store): ModelUnparsed => {
     ),
   )
 
+  const gamut = store.options.colorGamut
   const interval = store.options.interval
   const length = store.options.colors.length
   const squares = Array.from(values.keys())
@@ -49,8 +50,6 @@ export const selectorModel = (store: Store): ModelUnparsed => {
     number,
     number,
   ]
-
-  const gamut = store.options.colorGamut as number
 
   return [gamut, interval, length, triangle, squares, colors]
 }

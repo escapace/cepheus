@@ -1,8 +1,8 @@
 /* eslint-disable typescript/prefer-for-of */
-/* eslint-disable typescript/no-explicit-any */
-/* eslint-disable typescript/no-unsafe-assignment */
 
-export function permutations<O extends Record<number | string, any[]>>(object: O) {
+export function createCombinations<O extends Record<number | string, ArrayLike<unknown>>>(
+  object: O,
+) {
   let combos: Array<{ [k in keyof O]: O[k][number] }> = []
 
   for (const key in object) {

@@ -1,7 +1,8 @@
-import { ColorGamut, normalizeAngle } from 'cepheus'
+import { normalizeAngle } from 'cepheus'
 import { to as convert, OKLCH, OKLrCH, parse } from 'colorjs.io/fn'
 import { isInteger, isString, omit } from 'lodash-es'
 import {
+  DEFAULT_DELTA_E,
   DEFAULT_HUE_ANGLE,
   DEFAULT_ITERATIONS,
   DEFAULT_N_DIVISOR,
@@ -41,18 +42,20 @@ export function createStoreOptions(options: StoreOptions): RequiredStoreOptions 
     throw new Error(`'iterations' must be an integer greater or equal to 1`)
   }
 
-  const colorGamut = (options.colorGamut ?? 'p3') === 'p3' ? ColorGamut.p3 : ColorGamut.srgb
+  const colorGamut = options.colorGamut ?? 'p3'
 
   const hueAngle =
     options.hueAngle === undefined ? DEFAULT_HUE_ANGLE : normalizeAngle(options.hueAngle)
 
   const precision = options.precision ?? DEFAULT_PRECISION
+  const deltaE = options.deltaE ?? DEFAULT_DELTA_E
 
   return {
     ...omit(options, ['levels']),
     colorGamut,
     colors,
     colorSpace,
+    deltaE,
     hueAngle,
     interval,
     iterations,

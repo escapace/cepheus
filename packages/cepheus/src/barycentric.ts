@@ -2,7 +2,6 @@ import { cartesian } from './cartesian'
 import { INTERPOLATOR } from './constants'
 import type { Interpolator } from './types'
 import { normalize } from './utilities/normalize'
-import { xor } from './utilities/xor'
 
 export const barycentric = (
   interpolator: Interpolator,
@@ -12,13 +11,11 @@ export const barycentric = (
   gamma: number,
   invert = false,
 ) => {
-  const { state, triangle } = interpolator[INTERPOLATOR]
+  const { triangle } = interpolator[INTERPOLATOR]
   const [t0, t1, t2] = triangle
 
-  const swap = xor(state.darkMode, invert)
-
-  const aa = swap ? gamma : alpha
-  const gg = swap ? alpha : gamma
+  const aa = invert ? gamma : alpha
+  const gg = invert ? alpha : gamma
 
   const [a, b, g] = normalize([aa, beta, gg])
 

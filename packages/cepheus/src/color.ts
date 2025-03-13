@@ -2,10 +2,6 @@ import { barycentric } from './barycentric'
 import { INTERPOLATOR, MAX } from './constants'
 import type { Interpolator } from './types'
 
-function isNumeric(value: string): boolean {
-  return /^\d+$/.test(value)
-}
-
 export const color = (
   interpolator: Interpolator,
   color: number | string,
@@ -13,15 +9,13 @@ export const color = (
   lightness: number,
   invert = false,
 ) => {
-  const c = typeof color === 'string' ? (isNumeric(color) ? parseInt(color, 10) : color) : color
+  const alias = interpolator[INTERPOLATOR].state.model.alias
 
-  const function_ = interpolator[INTERPOLATOR].state.model.alias
+  const index = alias === undefined ? color : alias(color)
 
-  const n = function_ === undefined ? c : function_(c)
-
-  if (typeof n !== 'number') {
-    throw new TypeError(`Unknown color ${typeof n === 'string' ? n : 'undefined'}`)
+  if (typeof index !== 'number') {
+    throw new TypeError(`cepheus: unknown color index '${index}'`)
   }
 
-  return barycentric(interpolator, n, MAX - lightness, chroma, lightness, invert)
+  return barycentric(interpolator, index, MAX - lightness, chroma, lightness, invert)
 }

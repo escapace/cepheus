@@ -1,15 +1,15 @@
 import { assert } from './assert'
-import { ColorGamut, type Model, type ModelUnparsed, type Point, type Triangle } from './types'
+import type { Model, ModelUnparsed, Point, Triangle } from './types'
 import { chunk } from './utilities/chunk'
 
 export const parse = (model: unknown): Model => {
   assert(Array.isArray(model))
   assert(model.length === 6)
 
-  const [colorGamutIndex, interval, length, triangleFlat, squares, data] = model as ModelUnparsed
+  const [colorGamut, interval, length, triangleFlat, squares, data] = model as ModelUnparsed
 
-  assert(typeof colorGamutIndex === 'number')
-  assert(colorGamutIndex === 1 || colorGamutIndex === 2)
+  assert(typeof colorGamut === 'string')
+  assert(colorGamut === 'p3' || colorGamut === 'srgb')
   assert(typeof interval === 'number')
   assert(typeof length === 'number')
   assert(Array.isArray(triangleFlat))
@@ -31,8 +31,6 @@ export const parse = (model: unknown): Model => {
       chunk(data.slice(index * step, (index + 1) * step)) as Array<[number, number, number]>,
     ]),
   )
-
-  const colorGamut = colorGamutIndex === 1 ? ColorGamut.p3 : ColorGamut.srgb
 
   return {
     colorGamut,

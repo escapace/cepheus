@@ -1,109 +1,143 @@
-/* eslint-disable typescript/no-non-null-assertion */
-import { createCepheusOptions, createIterator } from '@cepheus/plugin'
+import {
+  createCepheusOptions,
+  createIterator,
+  createIteratorMultiplexer,
+  type ColorFunction,
+} from '@cepheus/plugin'
 import { PLUGIN, type Plugin as CassiopeiaPlugin, type Iterators } from 'cassiopeia'
 import {
   createInterpolator,
   subscribe,
   chroma as updateChroma,
-  darkMode as updateDarkMode,
   lightness as updateLightness,
   model as updateModel,
   type Model,
 } from 'cepheus'
-import type { MaybeRef } from 'vue'
-import { computed, ref, unref, watch, type App, type Plugin as VuePlugin } from 'vue'
+import type { MaybeRef, ObjectPlugin } from 'vue'
+import { computed, effectScope, isProxy, onScopeDispose, ref, unref, watch, type App } from 'vue'
 
-import { INJECTION_KEY } from './constants'
+import { INJECTION_KEY_COLORS, INJECTION_KEY_INTERPOLATOR } from './constants'
 
 export interface Options {
   colorFormat?: MaybeRef<Array<'oklch' | 'p3' | 'srgb'> | undefined>
   colorGamut?: MaybeRef<Array<'p3' | 'srgb'> | undefined>
-  colorScheme?: MaybeRef<Array<'dark' | 'light' | undefined> | undefined>
+  colorScheme?: MaybeRef<'dark' | 'light' | undefined> | undefined
   colorSchemeStrategy?: MaybeRef<'class' | 'media' | undefined>
 
   chroma?: MaybeRef<{ max: number; min: number }>
-  darkMode?: MaybeRef<boolean>
   lightness?: MaybeRef<{ max: number; min: number }>
+
+  colors?: Record<string, ColorFunction | [number, number, number] | undefined>
 
   model: MaybeRef<Model>
 }
 
-export type Cepheus = CassiopeiaPlugin & VuePlugin
+export interface Cepheus extends CassiopeiaPlugin, ObjectPlugin {
+  dispose: () => void
+}
 
 const WATCH_OPTIONS = { flush: 'sync' } as const
 
 export const createCepheus = (options: Options): Cepheus => {
-  const model = computed(() => unref(options.model))
-  const chroma = computed(() => unref(options.chroma))
-  const lightness = computed(() => unref(options.lightness))
-  const darkMode = computed(() => unref(options.darkMode))
+  const scope = effectScope(true)
 
-  const interpolator = createInterpolator({
-    chroma: unref(chroma),
-    darkMode: unref(darkMode),
-    lightness: unref(lightness),
-    model: unref(model),
-  })
-
-  watch(model, (value) => void updateModel(interpolator, value), WATCH_OPTIONS)
-  watch(darkMode, (value) => void updateDarkMode(interpolator, value!), WATCH_OPTIONS)
-  watch(chroma, (value) => void updateChroma(interpolator, value?.min, value?.max), WATCH_OPTIONS)
-  watch(
-    lightness,
-    (value) => void updateLightness(interpolator, value?.min, value?.max),
-    WATCH_OPTIONS,
-  )
-
+  const colors = options.colors
   const displayP3Support = ref<boolean | undefined>(
     __PLATFORM__ === 'browser' ? globalThis.matchMedia('(color-gamut: p3)').matches : undefined,
   )
 
-  const computedOptions = computed(() => ({
-    colorSchemeStrategy: unref(options.colorSchemeStrategy),
-    displayP3Support: displayP3Support.value,
-    flags: {
-      colorFormat: unref(options.colorFormat),
-      colorGamut: unref(options.colorGamut),
-      colorScheme: unref(options.colorScheme),
-    },
-  }))
+  const interpolator = createInterpolator({
+    chroma: unref(options.chroma),
+    lightness: unref(options.lightness),
+    model: unref(options.model),
+  })
 
-  const computedIteratorOptions = computed(() => createCepheusOptions(computedOptions.value))
-
-  if (__PLATFORM__ === 'browser') {
-    globalThis.matchMedia('(color-gamut: p3)').addEventListener(
-      'change',
-      (event) => {
+  scope.run(() => {
+    if (__PLATFORM__ === 'browser') {
+      const listener = (event: MediaQueryListEvent) => {
         displayP3Support.value = event.matches
-      },
-      { passive: true },
+      }
+      const mediaQueryList = globalThis.matchMedia('(color-gamut: p3)')
+
+      mediaQueryList.addEventListener('change', listener, { passive: true })
+
+      onScopeDispose(() => {
+        mediaQueryList.removeEventListener('change', listener)
+      })
+    }
+
+    const model = computed(() => unref(options.model))
+    const chroma = computed(() => unref(options.chroma))
+    const lightness = computed(() => unref(options.lightness))
+
+    watch(model, (value) => void updateModel(interpolator, value), WATCH_OPTIONS)
+    watch(chroma, (value) => void updateChroma(interpolator, value?.min, value?.max), WATCH_OPTIONS)
+    watch(
+      lightness,
+      (value) => void updateLightness(interpolator, value?.min, value?.max),
+      WATCH_OPTIONS,
     )
-  }
+  })
+
+  const dispose = () => scope.stop()
 
   return {
+    dispose,
     install: (app: App) => {
-      app.provide(INJECTION_KEY, interpolator)
+      app.provide(INJECTION_KEY_INTERPOLATOR, interpolator)
+      app.provide(INJECTION_KEY_COLORS, colors)
+
+      app.onUnmount(dispose)
     },
     [PLUGIN]: (iterators: Iterators, update) => {
-      const iteratorOptions = { ...unref(computedIteratorOptions) }
+      scope.run(() => {
+        const iteratorOptions = computed(() =>
+          createCepheusOptions({
+            colorFormat: unref(options.colorFormat),
+            colorGamut: unref(options.colorGamut),
+            colorScheme: unref(options.colorScheme),
+            colorSchemeStrategy: unref(options.colorSchemeStrategy),
+            displayP3Support: displayP3Support.value,
+          }),
+        )
 
-      watch(
-        computedIteratorOptions,
-        (value) => {
-          Object.assign(iteratorOptions, value)
+        watch(
+          iteratorOptions,
+          ({ colorSchemeStrategy, combinations }) => {
+            const options = combinations.map((combination) => ({
+              ...combination,
+              colors,
+              colorSchemeStrategy,
+              interpolator,
+            }))
 
-          void update(false)
-        },
-        WATCH_OPTIONS,
-      )
+            const thunk =
+              options.length === 1
+                ? () => createIterator(options[0])
+                : createIteratorMultiplexer(createIterator, options)
 
-      const iteratorColor = createIterator('color', iteratorOptions)
-      const iteratorInvert = createIterator('invert', iteratorOptions)
+            iterators.set('color', thunk)
+            iterators.set('invert', thunk)
 
-      iterators.set('color', () => iteratorColor(interpolator))
-      iterators.set('invert', () => iteratorInvert(interpolator))
+            void update(false)
+          },
+          { ...WATCH_OPTIONS, immediate: true },
+        )
 
-      subscribe(interpolator, update)
+        if (colors !== undefined && isProxy(colors)) {
+          watch(colors, () => void update(false), WATCH_OPTIONS)
+        }
+
+        const unsubscribe = subscribe(interpolator, update)
+
+        onScopeDispose(() => {
+          unsubscribe()
+          setImmediate(() => {
+            iterators.delete('color')
+            iterators.delete('invert')
+          })
+        })
+      })
     },
   }
 }

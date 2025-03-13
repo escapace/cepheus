@@ -91,6 +91,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 <style>
 body {
   background-color: var(---color-primary-250-5);
+  /* background-color: var(---color-red); */
   text-rendering: optimizeLegibility;
   text-rendering: geometricPrecision;
 }

@@ -6,7 +6,7 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import Event from './event.vue'
 // import { useCepheus } from '@cepheus/vue'
 import { useCassiopeia } from '@cassiopeia/vue'
-import { usePane } from '../hooks/use-pane'
+import { usePane } from '../composables/use-pane'
 const { SFC32 } = await import('@thi.ng/random')
 
 usePane()

@@ -1,18 +1,40 @@
-export interface Options {
-  colorSchemeStrategy?: 'class' | 'media'
-  flags?: {
-    colorFormat?: Array<'oklch' | 'p3' | 'srgb'>
-    colorGamut?: Array<'p3' | 'srgb'>
-    colorScheme?: Array<'dark' | 'light' | undefined>
-  }
-}
+import type { Interpolator } from 'cepheus'
 
-export interface Flags {
+export interface Combination {
   colorFormat: 'oklch' | 'p3' | 'srgb'
   colorGamut: 'p3' | 'srgb'
-  colorScheme: 'dark' | 'light' | undefined
+  colorScheme: 'dark' | 'light'
+}
+
+export interface Options {
+  colorFormat?: Array<Combination['colorFormat']>
+  colorGamut?: Array<Combination['colorGamut']>
+  colorScheme?: Combination['colorScheme']
+  colorSchemeStrategy?: 'class' | 'media'
 }
 
 export interface IteratorOptions extends Pick<Required<Options>, 'colorSchemeStrategy'> {
-  flags: Flags[]
+  combinations: Combination[]
 }
+
+export type ColorFunction = (
+  interpolator: Interpolator,
+  color: string,
+  chroma?: number,
+  lightness?: number,
+  invert?: boolean,
+) => [number, number, number] | undefined
+
+export interface CreateIteratorOptions extends Combination {
+  colorSchemeStrategy: 'class' | 'media'
+  interpolator: Interpolator
+  colors?: Record<string, ColorFunction | [number, number, number] | undefined>
+}
+
+export interface ColorOptions
+  extends Omit<CreateIteratorOptions, 'colorFormat' | 'colorSchemeStrategy'> {
+  colorGamutMapping?: boolean
+  invert?: boolean
+}
+
+// type CreateIterator = (options: CreateIteratorOptions) => Iterator

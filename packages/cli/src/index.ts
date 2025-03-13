@@ -112,7 +112,7 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
         }
       }
 
-      for (const tolerance of [1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3]) {
+      for (const tolerance of [1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4]) {
         await attempt(tolerance)
       }
 

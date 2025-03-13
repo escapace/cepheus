@@ -10,6 +10,8 @@ import type { z } from 'zod'
 import { createApp as _createApp } from './create-app'
 import webFonts from './fonts.json'
 import { preferencesSchema } from './types'
+import { disposePinia } from 'pinia'
+import { getRuntimeKey } from 'hono/adapter'
 
 const key = Buffer.from('XSRvhjsuPTumCCVsVjPFFdvQF62g6az0rzvVFfed+4E=', 'base64')
 
@@ -29,10 +31,7 @@ export const createSession = async (cookieHeader?: string) => {
   const session = await take(cookieHeader, cookies, {
     preferences: (previous, next) => {
       try {
-        const parsed = preferencesSchema.parse({
-          ...previous,
-          ...next,
-        })
+        const parsed = preferencesSchema.parse(next)
 
         return parsed
       } catch {
@@ -75,7 +74,8 @@ export const createApp = async (options: Options = POINTE_OPTIONS) => {
     async (c) => {
       const session = await createSession(c.req.header('cookie'))
 
-      session.set('preferences', c.req.valid('json'))
+      const json = c.req.valid('json')
+      session.set('preferences', json)
 
       for (const value of await session.values()) {
         c.header('set-cookie', value)
@@ -91,12 +91,11 @@ export const createApp = async (options: Options = POINTE_OPTIONS) => {
 
     const context: SSRContext = {
       cepheus: {
-        colorSchemeStrategy: preferences === undefined ? 'media' : 'class',
         preferences,
       },
     }
 
-    const { app, cassiopeia, pinia, router } = await _createApp(context)
+    const { app, cassiopeia, cepheus, pinia, router } = await _createApp(context)
 
     const url = new URL(c.req.url)
 
@@ -136,9 +135,23 @@ export const createApp = async (options: Options = POINTE_OPTIONS) => {
         .replace(
           '<!--app-html-tag-->',
           ` lang="en"${
-            preferences === undefined ? '' : ` class=${preferences.darkMode ? 'dark' : 'light'}`
+            preferences?.colorScheme === undefined ? '' : ` class=${preferences.colorScheme}`
           }`,
         )
+
+      const dispose = new Promise<void>((resolve) =>
+        setImmediate(() => {
+          cepheus.dispose()
+          cassiopeia.dispose()
+          disposePinia(pinia)
+
+          resolve()
+        }),
+      )
+
+      if (getRuntimeKey() === 'workerd') {
+        console.log(c.executionCtx.waitUntil(dispose))
+      }
 
       return c.html(html)
     }

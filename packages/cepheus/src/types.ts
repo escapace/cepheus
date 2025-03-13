@@ -4,13 +4,8 @@ export type Line = [Point, Point]
 export type Point = [x: number, y: number]
 export type Triangle = [Point, Point, Point]
 
-export enum ColorGamut {
-  p3 = 1,
-  srgb = 0,
-}
-
 export type ModelUnparsed = [
-  colorGamut: number,
+  colorGamut: 'p3' | 'srgb',
   interval: number,
   length: number,
   triangle: [...Point, ...Point, ...Point],
@@ -19,7 +14,7 @@ export type ModelUnparsed = [
 ]
 
 export interface Model {
-  colorGamut: ColorGamut
+  colorGamut: 'p3' | 'srgb'
   colors: Map<number, Array<[number, number, number]>>
   interval: number
   length: number
@@ -34,7 +29,6 @@ export type Unsubscribe = () => unknown
 
 export interface State {
   chroma: { max: number; min: number }
-  darkMode: boolean
   lightness: { max: number; min: number }
   model: Model
 }
@@ -47,7 +41,6 @@ export interface Interpolator {
     subscriptions: Set<Subscription>
     triangle: Triangle
     updateChroma: (a?: number, b?: number) => Promise<void>
-    updateDarkMode: (value: boolean) => Promise<void>
     updateLightness: (a?: number, b?: number) => Promise<void>
     updateModel: (model: Model) => Promise<void>
   }

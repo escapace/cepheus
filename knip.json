@@ -1,16 +1,18 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "entry": [
-    "{scripts,perf}/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}",
+    "packages/plugin/perf/color.bench.ts",
     "**/*.{test,spec}.?(c|m)[jt]s?(x)",
     "**/test/**/*.?(c|m)[jt]s?(x)",
     "eslint.config.mjs",
     "index.html",
+    "packages/cli/scripts/max-delta.ts",
     "packages/cli/src/worker.ts!",
     "src/**/example*.{js,cjs,mjs,jsx,ts,cts,mts,tsx,vue}",
     "src/cli.ts!",
     "src/index.ts!",
-    "src/types.ts"
+    "src/types.ts",
+    "{scripts,perf}/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"
   ],
   "ignore": ["**/*.d.+([a-zA-Z0-9]).ts", "**/*.d.ts", "lib/**", "packages/app/**"],
   "ignoreBinaries": ["ncu"],
