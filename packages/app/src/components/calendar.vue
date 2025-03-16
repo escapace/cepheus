@@ -15,17 +15,54 @@ usePane()
 const cassiopeia = useCassiopeia()
 
 const calendar = new Temporal.Calendar('iso8601')
-const weekDayFormatter = new Intl.DateTimeFormat('en-GB', {
+const weekDayFormatter = new Intl.DateTimeFormat('en-US', {
   calendar,
   day: '2-digit',
+  timeZone: 'UTC',
   weekday: 'short',
 })
 
-const dateFormatter = new Intl.DateTimeFormat('en-GB', {
+const dateFormatter = new Intl.DateTimeFormat('en-US', {
   calendar,
   month: 'long',
+  timeZone: 'UTC',
   year: 'numeric',
 })
+
+const formatDate = (value: Temporal.PlainDate) => {
+  let month = ''
+  let year = ''
+
+  for (const part of dateFormatter.formatToParts(value)) {
+    if (part.type === 'year') {
+      year = part.value
+    }
+
+    if (part.type === 'month') {
+      month = part.value
+    }
+  }
+
+  return [month, year].join(' ')
+}
+
+const formatWeekDay = (value: Temporal.PlainDate) => {
+  let day = ''
+  let weekday = ''
+
+  for (const part of weekDayFormatter.formatToParts(value)) {
+    if (part.type === 'day') {
+      weekday = part.value
+    }
+
+    if (part.type === 'weekday') {
+      day = part.value
+    }
+  }
+
+  return [day, weekday].join(' ')
+}
+
 
 interface Data {
   days: Array<{ current: boolean; title: string }>
@@ -112,11 +149,11 @@ const update = () => {
 
       return {
         current,
-        title: weekDayFormatter.format(plainDate),
+        title: formatWeekDay(plainDate),
       }
     }),
     events,
-    month: dateFormatter.format(date),
+    month: formatDate(date),
     time: { hour: (time.minute / 60) * 100, row: time.hour + 1 },
     week: `W${date.weekOfYear} `,
   }
@@ -152,12 +189,7 @@ onUnmounted(() => {
       <div class="subheader">
         <div class="filler"></div>
         <div class="filler"></div>
-        <div
-          v-for="(day, index) in data?.days"
-          :key="index"
-          :class="{ 'sans-serif-bold': day.current }"
-          class="day"
-        >
+        <div v-for="(day, index) in data?.days" :key="index" :class="{ 'sans-serif-bold': day.current }" class="day">
           {{ day.title }}
         </div>
       </div>
@@ -216,25 +248,13 @@ onUnmounted(() => {
         <div class="row" style="grid-row: 21"></div>
         <div class="row" style="grid-row: 22"></div>
         <div class="row" style="grid-row: 23"></div>
-        <Event
-          v-for="(event, index) in data?.events"
-          :key="index"
-          :day-of-week="event.dayOfWeek"
-          :hour="event.hour"
-          :minute="event.minute"
-          :duration="event.duration"
-          :background-color="event.backgroundColor"
-          :text-color="event.textColor"
-          :border-color="event.borderColor"
-          :title="event.title"
-        />
-        <div
-          class="current-time sans-serif-bold"
-          :style="{
-            gridRow: data?.time.row,
-            top: `calc(${data?.time.hour.toFixed(5)}% - 0.0625rem)`,
-          }"
-        ></div>
+        <Event v-for="(event, index) in data?.events" :key="index" :day-of-week="event.dayOfWeek" :hour="event.hour"
+          :minute="event.minute" :duration="event.duration" :background-color="event.backgroundColor"
+          :text-color="event.textColor" :border-color="event.borderColor" :title="event.title" />
+        <div class="current-time sans-serif-bold" :style="{
+          gridRow: data?.time.row,
+          top: `calc(${data?.time.hour.toFixed(5)}% - 0.0625rem)`,
+        }"></div>
       </div>
     </div>
   </div>

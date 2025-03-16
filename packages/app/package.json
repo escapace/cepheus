@@ -38,7 +38,7 @@
     "eslint": "9.22.0",
     "eslint-config-escapace": "5.5.1",
     "esroll": "0.4.1",
-    "pangram": "0.3.0",
+    "pangram": "1.0.0",
     "pointe": "5.13.4",
     "prettier": "3.5.3",
     "prettier-config-escapace": "1.2.1",
@@ -48,9 +48,9 @@
     "typescript": "5.8.2",
     "unocss": "66.0.0",
     "unocss-preset-escapace": "0.3.2",
-    "vite": "6.2.1",
+    "vite": "6.2.2",
     "vue-tsc": "2.2.8",
-    "wrangler": "3.114.1"
+    "wrangler": "4.0.0"
   },
   "engines": {
     "node": ">=22.13.1",
@@ -66,6 +66,7 @@
     "format": "syncpack format --source package.json && eslint --no-warn-ignored --fix && prettier -uw .",
     "lint": "ls-lint --config .ls-lint.yaml && eslint",
     "ls-lint": "ls-lint --config .ls-lint.yaml",
+    "pangram:build": "docker run -it --rm -v \"$(pwd)\":/workdir:z ghcr.io/escapace/pangram:latest build",
     "preview": "pointe preview",
     "test": "echo 'No Tests'",
     "typecheck": "vue-tsc --noEmit"

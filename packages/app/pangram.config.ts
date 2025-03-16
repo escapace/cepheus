@@ -1,4 +1,4 @@
-import { fallback, type Font, type Locales } from 'pangram'
+import { defineConfig, fallback, type UserConfigurationFont } from 'pangram'
 
 const enUnicodeRange =
   'U+20-7E,U+A0-BF,U+2BB,U+2BC,U+2C6,U+2DA,U+2DC,U+303,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'
@@ -13,7 +13,7 @@ const enUnicodeRange =
 //   // prefer: [robotoFlex]
 // }
 
-const robotoFlex: Font = {
+const robotoFlex: UserConfigurationFont = {
   display: 'swap',
   name: 'roboto-flex',
   resourceHint: 'preload',
@@ -23,7 +23,7 @@ const robotoFlex: Font = {
   // prefer: [robotoMedium]
 }
 
-const robotoRegular: Font = {
+const robotoRegular: UserConfigurationFont = {
   display: 'swap',
   name: 'roboto-regular',
   prefer: [robotoFlex],
@@ -31,7 +31,7 @@ const robotoRegular: Font = {
   unicodeRange: enUnicodeRange,
 }
 
-const robotoBold: Font = {
+const robotoBold: UserConfigurationFont = {
   display: 'swap',
   name: 'roboto-bold',
   prefer: [robotoFlex],
@@ -39,7 +39,7 @@ const robotoBold: Font = {
   unicodeRange: enUnicodeRange,
 }
 
-const robotoItalic: Font = {
+const robotoItalic: UserConfigurationFont = {
   display: 'swap',
   name: 'roboto-italic',
   prefer: [robotoFlex],
@@ -47,55 +47,57 @@ const robotoItalic: Font = {
   unicodeRange: enUnicodeRange,
 }
 
-const locales: Locales = {
-  en: {
-    'sans-serif': {
-      '@media': {
-        'screen and (max-width: 900px)': {
-          fontStretch: 50,
-          fontVariationSettings: {
-            wdth: 50,
-          },
-        },
-      },
-      'fontFamily': [robotoRegular, ...(await fallback('arial'))],
-    },
-    'sans-serif-bold': {
-      '@media': {
-        'screen and (max-width: 900px)': {
-          fontStretch: 50,
-          fontVariationSettings: {
-            wdth: 50,
-            wght: 700,
-          },
-        },
-      },
-      'fontFamily': [robotoBold, ...(await fallback('arial-bold'))],
-      'fontVariationSettings': {
-        wght: 700,
-      },
-      'fontWeight': 700,
-    },
-    'sans-serif-italic': {
-      'fontFamily': [robotoItalic, ...(await fallback('arial-italic'))],
-      // fontStyle: 'italic',
-      '@media': {
-        'screen and (max-width: 900px)': {
-          fontStretch: 50,
-          fontVariationSettings: {
-            slnt: -10,
-            wdth: 50,
-          },
-        },
-      },
-      'fontVariationSettings': {
-        slnt: -10,
-      },
-    },
-    // 'sans-serif-medium': {
-    //   fontFamily: [robotoMedium, 'system-ui']
-    // }
-  },
-}
+console.log(process.cwd())
 
-export default locales
+export default defineConfig({
+  locales: {
+    en: {
+      'sans-serif': {
+        '@media': {
+          'screen and (max-width: 900px)': {
+            fontStretch: 50,
+            fontVariationSettings: {
+              wdth: 50,
+            },
+          },
+        },
+        'fontFamily': [robotoRegular, ...(await fallback('arial'))],
+      },
+      'sans-serif-bold': {
+        '@media': {
+          'screen and (max-width: 900px)': {
+            fontStretch: 50,
+            fontVariationSettings: {
+              wdth: 50,
+              wght: 700,
+            },
+          },
+        },
+        'fontFamily': [robotoBold, ...(await fallback('arial-bold'))],
+        'fontVariationSettings': {
+          wght: 700,
+        },
+        'fontWeight': 700,
+      },
+      'sans-serif-italic': {
+        '@media': {
+          'screen and (max-width: 900px)': {
+            fontStretch: 50,
+            fontVariationSettings: {
+              slnt: -10,
+              wdth: 50,
+            },
+          },
+        },
+        'fontFamily': [robotoItalic, ...(await fallback('arial-italic'))],
+        'fontStyle': 'italic',
+        'fontVariationSettings': {
+          slnt: -10,
+        },
+      },
+      // 'sans-serif-medium': {
+      //   fontFamily: [robotoMedium, 'system-ui']
+      // }
+    },
+  },
+})
