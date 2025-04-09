@@ -34,9 +34,7 @@ onMounted(() => {
     return
   }
 
-  if (context === undefined) {
-    context = canvas.getContext('2d', { colorSpace: 'srgb' })!
-  }
+  context ??= canvas.getContext('2d', { colorSpace: 'srgb' })!
 
   const img = context.createImageData(context.canvas.width, context.canvas.height, {
     colorSpace: supportsDisplayP3 ? 'display-p3' : 'srgb',

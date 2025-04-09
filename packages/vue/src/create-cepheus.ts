@@ -117,7 +117,6 @@ export const createCepheus = (options: Options): Cepheus => {
                 : createIteratorMultiplexer(createIterator, options)
 
             iterators.set('color', thunk)
-            iterators.set('invert', thunk)
 
             void update(false)
           },
@@ -134,7 +133,6 @@ export const createCepheus = (options: Options): Cepheus => {
           unsubscribe()
           setImmediate(() => {
             iterators.delete('color')
-            iterators.delete('invert')
           })
         })
       })

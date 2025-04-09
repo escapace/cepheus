@@ -14,7 +14,7 @@ usePane()
 // const interpolator = useCepheus()
 const cassiopeia = useCassiopeia()
 
-const calendar = new Temporal.Calendar('iso8601')
+const calendar = 'iso8601'
 const weekDayFormatter = new Intl.DateTimeFormat('en-US', {
   calendar,
   day: '2-digit',
@@ -63,7 +63,6 @@ const formatWeekDay = (value: Temporal.PlainDate) => {
   return [day, weekday].join(' ')
 }
 
-
 interface Data {
   days: Array<{ current: boolean; title: string }>
   events: Array<InstanceType<typeof Event>['$props']>
@@ -103,11 +102,11 @@ const createEvents = (): Data['events'] => {
     const bc = random.minmaxInt(0, 4)
 
     const bg = cassiopeia.add(
-      `---color-${bc}-${random.minmaxInt(12, 25)}-${random.minmaxInt(150, 175)}`,
+      `---color-${bc}-${random.minmaxInt(0, 20)}-${random.minmaxInt(50, 130)}`,
     )
 
     const textColor = cassiopeia.add(
-      `---invert-${random.minmaxInt(0, 3)}-${random.minmaxInt(0, 5)}-${random.minmaxInt(0, 5)}`,
+      `---color-${random.minmaxInt(0, 3)}-${random.minmaxInt(253, 255)}-${random.minmaxInt(0, 5)}`,
     )
 
     const borderColor = cassiopeia.add(
@@ -128,7 +127,7 @@ const createEvents = (): Data['events'] => {
 }
 
 const update = () => {
-  const now = Temporal.Now.zonedDateTime(calendar, 'UTC')
+  const now = Temporal.Now.zonedDateTimeISO('UTC')
   const time = Temporal.PlainTime.from(now)
   const date = Temporal.PlainDate.from(now)
   const events = createEvents()
@@ -189,7 +188,12 @@ onUnmounted(() => {
       <div class="subheader">
         <div class="filler"></div>
         <div class="filler"></div>
-        <div v-for="(day, index) in data?.days" :key="index" :class="{ 'sans-serif-bold': day.current }" class="day">
+        <div
+          v-for="(day, index) in data?.days"
+          :key="index"
+          :class="{ 'sans-serif-bold': day.current }"
+          class="day"
+        >
           {{ day.title }}
         </div>
       </div>
@@ -248,13 +252,25 @@ onUnmounted(() => {
         <div class="row" style="grid-row: 21"></div>
         <div class="row" style="grid-row: 22"></div>
         <div class="row" style="grid-row: 23"></div>
-        <Event v-for="(event, index) in data?.events" :key="index" :day-of-week="event.dayOfWeek" :hour="event.hour"
-          :minute="event.minute" :duration="event.duration" :background-color="event.backgroundColor"
-          :text-color="event.textColor" :border-color="event.borderColor" :title="event.title" />
-        <div class="current-time sans-serif-bold" :style="{
-          gridRow: data?.time.row,
-          top: `calc(${data?.time.hour.toFixed(5)}% - 0.0625rem)`,
-        }"></div>
+        <Event
+          v-for="(event, index) in data?.events"
+          :key="index"
+          :day-of-week="event.dayOfWeek"
+          :hour="event.hour"
+          :minute="event.minute"
+          :duration="event.duration"
+          :background-color="event.backgroundColor"
+          :text-color="event.textColor"
+          :border-color="event.borderColor"
+          :title="event.title"
+        />
+        <div
+          class="current-time sans-serif-bold"
+          :style="{
+            gridRow: data?.time.row,
+            top: `calc(${data?.time.hour.toFixed(5)}% - 0.0625rem)`,
+          }"
+        ></div>
       </div>
     </div>
   </div>

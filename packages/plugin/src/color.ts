@@ -14,7 +14,7 @@ export const color = (
     return undefined
   }
 
-  const { alpha, chroma, color, lightness, type } = properties
+  const { alpha, chroma, color, lightness } = properties
 
   const value =
     typeof color === 'string'
@@ -35,7 +35,7 @@ export const color = (
         color as string,
         chroma!,
         lightness!,
-        (type !== 'invert') !== (options.colorScheme !== 'dark'),
+        options.colorScheme === 'dark',
       )
 
   if (coords === undefined) {

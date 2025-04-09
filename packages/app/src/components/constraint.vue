@@ -30,9 +30,7 @@ onMounted(() => {
     return
   }
 
-  if (context === undefined) {
-    context = canvas.getContext('2d', { colorSpace: 'srgb' })!
-  }
+  context ??= canvas.getContext('2d', { colorSpace: 'srgb' })!
 
   const toX = (x: number) => Math.floor((x / 240) * canvas.width)
   const toY = (y: number) => Math.floor((y / 240) * canvas.height)

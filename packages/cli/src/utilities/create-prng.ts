@@ -23,9 +23,7 @@ const split = (string: string) => {
   }
 
   for (let index = 0; index < 4; index += 1) {
-    if (hashes[index] === undefined) {
-      hashes[index] = EMPTY_FNV1A
-    }
+    hashes[index] ??= EMPTY_FNV1A
   }
 
   return hashes
