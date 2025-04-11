@@ -48,7 +48,7 @@
     "typescript": "5.8.3",
     "unocss": "66.0.0",
     "unocss-preset-escapace": "0.3.2",
-    "vite": "6.2.5",
+    "vite": "6.2.6",
     "vue-tsc": "2.2.8",
     "wrangler": "4.9.1"
   },
