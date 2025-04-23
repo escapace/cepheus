@@ -9,6 +9,8 @@ import { useCassiopeia } from '@cassiopeia/vue'
 import { usePane } from '../composables/use-pane'
 const { SFC32 } = await import('@thi.ng/random')
 
+const random = new SFC32([0, 1, 2, 3])
+
 usePane()
 
 // const interpolator = useCepheus()
@@ -73,8 +75,6 @@ interface Data {
 
 const data = ref<Data>()
 
-let called = 0
-
 const createEvents = (): Data['events'] => {
   const titles = [
     'Soft landing 2023?',
@@ -95,10 +95,7 @@ const createEvents = (): Data['events'] => {
 
   cassiopeia.clear()
 
-  return titles.map((title, index) => {
-    called = called + 1
-    const random = new SFC32([index + called * 1000])
-
+  return titles.map((title) => {
     const bc = random.minmaxInt(0, 4)
 
     const bg = cassiopeia.add(
@@ -276,32 +273,32 @@ onUnmounted(() => {
   </div>
 </template>
 
-<style lang="scss" scoped>
-$title-height: 3rem;
-$days-height: 3rem;
-$time-width: 3rem;
-$time-height: 3rem;
-$calendar-template: $time-width 0.625rem repeat(7, 1fr);
-$current-time-color: var(---color-3-254-254);
-$grid-color: var(---color-2-225-0);
-$background-weekday: var(---color-primary-252-5);
-$background-weekend: var(---color-primary-249-9);
-
-$header-color: var(---color-primary-250-8);
-$subheader-color: var(---color-primary-253-15);
-
+<style scoped>
 * {
+  --title-height: 3rem;
+  --days-height: 3rem;
+  --time-width: 3rem;
+  --time-height: 3rem;
+  --calendar-template: var(--time-width) 0.625rem repeat(7, 1fr);
+  --current-time-color: var(---color-3-254-254);
+  --grid-color: var(---color-2-225-0);
+  --background-weekday: var(---color-primary-252-5);
+  --background-weekend: var(---color-primary-249-9);
+
+  --header-color: var(---color-primary-250-8);
+  --subheader-color: var(---color-primary-253-15);
+
   transition: background-color 30ms linear;
 }
 
 .control {
-  background-color: $background-weekday;
+  background-color: var(--background-weekday);
 }
 
 .container {
   width: 100%;
   display: grid;
-  grid-template-rows: $title-height $days-height auto;
+  grid-template-rows: var(--title-height) var(--days-height) auto;
   /* position: absolute; */
 }
 
@@ -309,22 +306,22 @@ $subheader-color: var(---color-primary-253-15);
   display: grid;
   place-content: center;
   text-align: center;
-  grid-template-columns: $calendar-template;
-  top: $title-height;
-  border-bottom: 0.125rem solid $header-color;
-  background-color: $subheader-color;
+  grid-template-columns: var(--calendar-template);
+  top: var(--title-height);
+  border-bottom: 0.125rem solid var(--header-color);
+  background-color: var(--subheader-color);
   color: var(---color-2-2-25);
 }
 
 .day {
-  border-left: 0.0625rem solid $grid-color;
+  border-left: 0.0625rem solid var(--grid-color);
 }
 
 .content {
   display: grid;
-  grid-template-columns: $calendar-template;
-  grid-template-rows: repeat(24, $time-height);
-  background-color: $background-weekday;
+  grid-template-columns: var(--calendar-template);
+  grid-template-rows: repeat(24, var(--time-height));
+  background-color: var(--background-weekday);
 }
 
 .time {
@@ -339,7 +336,7 @@ $subheader-color: var(---color-primary-253-15);
 }
 
 .col {
-  border-right: 0.0625rem solid $grid-color;
+  border-right: 0.0625rem solid var(--grid-color);
   grid-row: 1 / span 24;
   grid-column: span 1;
 }
@@ -347,23 +344,23 @@ $subheader-color: var(---color-primary-253-15);
 .filler-col {
   grid-row: 1 / -1;
   grid-column: 2;
-  border-right: 0.0625rem solid $grid-color;
+  border-right: 0.0625rem solid var(--grid-color);
 }
 
 .row {
   grid-column: 2 / -1;
-  border-bottom: 0.0625rem solid $grid-color;
+  border-bottom: 0.0625rem solid var(--grid-color);
 }
 
 .weekend {
-  background-color: $background-weekend;
+  background-color: var(--background-weekend);
 }
 
 .current-time {
   grid-column: span 7 / 10;
   width: 100%;
   height: 0.125rem;
-  border-top: 0.125rem solid $current-time-color;
+  border-top: 0.125rem solid var(--current-time-color);
   position: relative;
 }
 
@@ -376,7 +373,7 @@ $subheader-color: var(---color-primary-253-15);
   grid-template-rows: 1fr;
   align-content: center;
   align-items: center;
-  background-color: $header-color;
+  background-color: var(--header-color);
   color: var(---color-3-1-1);
 }
 

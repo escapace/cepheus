@@ -1,4 +1,4 @@
-import { defineConfig, fallback, type UserConfigurationFont } from 'pangram'
+import { defineConfig, font, type UserConfigurationFont } from 'pangram'
 
 const enUnicodeRange =
   'U+20-7E,U+A0-BF,U+2BB,U+2BC,U+2C6,U+2DA,U+2DC,U+303,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'
@@ -47,7 +47,7 @@ const robotoItalic: UserConfigurationFont = {
   unicodeRange: enUnicodeRange,
 }
 
-console.log(process.cwd())
+const [arial, arialBold, arialItalic] = await font('arial', 'arial-bold', 'arial-italic')
 
 export default defineConfig({
   locales: {
@@ -61,7 +61,7 @@ export default defineConfig({
             },
           },
         },
-        'fontFamily': [robotoRegular, ...(await fallback('arial'))],
+        'fontFamily': [robotoRegular, arial],
       },
       'sans-serif-bold': {
         '@media': {
@@ -73,7 +73,7 @@ export default defineConfig({
             },
           },
         },
-        'fontFamily': [robotoBold, ...(await fallback('arial-bold'))],
+        'fontFamily': [robotoBold, arialBold],
         'fontVariationSettings': {
           wght: 700,
         },
@@ -89,7 +89,7 @@ export default defineConfig({
             },
           },
         },
-        'fontFamily': [robotoItalic, ...(await fallback('arial-italic'))],
+        'fontFamily': [robotoItalic, arialItalic],
         'fontStyle': 'italic',
         'fontVariationSettings': {
           slnt: -10,

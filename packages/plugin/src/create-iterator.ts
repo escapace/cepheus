@@ -12,7 +12,7 @@ const createStyleSheet = (
     return undefined
   }
 
-  let selector = ':where(:root,:host,::backdrop,::selection)'
+  let selector = ':where(:root,:host)'
   const media: string[] = []
   const supports: string[] = []
 

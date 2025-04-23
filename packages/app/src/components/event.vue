@@ -76,7 +76,7 @@ const time = computed(
 )
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 * {
   transition: background-color 300ms linear;
 }

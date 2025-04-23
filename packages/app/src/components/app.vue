@@ -10,7 +10,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
           <Menu as="div" class="relative inline-block text-left">
             <MenuButton
               as="div"
-              class="w-12 menu-button inline-flex justify-center rounded-md px-4 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+              class="inline-flex w-full justify-center rounded-md bg-black/20 px-4 py-2 text-sm font-medium text-white hover:bg-black/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
             >
               More
             </MenuButton>
@@ -124,3 +124,5 @@ body {
   color: var(---color-2-5-5);
 }
 </style>
+
+<style src="../styles/preflight.css"></style>
