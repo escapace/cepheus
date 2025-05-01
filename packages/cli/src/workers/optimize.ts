@@ -582,7 +582,7 @@ const iterate = (options: RequiredOptimizeOptions) => {
     throw new IterationError('No Changes')
   }
 
-  console.log(options.costs)
+  // console.log(options.costs)
 
   return {
     colors: map(bestColors, (value): [number, number, number] => value),

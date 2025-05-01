@@ -15,7 +15,6 @@ const enUnicodeRange =
 
 const robotoFlex: UserConfigurationFont = {
   display: 'swap',
-  name: 'roboto-flex',
   resourceHint: 'preload',
   source: './src/fonts/roboto-flex.ttf',
   tech: ['variations'],
@@ -25,7 +24,6 @@ const robotoFlex: UserConfigurationFont = {
 
 const robotoRegular: UserConfigurationFont = {
   display: 'swap',
-  name: 'roboto-regular',
   prefer: [robotoFlex],
   source: './src/fonts/roboto-regular.ttf',
   unicodeRange: enUnicodeRange,
@@ -33,7 +31,6 @@ const robotoRegular: UserConfigurationFont = {
 
 const robotoBold: UserConfigurationFont = {
   display: 'swap',
-  name: 'roboto-bold',
   prefer: [robotoFlex],
   source: './src/fonts/roboto-bold.ttf',
   unicodeRange: enUnicodeRange,
@@ -41,7 +38,6 @@ const robotoBold: UserConfigurationFont = {
 
 const robotoItalic: UserConfigurationFont = {
   display: 'swap',
-  name: 'roboto-italic',
   prefer: [robotoFlex],
   source: './src/fonts/roboto-italic.ttf',
   unicodeRange: enUnicodeRange,

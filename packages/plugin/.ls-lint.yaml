@@ -19,3 +19,4 @@ ignore:
   - lib
   - node_modules
   - packages
+  - vendor

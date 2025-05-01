@@ -118,9 +118,8 @@ export const createApp = async (options: Options = POINTE_OPTIONS) => {
               style.media === undefined ? ' ' : `media="${style.media}" `
             }cassiopeia="${style.name}-${style.key}">${style.content}</style>`,
         ),
-        `<style>${webFonts.locale['*'].fontFace}</style>`,
-        `<style>${webFonts.locale['*'].style}</style>`,
-        `<noscript><style>${webFonts.locale['*'].noScriptStyle}</style></noscript>`,
+        `<style>${webFonts.locales['*'].fontFace}</style>`,
+        `<style>${webFonts.locales['*'].style}</style>`,
         `<script>${webFonts.script}</script>`,
         `<script>window.fontLoader(${JSON.stringify('en')});</script>`,
       ].join('\n')
