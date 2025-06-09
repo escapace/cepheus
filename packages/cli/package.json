@@ -15,7 +15,7 @@
     "@cepheus/utilities": "workspace:*",
     "@escapace/minimum-perimeter-triangle": "^0.2.6",
     "@sindresorhus/fnv1a": "^3.1.0",
-    "@thi.ng/random": "^4.1.18",
+    "@thi.ng/random": "^4.1.19",
     "arg": "^5.0.2",
     "bignumber.js": "^9.3.0",
     "cepheus": "workspace:*",
@@ -26,15 +26,15 @@
     "lodash-es": "^4.17.21",
     "ora": "^8.2.0",
     "simple-statistics": "^7.8.8",
-    "tinypool": "^1.0.2",
+    "tinypool": "^1.1.0",
     "utility-types": "^3.11.0"
   },
   "devDependencies": {
     "@ls-lint/ls-lint": "2.3.0",
     "@types/lodash-es": "4.17.12",
-    "@types/node": "22.15.17",
-    "@vitest/coverage-v8": "3.1.3",
-    "eslint": "9.26.0",
+    "@types/node": "22.15.29",
+    "@vitest/coverage-v8": "3.2.0",
+    "eslint": "9.28.0",
     "eslint-config-escapace": "5.7.1",
     "esroll": "0.4.5",
     "prettier": "3.5.3",
@@ -42,7 +42,7 @@
     "syncpack": "13.0.4",
     "tsx": "4.19.4",
     "typescript": "5.8.3",
-    "vitest": "3.1.3"
+    "vitest": "3.2.0"
   },
   "engines": {
     "node": ">=22.15.0",
