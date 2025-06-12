@@ -111,26 +111,31 @@ export const createApp = async (options: Options = POINTE_OPTIONS) => {
 
       await cassiopeia.update(true)
 
-      const styles = [
+      const head = [
         ...cassiopeiaRenderToString(cassiopeia).map(
           (style) =>
             `<style ${
               style.media === undefined ? ' ' : `media="${style.media}" `
             }cassiopeia="${style.name}-${style.key}">${style.content}</style>`,
         ),
+        ...(options.manifest?.client['index.html'].css ?? []).map(
+          (value) => `<link rel="stylesheet" href="${value}" fetchpriority="high">`,
+        ),
         `<style>${webFonts.locales['*'].fontFace}</style>`,
         `<style>${webFonts.locales['*'].style}</style>`,
         `<script>${webFonts.script}</script>`,
         `<script>window.fontLoader(${JSON.stringify('en')});</script>`,
+        `<script>var INITIAL_STATE = ${uneval(pinia.state.value)};</script>`,
+        ...(options.manifest === undefined
+          ? []
+          : [
+              `<script type="module" src="/${options.manifest?.client['index.html'].file}" crossorigin></script>`,
+            ]),
       ].join('\n')
 
       const html = options.template
         .replace('<!--app-html-->', appHTML)
-        .replace('<!--app-styles-->', styles)
-        .replace(
-          '<!--app-state-->',
-          `<script>var INITIAL_STATE = ${uneval(pinia.state.value)};</script>`,
-        )
+        .replace('<!--app-head-->', head)
         .replace(
           '<!--app-html-tag-->',
           ` lang="en"${

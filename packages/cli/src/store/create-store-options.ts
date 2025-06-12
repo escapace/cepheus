@@ -38,7 +38,7 @@ export function createStoreOptions(options: StoreOptions): RequiredStoreOptions 
     throw new Error(`'levels' must be one of ${N_DIVISORS.join(', ')}`)
   }
 
-  if (!(isInteger(iterations) && iterations >= 1)) {
+  if (!isInteger(iterations) || iterations < 1) {
     throw new Error(`'iterations' must be an integer greater or equal to 1`)
   }
 

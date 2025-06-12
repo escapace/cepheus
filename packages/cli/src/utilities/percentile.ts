@@ -1,5 +1,5 @@
+import { clamp } from '@cepheus/utilities'
 import type { PRNG } from './create-prng'
-import { clamp } from './clamp'
 import { randomWithin } from './random-within'
 
 export const percentile = (

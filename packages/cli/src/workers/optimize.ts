@@ -3,7 +3,6 @@ import { normalizeAngle } from 'cepheus'
 import {
   type PlainColorObject,
   ColorSpace,
-  contrastAPCA,
   to as convert,
   deltaEJz,
   deltaEOK2,
@@ -23,14 +22,12 @@ import {
   type RequiredOptimizeOptions,
   TypeOptimizationState,
 } from '../types'
-import { clamp } from '../utilities/clamp'
 import { createPRNG } from '../utilities/create-prng'
 import { fixNaN } from '../utilities/fix-nan'
-import { isWithin } from '../utilities/is-within'
-import { normalizeRange } from '../utilities/normalize-range'
 import { percentile } from '../utilities/percentile'
 import { randomWithin } from '../utilities/random-within'
 import { relativeDifference } from '../utilities/relative-difference'
+import { clamp, expandRange, isWithin } from '@cepheus/utilities'
 
 /*
  * Calculates the (0 to 1) normalized coefficient of variation (CV)
@@ -50,7 +47,7 @@ import { relativeDifference } from '../utilities/relative-difference'
  */
 function normalizedCVD(x: number[]): number {
   if (x.length < 2) {
-    throw new Error('Need at least 2 points to form a difference')
+    throw new Error(`Need at least 2 points to form a difference, got ${x.join(', ')}`)
   }
 
   // 1. Compute consecutive differences
@@ -238,6 +235,10 @@ const distances = (
     }
   }
 
+  if (distances.includes(NaN)) {
+    console.log('here', distances, colors)
+  }
+
   return distances
 }
 
@@ -287,25 +288,25 @@ const createCosts = (
     options.chroma.range[1],
   )
 
-  // penalize lower contrasts with the background
-  const contrastCost =
-    1 -
-    mean(
-      map(options.background, (background) =>
-        mean(
-          map(
-            state,
-            (value) =>
-              Math.abs(
-                contrastAPCA(
-                  { alpha: 1, coords: background, space: options.colorSpace },
-                  { alpha: 1, coords: value, space: options.colorSpace },
-                ),
-              ) / 108,
-          ),
-        ),
-      ),
-    )
+  // // penalize lower contrasts with the background
+  // const contrastCost =
+  //   1 -
+  //   mean(
+  //     map(options.background, (background) =>
+  //       mean(
+  //         map(
+  //           state,
+  //           (value) =>
+  //             Math.abs(
+  //               contrastAPCA(
+  //                 { alpha: 1, coords: background, space: options.colorSpace },
+  //                 { alpha: 1, coords: value, space: options.colorSpace },
+  //               ),
+  //             ) / 108,
+  //         ),
+  //       ),
+  //     ),
+  //   )
 
   // calculate distances under different vision conditions
   const normalDistances = distances(state, options)
@@ -327,7 +328,7 @@ const createCosts = (
 
   const issues = Object.entries({
     chromaCost,
-    contrastCost,
+    // contrastCost,
     deuteranopiaCost,
     differenceCost,
     dispersionDeuteranopiaCost,
@@ -364,7 +365,7 @@ const createCosts = (
 
   return {
     chroma: chromaCost,
-    contrast: contrastCost,
+    // contrast: contrastCost,
     deuteranopia: deuteranopiaCost,
     difference: differenceCost,
     dispersionDeuteranopia: dispersionDeuteranopiaCost,
@@ -400,9 +401,9 @@ const normalizeLightness = (
   value: Required<Exclude<OptimizeOptions['lightness'], undefined>>,
   tolerance: number,
 ): Required<Exclude<OptimizeOptions['lightness'], undefined>> => ({
-  range: normalizeRange(
+  range: expandRange(
     map(value.range, (value) => value / N),
-    tolerance,
+    tolerance - 1,
   ),
   target: value.target / N,
 })
@@ -411,9 +412,9 @@ const normalizeChroma = (
   value: Required<Exclude<OptimizeOptions['chroma'], undefined>>,
   tolerance: number,
 ): Required<Exclude<OptimizeOptions['chroma'], undefined>> => ({
-  range: normalizeRange(
+  range: expandRange(
     map(value.range, (v) => (v / N) * 0.4),
-    tolerance,
+    tolerance - 1,
   ),
   target: (value.target / N) * 0.4,
 })
@@ -442,8 +443,12 @@ const createDistanceFunction = (options: OptimizeOptions) => {
   // root yields the theoretical upper bound of √5 (~2.236), ensuring mutual exclusivity of maxima
   // between ΔC and ΔH due to shared dependencies.
 
-  const distanceEJzColorOjbect = (a: PlainColorObject, b: PlainColorObject) =>
-    deltaEJz(a, b) / (options.colorGamut === 'srgb' ? 0.34 : 0.37)
+  const distanceEJzColorOjbect = (a: PlainColorObject, b: PlainColorObject) => {
+    const value = deltaEJz(a, b) / (options.colorGamut === 'srgb' ? 0.34 : 0.37)
+
+    return isNaN(value) ? 1 : value
+  }
+
   const distanceEJz = (a: Color, b: Color) =>
     distanceEJzColorOjbect({ alpha: 1, coords: a, space }, { alpha: 1, coords: b, space })
 
@@ -472,7 +477,6 @@ const normalizeOptions = (options: OptimizeOptions): RequiredOptimizeOptions => 
   // eslint-disable-next-line typescript/consistent-type-assertions
   const value = {
     ...createDistanceFunction(options),
-    background: options.background,
     chroma: normalizeChroma(
       {
         range: [0, N],

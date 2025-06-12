@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
-import { asyncExitHook, gracefulExit } from 'exit-hook'
 import arg from 'arg'
-import chalk from 'chalk'
+import { asyncExitHook, gracefulExit } from 'exit-hook'
 import { isError, isInteger, isString, map, repeat, throttle } from 'lodash-es'
 import { readFileSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import path, { resolve } from 'node:path'
 import { promisify } from 'node:util'
 import { gzip } from 'node:zlib'
-import ora from 'ora'
+import { Spinner } from 'picospinner'
+import chalk from 'picocolors'
 import {
   DEFAULT_DELTA_E,
   DEFAULT_HUE_ANGLE,
@@ -179,19 +179,19 @@ const run = async () => {
     return gracefulExit(1)
   }
 
-  if (iterations !== undefined && !(isInteger(iterations) && iterations >= 1)) {
+  if (iterations !== undefined && (!isInteger(iterations) || iterations < 1)) {
     console.log(HELP)
     console.error(`Option '--iterations' must be an integer greater or equal to 1.`)
     return gracefulExit(1)
   }
 
-  if (hueAngle !== undefined && !(isInteger(hueAngle) && hueAngle >= 1)) {
+  if (hueAngle !== undefined && (!isInteger(hueAngle) || hueAngle < 1)) {
     console.log(HELP)
     console.error(`Option '--hue-angle' must be an integer greater or equal to 1.`)
     return gracefulExit(1)
   }
 
-  if (precision !== undefined && !(isInteger(precision) && precision >= 2 && precision <= 10)) {
+  if (precision !== undefined && (!isInteger(precision) || precision < 2 || precision > 10)) {
     console.log(HELP)
     console.error(
       `Option '--precision' must be an integer greater or equal to 2, and smaller or equal to 10.`,
@@ -215,7 +215,8 @@ const run = async () => {
       ? (JSON.parse(await readFile(session, 'utf8')) as Record<string, OptimizeTask>)
       : undefined
 
-  const spinner = ora({ text: 'Preparing' }).start()
+  const spinner = new Spinner({ text: 'Preparing' })
+  spinner.start()
 
   const instance = cepheus({
     colorGamut,
@@ -240,7 +241,7 @@ const run = async () => {
         const done = rejected + fulfilled
         const total = Math.max(pending + done, minTotal)
 
-        spinner.text = `Palette optimization \t${padNumber(done, total)} / ~${total}`
+        spinner.setText(`Palette optimization \t${padNumber(done, total)} / ~${total}`)
       } else if (type === TypeCepheusState.OptimizationDone) {
         const { fulfilled, minTotal, pending, rejected } = selectorOptimizeTasksCount(
           instance.store,
@@ -309,26 +310,26 @@ const run = async () => {
       const prefix = `${repeat(' ', relativeFilePath.length)}${gap}`
 
       console.log(
-        `${chalk.white(chalk.bold(relativeFilePath))}${gap}${chalk.grey(
+        `${chalk.white(chalk.bold(relativeFilePath))}${gap}${chalk.gray(
           `${kibs.toFixed(2)} KiB${compressedSize}`,
         )}`,
       )
 
       console.log(
-        `${prefix}${chalk.grey(
+        `${prefix}${chalk.gray(
           `${(
             statistics.colors * statistics.squaresRemaining
           ).toString()} (${statistics.colors.toString()} * ${statistics.squaresRemaining.toString()}) colors`,
         )}`,
       )
       console.log(
-        `${prefix}${chalk.grey(
+        `${prefix}${chalk.gray(
           `∧ ${statistics.costMin.toFixed(5)}  ∨ ${statistics.costMax.toFixed(5)}`,
         )}`,
       )
 
       console.log(
-        `${prefix}${chalk.grey(
+        `${prefix}${chalk.gray(
           `μ ${statistics.costMean.toFixed(5)}  σ ${statistics.costSd.toFixed(5)}`,
         )}`,
       )
@@ -347,6 +348,8 @@ const run = async () => {
       // )
     } else if (state.type === TypeCepheusState.Error) {
       const error = state.error
+
+      console.log(error)
 
       if (isString(error)) {
         console.error(`${chalk.bgRed('ERROR')} ${error}`)

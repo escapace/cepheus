@@ -1,12 +1,27 @@
-import { range } from 'lodash-es'
+import { LENGTH } from 'cepheus'
 import { cartesianProduct } from './cartesian-product'
-import { LENGTH as N } from 'cepheus'
 import { toSquare } from './to-square'
 
 export const tile = (interval: number): number[] => {
-  const tuple = range(60, N + 60, interval)
+  // Validate that interval is a divisor
+  if (LENGTH % interval !== 0) {
+    throw new Error(`Interval ${interval} is not a divisor of ${LENGTH}`)
+  }
 
-  return cartesianProduct(tuple, tuple).map((value): number =>
+  // Calculate how many subdivisions we need along each axis
+  const divisions = LENGTH / interval
+
+  // Generate arrays of x and y coordinates for bottom-left corners
+  const xCoords: number[] = []
+  const yCoords: number[] = []
+
+  for (let index = 0; index < divisions; index++) {
+    xCoords.push(index * interval)
+    yCoords.push(index * interval)
+  }
+
+  // Use cartesian product to get all combinations
+  return cartesianProduct(xCoords, yCoords).map((value): number =>
     toSquare(value as [number, number], interval),
   )
 }

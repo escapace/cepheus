@@ -9,7 +9,7 @@ import type { Store } from './create-store'
 
 interface Options {
   hueAngle?: number
-  squares?: Map<number, Required<Pick<OptimizeTaskOptions, 'background' | 'chroma' | 'lightness'>>>
+  squares?: Map<number, Required<Pick<OptimizeTaskOptions, 'chroma' | 'lightness'>>>
   tolerance?: number
   weights?: OptimizeTaskOptions['weights']
 }

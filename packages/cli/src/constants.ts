@@ -1,5 +1,5 @@
+import { divisors } from '@cepheus/utilities'
 import { median } from 'simple-statistics'
-import { divisors } from './utilities/divisors'
 import { normalizeWeights } from './utilities/normalize-weights'
 
 export const N = 120
@@ -16,13 +16,12 @@ export const DEFAULT_DELTA_E = 'jzczhz'
 
 /* eslint-disable perfectionist/sort-objects */
 export const DEFAULT_WEIGHTS = normalizeWeights({
-  contrast: 1,
   difference: 1,
   ...normalizeWeights(
     {
       hue: 3,
       chroma: 2,
-      lightness: 1,
+      lightness: 2,
     },
     2,
   ),

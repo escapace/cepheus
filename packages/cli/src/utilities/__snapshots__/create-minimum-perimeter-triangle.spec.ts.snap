@@ -1,0 +1,18 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`create-minimum-perimeter-triangle > . 1`] = `
+[
+  [
+    0,
+    0,
+  ],
+  [
+    80,
+    109.99999999999999,
+  ],
+  [
+    120,
+    0,
+  ],
+]
+`;

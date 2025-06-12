@@ -7,13 +7,10 @@
     "email": "opensource@escapace.com"
   },
   "bugs": "https://github.com/escapace/cepheus/issues",
-  "dependencies": {
-    "cepheus": "workspace:*"
-  },
   "devDependencies": {
-    "@ls-lint/ls-lint": "2.3.0",
-    "@types/node": "22.15.29",
-    "@vitest/coverage-v8": "3.2.0",
+    "@ls-lint/ls-lint": "2.3.1",
+    "@types/node": "24.0.0",
+    "@vitest/coverage-v8": "3.2.3",
     "eslint": "9.28.0",
     "eslint-config-escapace": "5.7.1",
     "esroll": "0.4.5",
@@ -23,7 +20,7 @@
     "syncpack": "13.0.4",
     "tsx": "4.19.4",
     "typescript": "5.8.3",
-    "vitest": "3.2.0"
+    "vitest": "3.2.3"
   },
   "engines": {
     "node": ">=22.15.0",
@@ -60,7 +57,8 @@
   "license": "MPL-2.0",
   "peerDependencies": {
     "@texel/color": ">=1.1.10",
-    "cassiopeia": ">=6.1.1"
+    "cassiopeia": ">=7.0.0",
+    "cepheus": "workspace:*"
   },
   "private": false,
   "publishConfig": {

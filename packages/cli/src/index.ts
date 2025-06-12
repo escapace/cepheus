@@ -28,6 +28,7 @@ export {
 } from './types'
 
 import { ColorSpace, HSL, HSV, LCH, OKLab, OKLCH, OKLrCH, P3, sRGB } from 'colorjs.io/fn'
+import { toPrecision } from './utilities/to-precision'
 
 ColorSpace.register(HSL)
 ColorSpace.register(HSV)
@@ -94,28 +95,34 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
       const attempt = async (tolerance: number) => {
         const squares = selectorRemainingSquares(store)
 
-        if (squares.size !== 0) {
-          for (const iteration of range(store.options.iterations)) {
-            actionCreateOptimizeTasks(store, iteration, {
-              squares,
-              tolerance,
-              weights: {
-                ...store.options.weights,
-                chroma: store.options.weights.chroma * tolerance,
-                hue: store.options.weights.hue * tolerance,
-                lightness: store.options.weights.lightness * tolerance,
-              },
-            })
-          }
-
-          await runTasks()
+        if (squares.size === 0) {
+          return true
         }
+
+        for (const iteration of range(store.options.iterations)) {
+          actionCreateOptimizeTasks(store, iteration, {
+            squares,
+            tolerance,
+            weights: {
+              ...store.options.weights,
+              chroma: store.options.weights.chroma * tolerance,
+              hue: store.options.weights.hue * tolerance,
+              lightness: store.options.weights.lightness * tolerance,
+            },
+          })
+        }
+
+        await runTasks()
+
+        return squares.size === 0
       }
 
-      for (const tolerance of [
-        1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5,
-      ]) {
-        await attempt(tolerance)
+      const tolerances = [...Array(20).keys()].map((_, index) => toPrecision(1 + ((index + 1) * 0.05), 5))
+
+      for (const tolerance of tolerances) {
+        if (await attempt(tolerance)) {
+          break
+        }
       }
 
       const missing = selectorRemainingSquares(store)
@@ -144,7 +151,7 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
     .then(async () => {
       const state = selectorState(store)
 
-      if (!(state.type === TypeCepheusState.Abort || state.type === TypeCepheusState.Error)) {
+      if (state.type !== TypeCepheusState.Abort && state.type !== TypeCepheusState.Error) {
         return await actionUpdateStage(store, {
           type: TypeCepheusState.Done,
         })

@@ -44,8 +44,9 @@ export async function createApp(context?: SSRContext) {
 
   const cassiopeia = createCassiopeia({
     deferEvery: 8,
-    plugins: [cepheus],
   })
+
+  cassiopeia.use(cepheus)
 
   if (!import.meta.env.SSR) {
     // TODO: cleanup

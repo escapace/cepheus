@@ -288,7 +288,7 @@ onUnmounted(() => {
   --header-color: var(---color-primary-250-8);
   --subheader-color: var(---color-primary-253-15);
 
-  transition: background-color 30ms linear;
+  transition: background-color 100ms linear;
 }
 
 .control {

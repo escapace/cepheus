@@ -19,7 +19,7 @@ export function chroma(
 ): Promise<{ max: number; min: number }> | { max: number; min: number } {
   const value = interpolator[INTERPOLATOR]
 
-  if (!(a === undefined && b === undefined)) {
+  if (a !== undefined || b !== undefined) {
     return value.updateChroma(a, b).then(() => value.state.chroma)
   }
 
@@ -44,7 +44,7 @@ export function lightness(
 ): Promise<{ max: number; min: number }> | { max: number; min: number } {
   const value = interpolator[INTERPOLATOR]
 
-  if (!(a === undefined && b === undefined)) {
+  if (a !== undefined || b !== undefined) {
     return value.updateLightness(a, b).then(() => value.state.lightness)
   }
 

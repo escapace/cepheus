@@ -4,7 +4,6 @@ import type { OptimizeOptions } from '../types'
 import { optimize } from './optimize'
 
 const CASE_A: OptimizeOptions = {
-  background: [[0.999_999_993_473_546_2, 3.727_399_553_519_285e-8, 0]],
   chroma: { range: [0, 25], target: 12.5 },
   colorGamut: 'p3',
   colors: [

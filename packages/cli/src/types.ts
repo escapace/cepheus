@@ -52,7 +52,6 @@ export type CepheusState =
 export interface StoreOptions
   extends Omit<
     OptimizeOptions,
-    | 'background'
     | 'chroma'
     | 'colorGamut'
     | 'colors'
@@ -95,7 +94,6 @@ export interface OptimizeTaskOptions extends OptimizeOptions {
 }
 
 export interface OptimizeOptions {
-  background: Array<[number, number, number]>
   colorGamut: ColorGamut
   colors: Array<Array<[number, number, number]>>
   colorSpace: ColorSpaceLiteral
@@ -104,7 +102,7 @@ export interface OptimizeOptions {
   randomSeed: string
   weights: {
     chroma: number
-    contrast: number
+    // contrast: number
     deuteranopia: number
     difference: number
     dispersionDeuteranopia: number
@@ -149,7 +147,6 @@ export type RequiredOptimizeOptions = {
   distance: (a: [number, number, number], b: [number, number, number]) => number
   distanceColorOjbect: (a: PlainColorObject, b: PlainColorObject) => number
 
-  background: Array<[number, number, number]>
   colorGamut: ColorGamut
   colors: Array<Array<[number, number, number]>>
   colorSpace: ColorSpace
@@ -158,7 +155,7 @@ export type RequiredOptimizeOptions = {
 } & DeepRequired<
   Omit<
     OptimizeOptions,
-    'background' | 'colorGamut' | 'colors' | 'colorSpace' | 'randomSeed' | 'randomSource'
+    'colorGamut' | 'colors' | 'colorSpace' | 'randomSeed' | 'randomSource'
   >
 >
 

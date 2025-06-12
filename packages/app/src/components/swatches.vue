@@ -48,12 +48,12 @@ const toStyle = (squareIndex: number, colorIndex: number): Record<string, unknow
         :style="toStyle(square, colorIndex) as any"
         class="square"
       >
-        <div class="label">
+        <!-- <div class="label"> -->
           <!-- {{ square }} -->
           <!-- <svg viewBox="0 0 100 100"> -->
           <!--   <text textLength="100" x="0" y="50"  class="label">{{ square }}</text> -->
           <!-- </svg> -->
-        </div>
+        <!-- </div> -->
       </div>
     </div>
   </div>
@@ -67,7 +67,7 @@ const toStyle = (squareIndex: number, colorIndex: number): Record<string, unknow
   /* height: 100vh; */
   gap: 3em;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   flex-wrap: nowrap;
   align-content: center;
   justify-content: space-evenly;
@@ -87,11 +87,11 @@ const toStyle = (squareIndex: number, colorIndex: number): Record<string, unknow
 }
 
 .square {
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  display: block;
+  /* align-items: center; */
+  /* justify-content: center; */
   /* margin: 10px; */
   /* margin: 1rem; */
 }

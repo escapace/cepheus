@@ -129,8 +129,8 @@ onMounted(() => {
       }
     }
 
-    const toX = (x: number) => Math.floor((x / 150) * img.width) - 400
-    const toY = (y: number) => Math.floor((y / 150) * img.height) - 200
+    const toX = (x: number) => Math.floor((x / 150) * img.width) + 100
+    const toY = (y: number) => Math.floor((y / 150) * img.height) + 100
 
     const triangle = instance[INTERPOLATOR].state.model.triangle
 
@@ -168,7 +168,7 @@ onMounted(() => {
 
 <style scoped>
 .box {
-  display: flex;
+  display: block;
   width: 1024px;
   height: 1024px;
 }
