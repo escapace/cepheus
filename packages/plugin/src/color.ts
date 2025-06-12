@@ -44,7 +44,7 @@ export const color = (
 
   if (
     options.colorGamutMapping ??
-    options.colorGamut !== options.interpolator[INTERPOLATOR].state.model.colorGamut
+    options.colorGamut !== options.interpolator[INTERPOLATOR].state.palette.colorGamut
   ) {
     gamutMapOKLCH(coords, options.colorGamut === 'p3' ? DisplayP3Gamut : sRGBGamut, OKLCH, coords)
   }

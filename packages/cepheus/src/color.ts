@@ -9,7 +9,7 @@ export const color = (
   lightness: number,
   invert = false,
 ) => {
-  const alias = interpolator[INTERPOLATOR].state.model.alias
+  const alias = interpolator[INTERPOLATOR].state.palette.alias
 
   const index = alias === undefined ? color : alias(color)
 

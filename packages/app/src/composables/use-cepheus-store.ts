@@ -28,7 +28,7 @@ interface Options {
 
 const createCepheusStore = (preferences?: Preferences) =>
   defineStore('cepheus', () => {
-    const model = ref<Preferences['model']>(preferences?.model ?? 'one')
+    const palette = ref<Preferences['palette']>(preferences?.palette ?? 'one')
     const chroma = ref(preferences?.chroma ?? 1)
     const lightness = ref(preferences?.lightness ?? 0.5)
     const contrast = ref(preferences?.contrast)
@@ -39,7 +39,7 @@ const createCepheusStore = (preferences?: Preferences) =>
       colorScheme,
       contrast,
       lightness,
-      model,
+      palette,
     }
   })
 
@@ -48,11 +48,11 @@ export type CepheusStore = ReturnType<ReturnType<typeof createCepheusStore>>
 const createCepheus = async (store: CepheusStore): Promise<[Cepheus, () => void]> => {
   const scope = effectScope(true)
 
-  const modelInitial = (
-    store.model === 'one'
-      ? await import('../models/model-one')
-      : await import('../models/model-two')
-  ).model
+  const paletteInitial = (
+    store.palette === 'one'
+      ? await import('../palette/palette-one')
+      : await import('../palette/palette-two')
+  ).default
 
   const cepheus = scope.run(() => {
     const references = storeToRefs(store)
@@ -89,16 +89,16 @@ const createCepheus = async (store: CepheusStore): Promise<[Cepheus, () => void]
       return { max: lerp(1 - c, 1, l), min: lerp(0, c, l) }
     })
 
-    const model = computedAsync(
+    const palette = computedAsync(
       async () => {
         const value =
-          references.model.value === 'one'
-            ? await import('../models/model-one')
-            : await import('../models/model-two')
+          references.palette.value === 'one'
+            ? await import('../palette/palette-one')
+            : await import('../palette/palette-two')
 
-        return value.model
+        return value.default
       },
-      modelInitial,
+      paletteInitial,
       { lazy: true },
     )
 
@@ -106,7 +106,7 @@ const createCepheus = async (store: CepheusStore): Promise<[Cepheus, () => void]
       chroma,
       colorScheme,
       lightness,
-      model,
+      palette,
     })
 
     onScopeDispose(() => cepheus.dispose())
@@ -133,15 +133,15 @@ const createCepheus = async (store: CepheusStore): Promise<[Cepheus, () => void]
           references.chroma,
           references.contrast,
           references.colorScheme,
-          references.model,
+          references.palette,
         ],
-        ([lightness, chroma, contrast, colorScheme, model]) => {
+        ([lightness, chroma, contrast, colorScheme, palette]) => {
           update({
             chroma,
             colorScheme,
             contrast,
             lightness,
-            model,
+            palette,
           })
         },
       )

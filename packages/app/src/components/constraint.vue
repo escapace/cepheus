@@ -7,7 +7,7 @@ import { useCepheusStore } from '../composables/use-cepheus-store'
 import { usePane } from '../composables/use-pane'
 
 const instance = useInterpolator()
-const model = instance[INTERPOLATOR].state.model
+const palette = instance[INTERPOLATOR].state.palette
 
 usePane()
 
@@ -56,12 +56,12 @@ onMounted(() => {
 
       context.clearRect(0, 0, canvas.width, canvas.height)
 
-      const modelTriangle = model.triangle.map(([x, y]) => [toX(x), toY(y)]) as Triangle
+      const paletteTriangle = palette.triangle.map(([x, y]) => [toX(x), toY(y)]) as Triangle
 
       const triangle = instance[INTERPOLATOR].triangle.map(([x, y]) => [toX(x), toY(y)]) as Triangle
 
       context.putImageData(img, 0, 0)
-      strokeTriangle(modelTriangle)
+      strokeTriangle(paletteTriangle)
       strokeTriangle(triangle)
     })
   }

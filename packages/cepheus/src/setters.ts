@@ -1,5 +1,5 @@
 import { INTERPOLATOR } from './constants'
-import type { Interpolator, Model } from './types'
+import type { Interpolator, Palette } from './types'
 
 export function chroma(interpolator: Interpolator): { max: number; min: number }
 export function chroma(
@@ -51,15 +51,15 @@ export function lightness(
   return value.state.lightness
 }
 
-export function model(interpolator: Interpolator, model?: undefined): Model
-export function model(interpolator: Interpolator, model?: undefined): Model
-export function model(interpolator: Interpolator, model: Model): Promise<Model>
-export function model(interpolator: Interpolator, model?: Model): Model | Promise<Model> {
+export function palette(interpolator: Interpolator, palette?: undefined): Palette
+export function palette(interpolator: Interpolator, palette?: undefined): Palette
+export function palette(interpolator: Interpolator, palette: Palette): Promise<Palette>
+export function palette(interpolator: Interpolator, palette?: Palette): Palette | Promise<Palette> {
   const value = interpolator[INTERPOLATOR]
 
-  if (model !== undefined) {
-    return value.updateModel(model).then(() => value.state.model)
+  if (palette !== undefined) {
+    return value.updatePalette(palette).then(() => value.state.palette)
   }
 
-  return value.state.model
+  return value.state.palette
 }

@@ -35,7 +35,7 @@ export const usePane = () => {
       contrastSystem,
     })
 
-    pane.addBinding(store, 'model', {
+    pane.addBinding(store, 'palette', {
       label: 'theme',
       options: {
         one: 'one',

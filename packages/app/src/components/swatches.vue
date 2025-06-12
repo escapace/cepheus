@@ -14,16 +14,16 @@ import { INTERPOLATOR, LENGTH as N } from 'cepheus'
 import { range } from 'lodash-es'
 
 const interpolator = useInterpolator()
-const model = interpolator[INTERPOLATOR].state.model
+const palette = interpolator[INTERPOLATOR].state.palette
 
-const levels = N / model.interval
-const numberColors = model.length
+const levels = N / palette.interval
+const numberColors = palette.length
 const colors = range(0, numberColors)
 
-const squares = tile(model.interval)
+const squares = tile(palette.interval)
 
 const toStyle = (squareIndex: number, colorIndex: number): Record<string, unknown> => {
-  const colors = model.colors.get(squareIndex)
+  const colors = palette.colors.get(squareIndex)
   const coords = colors?.[colorIndex]
 
   if (coords === undefined) {

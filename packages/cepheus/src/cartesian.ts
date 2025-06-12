@@ -17,7 +17,7 @@ export const cartesian = (
   y: number,
   extend = true,
 ): [number, number, number] | undefined => {
-  const { colors, interval } = interpolator[INTERPOLATOR].state.model
+  const { colors, interval } = interpolator[INTERPOLATOR].state.palette
 
   const nXf = Math.floor(x / interval)
   const nYf = Math.floor(y / interval)

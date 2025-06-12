@@ -55,7 +55,7 @@ export function* createIterator(options: CreateIteratorOptions): Iterator {
   const properties = {
     ...options,
     colorGamutMapping:
-      options.colorGamut !== options.interpolator[INTERPOLATOR].state.model.colorGamut,
+      options.colorGamut !== options.interpolator[INTERPOLATOR].state.palette.colorGamut,
   }
 
   let variable: string | true

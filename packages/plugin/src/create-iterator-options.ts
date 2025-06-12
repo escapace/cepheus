@@ -15,7 +15,7 @@ const intersection = <T extends string>(a: T[], b: T[] | undefined): T[] => {
   return a.filter((value) => b.includes(value))
 }
 
-export const createCepheusOptions = (
+export const createIteratorOptions = (
   options: { displayP3Support?: boolean } & Options,
 ): IteratorOptions => {
   let colorFormat: Array<'oklch' | 'p3' | 'srgb'>

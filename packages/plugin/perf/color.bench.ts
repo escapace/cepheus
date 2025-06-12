@@ -1,4 +1,4 @@
-import { createInterpolator, parse } from 'cepheus'
+import { createInterpolator, parsePalette } from 'cepheus'
 import { assert, bench } from 'vitest'
 import { color } from '../src/color'
 
@@ -6,13 +6,13 @@ function randomInt(max: number) {
   return Math.floor(Math.random() * max)
 }
 
-const model = parse((await import('./model.json')).default)
+const palette = parsePalette((await import('./palette.json')).default)
 
 bench('color p3', () => {
   const value = color(`---color-${randomInt(3)}-${randomInt(255)}-${randomInt(100)}`, {
     colorGamut: 'p3',
     colorScheme: 'light',
-    interpolator: createInterpolator({ model }),
+    interpolator: createInterpolator({ palette }),
   })
 
   assert(value !== undefined)
@@ -24,7 +24,7 @@ bench('color srgb', () => {
   const value = color(`---color-${randomInt(3)}-${randomInt(255)}-${randomInt(100)}`, {
     colorGamut: 'srgb',
     colorScheme: 'light',
-    interpolator: createInterpolator({ model }),
+    interpolator: createInterpolator({ palette }),
   })
 
   assert(value !== undefined)

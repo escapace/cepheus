@@ -1,12 +1,12 @@
 import { assert } from './assert'
-import type { Model, ModelUnparsed, Point, Triangle } from './types'
+import type { Palette, RawPalette, Point, Triangle } from './types'
 import { chunk } from './utilities/chunk'
 
-export const parse = (model: unknown): Model => {
-  assert(Array.isArray(model))
-  assert(model.length === 6)
+export const parsePalette = (palette: unknown): Palette => {
+  assert(Array.isArray(palette))
+  assert(palette.length === 6)
 
-  const [colorGamut, interval, length, triangleFlat, squares, data] = model as ModelUnparsed
+  const [colorGamut, interval, length, triangleFlat, squares, data] = palette as RawPalette
 
   assert(typeof colorGamut === 'string')
   assert(colorGamut === 'p3' || colorGamut === 'srgb')

@@ -4,7 +4,7 @@ export type Line = [Point, Point]
 export type Point = [x: number, y: number]
 export type Triangle = [Point, Point, Point]
 
-export type ModelUnparsed = [
+export type RawPalette = [
   colorGamut: 'p3' | 'srgb',
   interval: number,
   length: number,
@@ -13,7 +13,7 @@ export type ModelUnparsed = [
   colors: number[],
 ]
 
-export interface Model {
+export interface Palette {
   colorGamut: 'p3' | 'srgb'
   colors: Map<number, Array<[number, number, number]>>
   interval: number
@@ -30,10 +30,10 @@ export type Unsubscribe = () => unknown
 export interface State {
   chroma: { max: number; min: number }
   lightness: { max: number; min: number }
-  model: Model
+  palette: Palette
 }
 
-export interface Options extends Partial<Omit<State, 'model'>>, Pick<State, 'model'> {}
+export interface Options extends Partial<Omit<State, 'palette'>>, Pick<State, 'palette'> {}
 
 export interface Interpolator {
   [INTERPOLATOR]: {
@@ -42,6 +42,6 @@ export interface Interpolator {
     triangle: Triangle
     updateChroma: (a?: number, b?: number) => Promise<void>
     updateLightness: (a?: number, b?: number) => Promise<void>
-    updateModel: (model: Model) => Promise<void>
+    updatePalette: (palette: Palette) => Promise<void>
   }
 }

@@ -13,7 +13,7 @@ import { cartesian, INTERPOLATOR } from 'cepheus'
 import { onMounted } from 'vue'
 
 const instance = useInterpolator()
-const model = instance[INTERPOLATOR].state.model
+const palette = instance[INTERPOLATOR].state.palette
 
 onMounted(() => {
   const canvas = document.querySelector('canvas')!
@@ -81,9 +81,9 @@ onMounted(() => {
   context.strokeStyle = 'red'
   context.beginPath()
   // context.moveTo(0, 0)
-  context.lineTo(toX(model.triangle[0][0]), toY(model.triangle[0][1]))
-  context.lineTo(toX(model.triangle[1][0]), toY(model.triangle[1][1]))
-  context.lineTo(toX(model.triangle[2][0]), toY(model.triangle[2][1]))
+  context.lineTo(toX(palette.triangle[0][0]), toY(palette.triangle[0][1]))
+  context.lineTo(toX(palette.triangle[1][0]), toY(palette.triangle[1][1]))
+  context.lineTo(toX(palette.triangle[2][0]), toY(palette.triangle[2][1]))
   context.stroke()
 
   // context.translate(0, context.canvas.height) // reset where 0,0 is located

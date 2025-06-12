@@ -1,0 +1,39 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`createSquareOptions() > . 1`] = `
+{
+  "chroma": {
+    "range": [
+      0,
+      2,
+    ],
+    "target": 0,
+  },
+  "lightness": {
+    "range": [
+      0,
+      2,
+    ],
+    "target": 0,
+  },
+}
+`;
+
+exports[`createSquareOptions() > . 2`] = `
+{
+  "chroma": {
+    "range": [
+      0,
+      2,
+    ],
+    "target": 0,
+  },
+  "lightness": {
+    "range": [
+      118,
+      120,
+    ],
+    "target": 120,
+  },
+}
+`;

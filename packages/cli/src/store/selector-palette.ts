@@ -1,6 +1,5 @@
-import type { ModelUnparsed } from 'cepheus'
+import type { RawPalette } from 'cepheus'
 import { to as convert, OKLCH, OKLrCH } from 'colorjs.io/fn'
-
 import { flattenDeep, map } from 'lodash-es'
 import { fixNaN } from '../utilities/fix-nan'
 import { toPrecision } from '../utilities/to-precision'
@@ -8,7 +7,7 @@ import type { Store } from './create-store'
 import { selectorSquares } from './selector-squares'
 import { selectorTriangle } from './selector-triangle'
 
-export const selectorModel = (store: Store): ModelUnparsed => {
+export const selectorPalette = (store: Store): RawPalette => {
   const values = new Map(
     Array.from(selectorSquares(store, store.allIterations).entries()).map(
       ([square, task]): [number, Array<[number, number, number]>] => [

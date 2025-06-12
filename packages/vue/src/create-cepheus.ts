@@ -1,7 +1,7 @@
 import {
-  createCepheusOptions,
   createIterator,
   createIteratorMultiplexer,
+  createIteratorOptions,
   type ColorFunction,
 } from '@cepheus/plugin'
 import { PLUGIN, type Plugin as CassiopeiaPlugin, type Iterators } from 'cassiopeia'
@@ -10,8 +10,8 @@ import {
   subscribe,
   chroma as updateChroma,
   lightness as updateLightness,
-  model as updateModel,
-  type Model,
+  palette as updatePalette,
+  type Palette,
 } from 'cepheus'
 import type { MaybeRef, ObjectPlugin } from 'vue'
 import { computed, effectScope, isProxy, onScopeDispose, ref, unref, watch, type App } from 'vue'
@@ -29,7 +29,7 @@ export interface Options {
 
   colors?: Record<string, ColorFunction | [number, number, number] | undefined>
 
-  model: MaybeRef<Model>
+  palette: MaybeRef<Palette>
 }
 
 export interface Cepheus extends CassiopeiaPlugin, ObjectPlugin {
@@ -49,7 +49,7 @@ export const createCepheus = (options: Options): Cepheus => {
   const interpolator = createInterpolator({
     chroma: unref(options.chroma),
     lightness: unref(options.lightness),
-    model: unref(options.model),
+    palette: unref(options.palette),
   })
 
   scope.run(() => {
@@ -66,11 +66,11 @@ export const createCepheus = (options: Options): Cepheus => {
       })
     }
 
-    const model = computed(() => unref(options.model))
+    const palette = computed(() => unref(options.palette))
     const chroma = computed(() => unref(options.chroma))
     const lightness = computed(() => unref(options.lightness))
 
-    watch(model, (value) => void updateModel(interpolator, value), WATCH_OPTIONS)
+    watch(palette, (value) => void updatePalette(interpolator, value), WATCH_OPTIONS)
     watch(chroma, (value) => void updateChroma(interpolator, value?.min, value?.max), WATCH_OPTIONS)
     watch(
       lightness,
@@ -92,7 +92,7 @@ export const createCepheus = (options: Options): Cepheus => {
     [PLUGIN]: (iterators: Iterators, update) => {
       scope.run(() => {
         const iteratorOptions = computed(() =>
-          createCepheusOptions({
+          createIteratorOptions({
             colorFormat: unref(options.colorFormat),
             colorGamut: unref(options.colorGamut),
             colorScheme: unref(options.colorScheme),

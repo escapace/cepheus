@@ -18,7 +18,7 @@ import {
   DEFAULT_PRECISION,
   N_DIVISORS,
 } from './constants'
-import { selectorModel } from './store/selector-model'
+import { selectorPalette } from './store/selector-palette'
 import {
   selectorOptimizeTasksCount,
   selectorOptimizeTasksNotPending,
@@ -47,12 +47,13 @@ const HELP = `${chalk.bold('Usage:')}
 ${chalk.bold('Options:')}
   --seed          Pseudorandom number generator seed.
   --color         Foreground color.
-  --output        Write output palette model to file.
+  --output        Write output palette to file.
   --color-gamut   Ensure that colors are inside the color gamut. [default: p3]
   --color-space   Preferred iteration color space. [default: oklrch]
   --hue-angle     Hue angle for each sampling step. [default: ${DEFAULT_HUE_ANGLE}]
   --prng          Pseudorandom number generator. [default: xoshiro128++]
-  --levels        Number of uniform sampling steps along each square axis. [default: ${DEFAULT_N_DIVISOR}]
+  --levels        Number of uniform sampling steps (${N_DIVISORS.join(',')})
+                  along each square axis. [default: ${DEFAULT_N_DIVISOR}]
   --iterations    Number of iterations. [default: ${DEFAULT_ITERATIONS}]
   --session       Use a session to file.
   --precision     Number of significant digits to round to. [default: ${DEFAULT_PRECISION}]
@@ -294,7 +295,7 @@ const run = async () => {
     const state = selectorState(instance.store)
 
     if (state.type === TypeCepheusState.Done) {
-      const content = JSON.stringify(selectorModel(instance.store))
+      const content = JSON.stringify(selectorPalette(instance.store))
       const filePath = path.resolve(process.cwd(), output)
       const relativeFilePath = path.relative(process.cwd(), output)
 
