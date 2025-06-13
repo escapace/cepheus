@@ -50,7 +50,7 @@ export async function createApp(context?: SSRContext) {
 
   if (!import.meta.env.SSR) {
     // TODO: cleanup
-    cassiopeia.subscribe(createBrowserSubscription({ method: 'insert-discard' }))
+    cassiopeia.subscribe(createBrowserSubscription({ method: 'overwrite' }))
   }
 
   const app = createSSRApp(App).use(router).use(pinia).use(cepheus).use(cassiopeia)

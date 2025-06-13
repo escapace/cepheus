@@ -5,8 +5,8 @@ import type { Interpolator } from './types'
 export const color = (
   interpolator: Interpolator,
   color: number | string,
-  chroma: number,
   lightness: number,
+  chroma: number,
   invert = false,
 ) => {
   const alias = interpolator[INTERPOLATOR].state.palette.alias
@@ -14,7 +14,7 @@ export const color = (
   const index = alias === undefined ? color : alias(color)
 
   if (typeof index !== 'number') {
-    throw new TypeError(`cepheus: unknown color index '${index}'`)
+    return
   }
 
   return barycentric(interpolator, index, MAX - lightness, chroma, lightness, invert)

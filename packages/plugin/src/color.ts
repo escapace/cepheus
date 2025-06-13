@@ -33,8 +33,8 @@ export const color = (
     : value(
         options.interpolator,
         color as string,
-        chroma!,
         lightness!,
+        chroma!,
         options.colorScheme === 'dark',
       )
 

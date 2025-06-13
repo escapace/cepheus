@@ -88,6 +88,8 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
   </div>
 </template>
 
+<style src="../styles/preflight.css"></style>
+
 <style>
 body {
   background-color: var(---color-primary-250-5);
@@ -124,5 +126,3 @@ body {
   color: var(---color-2-5-5);
 }
 </style>
-
-<style src="../styles/preflight.css"></style>

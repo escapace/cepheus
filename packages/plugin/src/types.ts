@@ -20,9 +20,9 @@ export interface IteratorOptions extends Pick<Required<Options>, 'colorSchemeStr
 export type ColorFunction = (
   interpolator: Interpolator,
   color: string,
-  chroma?: number,
-  lightness?: number,
-  invert?: boolean,
+  lightness: number | undefined,
+  chroma: number | undefined,
+  invert: boolean,
 ) => [number, number, number] | undefined
 
 export interface CreateIteratorOptions extends Combination {
