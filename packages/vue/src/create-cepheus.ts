@@ -4,19 +4,24 @@ import {
   createIteratorOptions,
   type ColorFunction,
 } from '@cepheus/plugin'
-import { PLUGIN, type Plugin as CassiopeiaPlugin, type Iterators } from 'cassiopeia'
+import {
+  PLUGIN,
+  type Plugin as CassiopeiaPlugin,
+  type Iterators,
+  type UpdatePlugin,
+} from 'cassiopeia'
 import {
   createInterpolator,
   subscribe,
   chroma as updateChroma,
   lightness as updateLightness,
   palette as updatePalette,
+  type Interpolator,
   type Palette,
 } from 'cepheus'
 import type { MaybeRef, ObjectPlugin } from 'vue'
 import { computed, effectScope, isProxy, onScopeDispose, ref, unref, watch, type App } from 'vue'
-
-import { INJECTION_KEY_COLORS, INJECTION_KEY_INTERPOLATOR } from './constants'
+import { CEPHEUS_INJECTION_KEY } from './constants'
 
 export interface Options {
   colorFormat?: MaybeRef<Array<'oklch' | 'p3' | 'srgb'> | undefined>
@@ -34,6 +39,8 @@ export interface Options {
 
 export interface Cepheus extends CassiopeiaPlugin, ObjectPlugin {
   dispose: () => void
+  interpolator: Interpolator
+  colors?: Options['colors']
 }
 
 const WATCH_OPTIONS = { flush: 'sync' } as const
@@ -81,61 +88,66 @@ export const createCepheus = (options: Options): Cepheus => {
 
   const dispose = () => scope.stop()
 
-  return {
+  const plugin = (iterators: Iterators, update: UpdatePlugin) => {
+    scope.run(() => {
+      const iteratorOptions = computed(() =>
+        createIteratorOptions({
+          colorFormat: unref(options.colorFormat),
+          colorGamut: unref(options.colorGamut),
+          colorScheme: unref(options.colorScheme),
+          colorSchemeStrategy: unref(options.colorSchemeStrategy),
+          displayP3Support: displayP3Support.value,
+        }),
+      )
+
+      watch(
+        iteratorOptions,
+        ({ colorSchemeStrategy, combinations }) => {
+          const options = combinations.map((combination) => ({
+            ...combination,
+            colors,
+            colorSchemeStrategy,
+            interpolator,
+          }))
+
+          const thunk =
+            options.length === 1
+              ? () => createIterator(options[0])
+              : createIteratorMultiplexer(createIterator, options)
+
+          iterators.set('color', thunk)
+
+          void update(false)
+        },
+        { ...WATCH_OPTIONS, immediate: true },
+      )
+
+      if (colors !== undefined && isProxy(colors)) {
+        watch(colors, () => void update(false), WATCH_OPTIONS)
+      }
+
+      const unsubscribe = subscribe(interpolator, update)
+
+      onScopeDispose(() => {
+        unsubscribe()
+        setImmediate(() => {
+          iterators.delete('color')
+        })
+      })
+    })
+  }
+
+  const cepheus: Cepheus = {
+    colors,
     dispose,
     install: (app: App) => {
-      app.provide(INJECTION_KEY_INTERPOLATOR, interpolator)
-      app.provide(INJECTION_KEY_COLORS, colors)
+      app.provide(CEPHEUS_INJECTION_KEY, cepheus)
 
       app.onUnmount(dispose)
     },
-    [PLUGIN]: (iterators: Iterators, update) => {
-      scope.run(() => {
-        const iteratorOptions = computed(() =>
-          createIteratorOptions({
-            colorFormat: unref(options.colorFormat),
-            colorGamut: unref(options.colorGamut),
-            colorScheme: unref(options.colorScheme),
-            colorSchemeStrategy: unref(options.colorSchemeStrategy),
-            displayP3Support: displayP3Support.value,
-          }),
-        )
-
-        watch(
-          iteratorOptions,
-          ({ colorSchemeStrategy, combinations }) => {
-            const options = combinations.map((combination) => ({
-              ...combination,
-              colors,
-              colorSchemeStrategy,
-              interpolator,
-            }))
-
-            const thunk =
-              options.length === 1
-                ? () => createIterator(options[0])
-                : createIteratorMultiplexer(createIterator, options)
-
-            iterators.set('color', thunk)
-
-            void update(false)
-          },
-          { ...WATCH_OPTIONS, immediate: true },
-        )
-
-        if (colors !== undefined && isProxy(colors)) {
-          watch(colors, () => void update(false), WATCH_OPTIONS)
-        }
-
-        const unsubscribe = subscribe(interpolator, update)
-
-        onScopeDispose(() => {
-          unsubscribe()
-          setImmediate(() => {
-            iterators.delete('color')
-          })
-        })
-      })
-    },
+    interpolator,
+    [PLUGIN]: plugin,
   }
+
+  return cepheus
 }

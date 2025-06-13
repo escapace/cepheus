@@ -1,14 +1,13 @@
 import { color, type ColorOptions } from '@cepheus/plugin'
 import { computed, inject } from 'vue'
-import { INJECTION_KEY_COLORS, INJECTION_KEY_INTERPOLATOR } from './constants'
+import { CEPHEUS_INJECTION_KEY } from './constants'
 
 export const useColor = (
   options: { variable: string } & Pick<ColorOptions, 'colorGamut' | 'colorScheme'>,
 ) => {
-  const interpolator = inject(INJECTION_KEY_INTERPOLATOR)
-  const colors = inject(INJECTION_KEY_COLORS)
+  const cepheus = inject(CEPHEUS_INJECTION_KEY)
 
-  if (interpolator === undefined) {
+  if (cepheus === undefined) {
     throw new Error('Is vue cepheus plugin added?')
   }
 
@@ -17,9 +16,9 @@ export const useColor = (
   return computed(() =>
     color(options.variable, {
       colorGamut: options.colorGamut,
-      colors,
+      colors: cepheus.colors,
       colorScheme: options.colorScheme,
-      interpolator,
+      interpolator: cepheus.interpolator,
     }),
   )
 }

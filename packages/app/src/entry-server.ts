@@ -137,10 +137,10 @@ export const createApp = async (options: Options = POINTE_OPTIONS) => {
         .replace('<!--app-html-->', appHTML)
         .replace('<!--app-head-->', head)
         .replace(
-          '<!--app-html-tag-->',
-          ` lang="en"${
+          '<html>',
+          `<html lang="en"${
             preferences?.colorScheme === undefined ? '' : ` class=${preferences.colorScheme}`
-          }`,
+          }>`,
         )
 
       const dispose = new Promise<void>((resolve) =>

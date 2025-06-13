@@ -1,12 +1,13 @@
+import type { Interpolator } from 'cepheus'
 import { inject } from 'vue'
-import { INJECTION_KEY_INTERPOLATOR } from './constants'
+import { CEPHEUS_INJECTION_KEY } from './constants'
 
-export const useInterpolator = () => {
-  const interpolator = inject(INJECTION_KEY_INTERPOLATOR)
+export const useInterpolator = (): Interpolator => {
+  const cepheus = inject(CEPHEUS_INJECTION_KEY)
 
-  if (interpolator === undefined) {
+  if (cepheus === undefined) {
     throw new Error('Is vue cepheus plugin added?')
   }
 
-  return interpolator
+  return cepheus.interpolator
 }
