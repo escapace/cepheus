@@ -8,4 +8,4 @@ export const isPalette = (palette: unknown): palette is Palette =>
   typeof (palette as Partial<Palette>).interval === 'number' &&
   typeof (palette as Partial<Palette>).length === 'number' &&
   Array.isArray((palette as Partial<Palette>).squares) &&
-  Array.isArray((palette as Partial<Palette>).triangle)
+  Array.isArray((palette as Partial<Palette>).triangles)

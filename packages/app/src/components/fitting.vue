@@ -77,13 +77,15 @@ onMounted(() => {
   // [ [ 0, 0 ], [ 79.296875, 69.921875 ], [ 99.86979166666667, 0 ] ]
   // [ [ 0, 0 ], [ 79.6875, 69.53125 ], [ 99.21875, 0 ] ]
   // [ [ 0, 0 ], [ 71.875, 69.53125 ], [ 99.21875, 0 ] ]
+  //
+  const triangle = palette.triangles[0]
 
   context.strokeStyle = 'red'
   context.beginPath()
   // context.moveTo(0, 0)
-  context.lineTo(toX(palette.triangle[0][0]), toY(palette.triangle[0][1]))
-  context.lineTo(toX(palette.triangle[1][0]), toY(palette.triangle[1][1]))
-  context.lineTo(toX(palette.triangle[2][0]), toY(palette.triangle[2][1]))
+  context.lineTo(toX(triangle[0][0]), toY(triangle[0][1]))
+  context.lineTo(toX(triangle[1][0]), toY(triangle[1][1]))
+  context.lineTo(toX(triangle[2][0]), toY(triangle[2][1]))
   context.stroke()
 
   // context.translate(0, context.canvas.height) // reset where 0,0 is located

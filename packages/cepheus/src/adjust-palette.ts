@@ -8,19 +8,22 @@ export const adjustPalette = (palette: Palette, options: Partial<State> = {}): P
       lightness: options.lightness ?? { max: 1, min: 0 },
     }
 
-    const x0 = getX0(palette.triangle)
+    const triangle = palette.triangles[0]
 
-    const { p0, p1 } = chroma0(x0, palette.triangle, state)
+    const x0 = getX0(triangle)
 
-    const triangle: Triangle = [
-      lightness0(p0, p1, state),
-      chroma1(x0, palette.triangle[1], state),
-      lightness1(p0, p1, state),
-    ]
+    const { p0, p1 } = chroma0(x0, triangle, state)
 
     return {
       ...palette,
-      triangle,
+      triangles: [
+        [
+          lightness0(p0, p1, state),
+          chroma1(x0, triangle[1], state),
+          lightness1(p0, p1, state),
+        ] satisfies Triangle,
+        ...palette.triangles.slice(1),
+      ],
     }
   }
 

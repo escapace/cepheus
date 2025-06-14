@@ -5,10 +5,10 @@ export type Point = [x: number, y: number]
 export type Triangle = [Point, Point, Point]
 
 export type RawPalette = [
-  colorGamut: 'p3' | 'srgb',
+  colorGamut: string,
   interval: number,
   length: number,
-  triangle: [...Point, ...Point, ...Point],
+  triangles: number[],
   squares: number[],
   colors: number[],
 ]
@@ -19,7 +19,7 @@ export interface Palette {
   interval: number
   length: number
   squares: number[]
-  triangle: Triangle
+  triangles: Triangle[]
   alias?: (value: number | string) => number | undefined
 }
 

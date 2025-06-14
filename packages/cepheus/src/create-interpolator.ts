@@ -6,26 +6,28 @@ import { chroma0, chroma1, getX0, lightness0, lightness1 } from './utilities/cal
 const notify = async (subscriptions: Set<Subscription>) =>
   await Promise.all(Array.from(subscriptions).map((value) => value()))
 
-const changePalette = (state: State, triangle: Triangle, palette: Palette = state.palette) => {
-  const x0 = getX0(palette.triangle)
+const changePalette = (state: State, triangleReference: Triangle, palette: Palette = state.palette) => {
+  const triangle = palette.triangles[0]
 
-  const { p0, p1 } = chroma0(x0, palette.triangle, state)
+  const x0 = getX0(triangle)
+
+  const { p0, p1 } = chroma0(x0, triangle, state)
 
   const triangle0 = lightness0(p0, p1, state)
-  const triangle1 = chroma1(x0, palette.triangle[1], state)
+  const triangle1 = chroma1(x0, triangle[1], state)
   const triangle2 = lightness1(p0, p1, state)
 
   state.palette = palette
-  triangle[0] = triangle0
-  triangle[1] = triangle1
-  triangle[2] = triangle2
+  triangleReference[0] = triangle0
+  triangleReference[1] = triangle1
+  triangleReference[2] = triangle2
 
   return { p0, p1, state, x0 }
 }
 
 export const createInterpolator = (options: Options): Interpolator => {
   const subscriptions = new Set<Subscription>()
-  const triangle: Triangle = [] as unknown as Triangle
+  const triangleReference: Triangle = [] as unknown as Triangle
 
   let { p0, p1, state, x0 } = changePalette(
     {
@@ -39,12 +41,12 @@ export const createInterpolator = (options: Options): Interpolator => {
           : { max: options.lightness.max, min: options.lightness.min },
       palette: options.palette,
     },
-    triangle,
+    triangleReference,
   )
 
   const updatePalette = async (palette?: Palette) => {
     if (palette !== undefined && state.palette !== palette) {
-      const properties = changePalette(state, triangle, palette)
+      const properties = changePalette(state, triangleReference, palette)
 
       x0 = properties.x0
       p0 = properties.p0
@@ -56,20 +58,21 @@ export const createInterpolator = (options: Options): Interpolator => {
 
   const updateChroma = async (a?: number, b?: number) => {
     let changed = false
+    const triangle = state.palette.triangles[0]
 
     if (a !== undefined && a !== state.chroma.min) {
       state.chroma.min = a
-      const temporary = chroma0(x0, state.palette.triangle, state)
+      const temporary = chroma0(x0, triangle, state)
       p0 = temporary.p0
       p1 = temporary.p1
-      triangle[0] = lightness0(p0, p1, state)
-      triangle[2] = lightness1(p0, p1, state)
+      triangleReference[0] = lightness0(p0, p1, state)
+      triangleReference[2] = lightness1(p0, p1, state)
       changed = true
     }
 
     if (b !== undefined && b !== state.chroma.max) {
       state.chroma.max = b
-      triangle[1] = chroma1(x0, state.palette.triangle[1], state)
+      triangleReference[1] = chroma1(x0, triangle[1], state)
       changed = true
     }
 
@@ -83,13 +86,13 @@ export const createInterpolator = (options: Options): Interpolator => {
 
     if (b !== undefined && b !== state.lightness.max) {
       state.lightness.max = b
-      triangle[2] = lightness1(p0, p1, state)
+      triangleReference[2] = lightness1(p0, p1, state)
       changed = true
     }
 
     if (a !== undefined && a !== state.lightness.min) {
       state.lightness.min = a
-      triangle[0] = lightness0(p0, p1, state)
+      triangleReference[0] = lightness0(p0, p1, state)
       changed = true
     }
 
@@ -102,7 +105,7 @@ export const createInterpolator = (options: Options): Interpolator => {
     [INTERPOLATOR]: {
       state,
       subscriptions,
-      triangle,
+      triangle: triangleReference,
       updateChroma,
       updateLightness,
       updatePalette,

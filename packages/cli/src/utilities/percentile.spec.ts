@@ -41,13 +41,5 @@ describe('./src/utilities/percentlie.spec.ts', () => {
     assert.equal(normalizeAngle(percentile(0, 0.1, -30, 30, one)), 6)
     assert.equal(normalizeAngle(percentile(0, 0.1, -30, 30, half)), 0)
     assert.equal(normalizeAngle(percentile(0, 0.1, -30, 30, zero)), 354)
-
-    // console.log(
-    //   percentile(0.19607298879671345, 0.4713503938800034, 0, 0.1, one)
-    // )
-    //
-    // console.log(
-    //   percentile(0.19607298879671345, 0.4713503938800034, 0, 0.1, zero)
-    // )
   })
 })

@@ -56,7 +56,7 @@ onMounted(() => {
 
       context.clearRect(0, 0, canvas.width, canvas.height)
 
-      const paletteTriangle = palette.triangle.map(([x, y]) => [toX(x), toY(y)]) as Triangle
+      const paletteTriangle = palette.triangles[0].map(([x, y]) => [toX(x), toY(y)]) as Triangle
 
       const triangle = instance[INTERPOLATOR].triangle.map(([x, y]) => [toX(x), toY(y)]) as Triangle
 

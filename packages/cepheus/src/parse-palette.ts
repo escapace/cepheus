@@ -1,27 +1,24 @@
 import { assert } from './assert'
-import type { Palette, RawPalette, Point, Triangle } from './types'
+import type { Palette, RawPalette, Triangle } from './types'
 import { chunk } from './utilities/chunk'
 
 export const parsePalette = (palette: unknown): Palette => {
   assert(Array.isArray(palette))
   assert(palette.length === 6)
 
-  const [colorGamut, interval, length, triangleFlat, squares, data] = palette as RawPalette
+  const [colorGamut, interval, length, trianglesFlat, squares, data] = palette as RawPalette
 
   assert(typeof colorGamut === 'string')
   assert(colorGamut === 'p3' || colorGamut === 'srgb')
   assert(typeof interval === 'number')
   assert(typeof length === 'number')
-  assert(Array.isArray(triangleFlat))
-  assert(triangleFlat.length === 6)
+  assert(Array.isArray(trianglesFlat))
   assert(Array.isArray(squares))
   assert(Array.isArray(data))
 
-  const triangle: Triangle = [
-    triangleFlat.slice(0, 2) as Point,
-    triangleFlat.slice(2, 4) as Point,
-    triangleFlat.slice(4, 6) as Point,
-  ]
+  const triangles = chunk(chunk(trianglesFlat, 2), 3) as Triangle[]
+
+  assert(triangles.length >= 1)
 
   const step = length * 3
 
@@ -38,6 +35,6 @@ export const parsePalette = (palette: unknown): Palette => {
     interval,
     length,
     squares,
-    triangle,
+    triangles
   }
 }

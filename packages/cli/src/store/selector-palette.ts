@@ -13,7 +13,7 @@ export const selectorPalette = (store: Store): RawPalette => {
       ([square, task]): [number, Array<[number, number, number]>] => [
         square,
         map(task.state.colors, (value) =>
-          map(value, (value) => toPrecision(value, store.options.precision)),
+          map(value, (value) => value),
         ),
       ],
     ),
@@ -37,7 +37,7 @@ export const selectorPalette = (store: Store): RawPalette => {
         fixNaN(convert({ alpha: 1, coords, space: OKLrCH }, OKLCH).coords),
       )
     }),
-  )
+  ).map(value => toPrecision(value, store.options.precision))
 
   const triangle = selectorTriangle(store)
     .triangle.flat()
