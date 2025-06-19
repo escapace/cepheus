@@ -8,20 +8,21 @@ import { selectorSquares } from './selector-squares'
 import { selectorTriangle } from './selector-triangle'
 
 export const selectorPalette = (store: Store): RawPalette => {
+  const gamut = store.options.colorGamut
+  const interval = store.options.interval
+  const length = store.options.colors.length
+
+  const triangle = selectorTriangle(store)
+
   const values = new Map(
     Array.from(selectorSquares(store, store.allIterations).entries()).map(
       ([square, task]): [number, Array<[number, number, number]>] => [
         square,
-        map(task.state.colors, (value) =>
-          map(value, (value) => value),
-        ),
+        map(task.state.colors, (value) => map(value, (value) => value)),
       ],
     ),
   )
 
-  const gamut = store.options.colorGamut
-  const interval = store.options.interval
-  const length = store.options.colors.length
   const squares = Array.from(values.keys())
 
   const colors = flattenDeep(
@@ -37,10 +38,10 @@ export const selectorPalette = (store: Store): RawPalette => {
         fixNaN(convert({ alpha: 1, coords, space: OKLrCH }, OKLCH).coords),
       )
     }),
-  ).map(value => toPrecision(value, store.options.precision))
+  ).map((value) => toPrecision(value, store.options.precision))
 
-  const triangle = selectorTriangle(store)
-    .triangle.flat()
+  const triangleFlat = triangle
+    .flat()
     .map((value) => toPrecision(value, store.options.precision)) as [
     number,
     number,
@@ -50,5 +51,5 @@ export const selectorPalette = (store: Store): RawPalette => {
     number,
   ]
 
-  return [gamut, interval, length, triangle, squares, colors]
+  return [gamut, interval, length, triangleFlat, squares, colors]
 }

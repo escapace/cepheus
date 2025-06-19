@@ -117,7 +117,9 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
         return squares.size === 0
       }
 
-      const tolerances = [...Array(20).keys()].map((_, index) => toPrecision(1 + ((index + 1) * 0.05), 5))
+      const tolerances = [...Array(20).keys()].map((_, index) =>
+        toPrecision(1 + (index + 1) * 0.05, 5),
+      )
 
       for (const tolerance of tolerances) {
         if (await attempt(tolerance)) {
@@ -125,11 +127,11 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
         }
       }
 
-      const missing = selectorRemainingSquares(store)
+      const remainingSquares = selectorRemainingSquares(store)
 
-      if (missing.size !== 0) {
+      if (remainingSquares.size !== 0) {
         throw new Error(
-          `Unable to fit triangle, squares ${Array.from(missing.keys()).join(', ')} missing.`,
+          `Unable to fit triangle, squares ${Array.from(remainingSquares.keys()).join(', ')} missing.`,
         )
       }
 

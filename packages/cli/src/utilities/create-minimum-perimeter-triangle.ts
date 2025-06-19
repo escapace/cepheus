@@ -43,9 +43,9 @@ export const createMinimumPerimeterTriangle = (squares: number[], interval: numb
     clamp(value, 0, N),
   ) as Point
 
-  assert(A !== B, 'selectorTriangle() unable to produce correct triangle')
-  assert(B !== C, 'selectorTriangle() unable to produce correct triangle')
-  assert(C !== A, 'selectorTriangle() unable to produce correct triangle')
+  assert(A !== B, 'createMinimumPerimeterTriangle() unable to produce correct triangle')
+  assert(B !== C, 'createMinimumPerimeterTriangle() unable to produce correct triangle')
+  assert(C !== A, 'createMinimumPerimeterTriangle() unable to produce correct triangle')
 
   const triangle: Triangle = [A, B, C]
 

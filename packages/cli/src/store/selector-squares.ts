@@ -1,13 +1,14 @@
-// import { isolate as iso } from '@cepheus/utilities'
-import { compact, difference } from 'lodash-es'
+import { tile } from '@cepheus/utilities'
+import { compact } from 'lodash-es'
 import type { OptimizationStateFulfilled, OptimizeTask } from '../types'
+import { isSquareInsideTriangle } from '../utilities/is-square-inside-triangle'
+import { createSquareOptions } from './create-square-options'
 import type { Store } from './create-store'
 import { selectorOptimizeTasksFulfilled } from './selector-optimize-tasks'
 import { selectorTriangle } from './selector-triangle'
 
 export const selectorSquares = (
   store: Store,
-  // isolate: boolean,
   iterations: number[] = store.allIterations,
 ): Map<number, OptimizeTask<OptimizationStateFulfilled>> => {
   const bestTasks = new Map(Object.entries(selectorOptimizeTasksFulfilled(store, iterations)))
@@ -31,24 +32,31 @@ export const selectorSquares = (
     ),
   )
 
-  // const squares = Array.from(result.keys())
-  //
-  // difference(
-  //   squares,
-  //   iso(squares, store.options.interval, false)[0]
-  // ).forEach((square) => result.delete(square))
-
   return result
 }
 
 export const selectorRemainingSquares = (store: Store) => {
-  const { squares } = selectorTriangle(store)
+  const { interval } = store.options
+  const triangle = selectorTriangle(store)
+  const squares = Array.from(selectorSquares(store).keys())
 
   return new Map(
-    difference(
-      Array.from(squares.keys()),
-      Array.from(selectorSquares(store).keys()),
-      // eslint-disable-next-line typescript/no-non-null-assertion
-    ).map((value) => [value, squares.get(value)!]),
+    tile(interval)
+      .filter((square) => {
+        if (squares.includes(square)) {
+          return false
+        }
+
+        return isSquareInsideTriangle(square, interval, triangle)
+      })
+      .map((square) => [square, createSquareOptions(square, interval)] as const),
   )
 }
+
+// return new Map(
+//   difference(
+//     Array.from(remainingSquares.keys()),
+//     squares,
+//     // eslint-disable-next-line typescript/no-non-null-assertion
+//   ).map((value) => [value, remainingSquares.get(value)!]),
+// )
