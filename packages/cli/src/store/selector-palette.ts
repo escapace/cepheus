@@ -15,7 +15,7 @@ export const selectorPalette = (store: Store): RawPalette => {
   const triangle = selectorTriangle(store)
 
   const values = new Map(
-    Array.from(selectorSquares(store, store.allIterations).entries()).map(
+    Array.from(selectorSquares(store, false).entries()).map(
       ([square, task]): [number, Array<[number, number, number]>] => [
         square,
         map(task.state.colors, (value) => map(value, (value) => value)),

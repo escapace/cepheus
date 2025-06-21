@@ -6,7 +6,7 @@ import { actionUpdateOptimizeTask } from './store/action-update-optimize-task'
 import { actionUpdateStage } from './store/action-update-stage'
 import { createStore } from './store/create-store'
 import { selectorOptimizeTasksPending } from './store/selector-optimize-tasks'
-import { selectorRemainingSquares, selectorSquares } from './store/selector-squares'
+import { selectorSquares } from './store/selector-squares'
 import { selectorState } from './store/selector-state'
 import {
   TypeCepheusState,
@@ -29,6 +29,7 @@ export {
 
 import { ColorSpace, HSL, HSV, LCH, OKLab, OKLCH, OKLrCH, P3, sRGB } from 'colorjs.io/fn'
 import { toPrecision } from './utilities/to-precision'
+import { selectorRemainingSquares } from './store/selector-remaining-squares'
 
 ColorSpace.register(HSL)
 ColorSpace.register(HSV)
@@ -88,7 +89,7 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
         await runTasks()
       }
 
-      if (Array.from(selectorSquares(store)).length === 0) {
+      if (Array.from(selectorSquares(store, false)).length === 0) {
         throw new Error('No squares available.')
       }
 
@@ -131,7 +132,7 @@ export const cepheus = (options: CepheusOptions): CepheusReturnType => {
 
       if (remainingSquares.size !== 0) {
         throw new Error(
-          `Unable to fit triangle, squares ${Array.from(remainingSquares.keys()).join(', ')} missing.`,
+          `Unable to fit triangle, squares ${Array.from(remainingSquares.keys()).join(', ')} remaining.`,
         )
       }
 

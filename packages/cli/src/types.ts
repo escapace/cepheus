@@ -93,6 +93,11 @@ export interface OptimizeTaskOptions extends OptimizeOptions {
   key: string
 }
 
+export interface SquareOptions {
+  chroma: { range: [number, number]; target: number }
+  lightness: { range: [number, number]; target: number }
+}
+
 export interface OptimizeOptions {
   colorGamut: ColorGamut
   colors: Array<Array<[number, number, number]>>
@@ -102,7 +107,7 @@ export interface OptimizeOptions {
   randomSeed: string
   weights: {
     chroma: number
-    // contrast: number
+    colors: number
     deuteranopia: number
     difference: number
     dispersionDeuteranopia: number
@@ -115,32 +120,20 @@ export interface OptimizeOptions {
     protanopia: number
     tritanopia: number
   }
-  chroma?: {
-    range?: [number, number]
-    // Chroma [0, 0.4]
-    target?: number
-  }
+  chroma?: Partial<SquareOptions['chroma']>
   hyperparameters?: {
-    coolingRate: number
-    cutoff: number
-    temperature: number
+    /* Total number of proposal steps to plan for. */
+    iterations: number
+    /* Target probability of accepting a worse move at the final step. */
+    acceptanceProbabilityTarget: number
+    /* Fraction of the run that determines the EMA time constant. */
+    movingAverageWindowRatio: number
+    /* Winsorisation factor that limits the influence of large |Δcost| spikes. */
+    movingAverageWeightClippingFactor: number
   }
-  lightness?: {
-    range?: [number, number]
-    // Lightness [0, 1]
-    target?: number
-  }
+  lightness?: Partial<SquareOptions['lightness']>
   randomSource?: PRNGName
   tolerance?: number
-  // contrast?: {
-  //   // APCA [0, 106] or [0, 108]
-  //   target?: number
-  //   /* APCA reports lightness contrast as an Lc value from Lc 0 to Lc 106 for dark
-  //    * text on a light background, and Lc 0 to Lc -108 for light text on a dark
-  //    * background (dark mode). The minus sign merely indicates negative contrast,
-  //    * which means light text on a dark background. */
-  //   range?: [number, number]
-  // }
 }
 
 export type RequiredOptimizeOptions = {
@@ -150,13 +143,10 @@ export type RequiredOptimizeOptions = {
   colorGamut: ColorGamut
   colors: Array<Array<[number, number, number]>>
   colorSpace: ColorSpace
-  costs: Partial<Record<keyof OptimizeOptions['weights'], [number, number]>>
+  // costs: Partial<Record<keyof OptimizeOptions['weights'], [number, number]>>
   prng: PRNG
 } & DeepRequired<
-  Omit<
-    OptimizeOptions,
-    'colorGamut' | 'colors' | 'colorSpace' | 'randomSeed' | 'randomSource'
-  >
+  Omit<OptimizeOptions, 'colorGamut' | 'colors' | 'colorSpace' | 'randomSeed' | 'randomSource'>
 >
 
 export const enum TypeOptimizationState {
@@ -169,8 +159,12 @@ interface IOptimizationState {
   type: TypeOptimizationState
 }
 
-export interface OptimizationStateFulfilled extends IOptimizationState {
-  colors: Array<[number, number, number]>
+export interface OptimizationStateFulfilled<PARTIAL extends 'false' | 'true' = 'true'>
+  extends IOptimizationState {
+  colors: {
+    false: Array<[number, number, number]>
+    true: Array<[number, number, number] | null>
+  }[PARTIAL]
   cost: number
   type: TypeOptimizationState.Fulfilled
 }

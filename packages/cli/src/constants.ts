@@ -1,6 +1,7 @@
 import { divisors } from '@cepheus/utilities'
 import { median } from 'simple-statistics'
 import { normalizeWeights } from './utilities/normalize-weights'
+import type { OptimizeOptions } from './types'
 
 export const N = 120
 export const N_DIVISORS = divisors(N).filter((value) => value !== 1)
@@ -16,6 +17,7 @@ export const DEFAULT_DELTA_E = 'jzczhz'
 
 /* eslint-disable perfectionist/sort-objects */
 export const DEFAULT_WEIGHTS = normalizeWeights({
+  colors: 25,
   difference: 1,
   ...normalizeWeights(
     {
@@ -37,4 +39,4 @@ export const DEFAULT_WEIGHTS = normalizeWeights({
     dispersionProtanopia: 1,
     dispersionTritanopia: 1,
   }),
-})
+}) satisfies OptimizeOptions['weights']

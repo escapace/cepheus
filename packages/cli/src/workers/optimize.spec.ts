@@ -17,7 +17,7 @@ const CASE_A: OptimizeOptions = {
   hueAngle: DEFAULT_HUE_ANGLE,
   lightness: { range: [25, 50], target: 37.5 },
   randomSeed:
-    '100bf1952a0373f672054096995f5d337938d5d2ee3d68a0264e7d3fcff0ff170e33516bf381d9ad66d91f632c6c515f804cda4d055406670c5071d3f03c8e6b',
+    '100bf1952a0373f672054096995f5d337938d5d2ee3d68a0264e7d3fcff0ff170e33516bf381d9ad66d91f632c6c515f804cda4d05540667a',
   weights: DEFAULT_WEIGHTS,
 }
 
