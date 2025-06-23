@@ -39,7 +39,7 @@ const compress = promisify(gzip)
 const HELP = `${chalk.bold('Usage:')}
   cepheus --seed <string> (--color <color>)...
         [--color-gamut p3|srgb] [--color-space oklch|oklrch] [--prng xoshiro128++|xorwow|xorshift128|sfc32]
-        [--delta-e jzczhz|ok2] [--iterations <number>] [--levels ${N_DIVISORS.join('|')}]
+        [--delta-e jzczhz|oklab] [--iterations <number>] [--levels ${N_DIVISORS.join('|')}]
         [--restore <file>] [--save <file>]
   cepheus -h | --help
   cepheus --version
@@ -108,7 +108,7 @@ const run = async () => {
 
   const colorGamut = arguments_['--color-gamut'] as 'p3' | 'srgb' | undefined
   const colorSpace = arguments_['--color-space'] as 'oklch' | 'oklrch' | undefined
-  const deltaE = arguments_['--delta-e'] as 'jzczhz' | 'ok2' | undefined
+  const deltaE = arguments_['--delta-e'] as 'jzczhz' | 'oklab' | undefined
   const colors = arguments_['--color']
   const levels = arguments_['--levels']
   const randomSource = arguments_['--prng'] as
@@ -145,9 +145,9 @@ const run = async () => {
 
   // optional
 
-  if (deltaE !== undefined && !['jzczhz', 'ok2'].includes(deltaE)) {
+  if (deltaE !== undefined && !['jzczhz', 'oklab'].includes(deltaE)) {
     console.log(HELP)
-    console.error(`Option '--delta-e' must be either 'jzczhz' or 'ok2'.`)
+    console.error(`Option '--delta-e' must be either 'jzczhz' or 'oklab'.`)
     return gracefulExit(1)
   }
 

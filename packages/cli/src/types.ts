@@ -65,7 +65,7 @@ export interface StoreOptions
   colors: Array<Array<[number, number, number]> | string[]>
   colorGamut?: 'p3' | 'srgb'
   colorSpace?: ColorSpaceLiteral
-  deltaE?: 'jzczhz' | 'ok2'
+  deltaE?: 'jzczhz' | 'oklab'
   hueAngle?: OptimizeOptions['hueAngle']
   iterations?: number
   levels?: number
@@ -81,7 +81,7 @@ export interface RequiredStoreOptions
   colorGamut: ColorGamut
   colors: Array<Array<[number, number, number]>>
   colorSpace: ColorSpaceLiteral
-  deltaE: 'jzczhz' | 'ok2'
+  deltaE: 'jzczhz' | 'oklab'
   hueAngle: OptimizeOptions['hueAngle']
   interval: number
   iterations: number
@@ -103,7 +103,7 @@ export interface OptimizeOptions {
   colorGamut: ColorGamut
   colors: Array<Array<[number, number, number]> | null>
   colorSpace: ColorSpaceLiteral
-  deltaE: 'jzczhz' | 'ok2'
+  deltaE: 'jzczhz' | 'oklab'
   hueAngle: number
   randomSeed: string
   weights: {

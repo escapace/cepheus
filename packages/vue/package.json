@@ -21,7 +21,7 @@
     "tsx": "4.20.3",
     "typescript": "5.8.3",
     "vitest": "3.2.3",
-    "vue": "3.5.16"
+    "vue": "3.5.17"
   },
   "engines": {
     "node": ">=22.15.0",
@@ -60,7 +60,7 @@
     "@cepheus/plugin": "workspace:*",
     "cassiopeia": ">=7.0.0",
     "cepheus": "workspace:*",
-    "vue": ">=3.5.16"
+    "vue": ">=3.5.17"
   },
   "private": false,
   "publishConfig": {

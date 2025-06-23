@@ -20,13 +20,13 @@
     "bignumber.js": "^9.3.0",
     "cepheus": "workspace:*",
     "colorjs.io": "^0.6.0-alpha.1",
-    "emittery": "^1.1.0",
+    "emittery": "^1.2.0",
     "exit-hook": "^4.0.0",
     "lodash-es": "^4.17.21",
     "picocolors": "^1.1.1",
     "picospinner": "^3.0.0",
     "simple-statistics": "^7.8.8",
-    "tinypool": "^1.1.0",
+    "tinypool": "^1.1.1",
     "utility-types": "^3.11.0"
   },
   "devDependencies": {

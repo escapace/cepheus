@@ -13,7 +13,7 @@ const CASE_A: OptimizeOptions = {
     [[0.579_615_232_252_094_4, 0.107_082_013_112_224_5, 166.457_472_530_682_03]],
   ],
   colorSpace: 'oklrch',
-  deltaE: 'ok2',
+  deltaE: 'oklab',
   hueAngle: DEFAULT_HUE_ANGLE,
   lightness: { range: [25, 50], target: 37.5 },
   randomSeed:

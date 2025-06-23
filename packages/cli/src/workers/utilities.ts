@@ -68,7 +68,6 @@ const createDistanceFunction = (options: OptimizeOptions) => {
 
     return isNaN(value) ? 1 : value
   }
-
   const distanceEJz = (a: Color, b: Color) =>
     distanceEJzColorOjbect({ alpha: 1, coords: a, space }, { alpha: 1, coords: b, space })
 
@@ -348,7 +347,7 @@ export function randomColor(
     return accumulator
   }
 
-  const deltaEMethod = ({ jzczhz: 'Jz', ok2: 'OK2' } as const)[options.deltaE]
+  const deltaEMethod = ({ jzczhz: 'Jz', oklab: 'OK2' } as const)[options.deltaE]
 
   const { coords: first } = toGamut(
     { alpha: 1, coords: [...accumulator], space: options.colorSpace },
