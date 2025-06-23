@@ -3,7 +3,7 @@ import type { DeepRequired } from 'utility-types'
 import type { PRNG, PRNGName } from './utilities/create-prng'
 export type { PRNG, PRNGName }
 
-export type Square = number
+export type Color = [number, number, number]
 
 type ColorGamut = 'p3' | 'srgb'
 type ColorSpaceLiteral = 'oklch' | 'oklrch'
@@ -96,11 +96,12 @@ export interface OptimizeTaskOptions extends OptimizeOptions {
 export interface SquareOptions {
   chroma: { range: [number, number]; target: number }
   lightness: { range: [number, number]; target: number }
+  colors?: number[]
 }
 
 export interface OptimizeOptions {
   colorGamut: ColorGamut
-  colors: Array<Array<[number, number, number]>>
+  colors: Array<Array<[number, number, number]> | null>
   colorSpace: ColorSpaceLiteral
   deltaE: 'jzczhz' | 'ok2'
   hueAngle: number
@@ -141,7 +142,7 @@ export type RequiredOptimizeOptions = {
   distanceColorOjbect: (a: PlainColorObject, b: PlainColorObject) => number
 
   colorGamut: ColorGamut
-  colors: Array<Array<[number, number, number]>>
+  colors: Array<Array<[number, number, number]> | null>
   colorSpace: ColorSpace
   // costs: Partial<Record<keyof OptimizeOptions['weights'], [number, number]>>
   prng: PRNG

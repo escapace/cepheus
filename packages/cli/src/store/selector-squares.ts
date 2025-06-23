@@ -20,26 +20,35 @@ export function selectorSquares(
 ):
   | Map<number, OptimizeTask<OptimizationStateFulfilled<'false'>>>
   | Map<number, OptimizeTask<OptimizationStateFulfilled>> {
-  const bestTasks = new Map(Object.entries(selectorOptimizeTasksFulfilled(store, iterations)))
+  const tasks = new Map(Object.entries(selectorOptimizeTasksFulfilled(store, iterations)))
 
   const result = new Map(
     compact(
       Array.from(store.indexSquare.entries()).map(([square, iterationsMap]) => {
         const keys = compact(iterations.map((iteration) => iterationsMap.get(iteration)))
-        const key: string | undefined = keys.find((key) => bestTasks.has(key))
+        const key: string | undefined = keys.find((key) => tasks.has(key))
 
-        if (key !== undefined) {
+        if (typeof key === 'string') {
           // eslint-disable-next-line typescript/no-non-null-assertion
-          const task = bestTasks.get(key)!
+          const task = tasks.get(key)!
 
-          if (index === false && task.state.colors.includes(null)) {
+          if (task.state.colors.length === 0) {
             return undefined
           } else if (typeof index === 'number') {
+            /* return undefined if that specific color position is null/undefined */
             return task.state.colors[index] === null || task.state.colors[index] === undefined
               ? undefined
               : [square, task]
+          } else if (index) {
+            /* return undefined if ALL colors are null/undefined */
+            return task.state.colors.every((value) => value === null || value === undefined)
+              ? undefined
+              : [square, task]
           } else {
-            return [square, task]
+            // return undefined if ANY color is null
+            return task.state.colors.some((value) => value === null || value === undefined)
+              ? undefined
+              : [square, task]
           }
         }
 

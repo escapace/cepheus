@@ -1,13 +1,14 @@
 import { toPosition } from '@cepheus/utilities'
 import { range } from 'lodash-es'
 import { N } from '../constants'
-import type { Square, SquareOptions } from '../types'
+import type { SquareOptions } from '../types'
 import { parametricLogisticLift } from '../utilities/parametric-logistic-lift'
 import { toPrecision } from '../utilities/to-precision'
 
 export function createSquareOptions(
-  square: Square,
+  square: number,
   interval: number,
+  colors?: number[],
 ): SquareOptions {
   const position = toPosition(square, interval)
 
@@ -29,7 +30,7 @@ export function createSquareOptions(
     delta = parametricLogisticLift(
       delta,
       isLightness ? (reverse ? 80 : 40) : 40,
-      isLightness ? (reverse ? 0.2 : 0.025) : (reverse ? 0.8 : 0.025),
+      isLightness ? (reverse ? 0.2 : 0.025) : reverse ? 0.8 : 0.025,
     )
     delta = reverse ? 1 - delta : delta
 
@@ -43,6 +44,7 @@ export function createSquareOptions(
 
   return {
     chroma,
+    colors,
     lightness,
   }
 }

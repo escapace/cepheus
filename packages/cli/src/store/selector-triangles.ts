@@ -1,7 +1,16 @@
 import type { Triangle } from 'cepheus'
 import { once } from 'lodash-es'
 import type { Store } from './create-store'
-import { selectorTriangle } from './selector-triangle'
+import { createMinimumPerimeterTriangle } from '../utilities/create-minimum-perimeter-triangle'
+import { selectorSquares } from './selector-squares'
+
+const selectorTriangle = (store: Store, index: boolean | number = false) => {
+  const { interval } = store.options
+
+  // eslint-disable-next-line typescript/no-unsafe-argument, typescript/no-explicit-any
+  const squares = Array.from(selectorSquares(store, index as any).keys())
+  return createMinimumPerimeterTriangle(squares, interval)
+}
 
 export const selectorTriangles = once((store: Store): Triangle[] => {
   const primary = selectorTriangle(store, false)

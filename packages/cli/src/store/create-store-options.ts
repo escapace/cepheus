@@ -11,25 +11,32 @@ import {
   N,
   N_DIVISORS,
 } from '../constants'
-import type { RequiredStoreOptions, StoreOptions } from '../types'
-import { fixNaN } from '../utilities/fix-nan'
+import type { Color, RequiredStoreOptions, StoreOptions } from '../types'
+import assert from 'node:assert'
+import { isColor } from '../utilities/is-color'
 
 export function createStoreOptions(options: StoreOptions): RequiredStoreOptions {
   const colorSpace = options.colorSpace ?? 'oklrch'
 
   const colors = options.colors.map((colors) =>
-    colors.map((value) =>
-      fixNaN(
+    colors.map(
+      (value) =>
         convert(
           isString(value) ? parse(value) : { alpha: 1, coords: [...value], space: OKLCH },
           colorSpace === 'oklch' ? OKLCH : OKLrCH,
           {
             inGamut: true,
           },
-        ).coords,
-      ),
+        ).coords as Color,
     ),
   )
+
+  for (const value of colors) {
+    assert(
+      value.every((value) => isColor(value)),
+      'faulty input colors',
+    )
+  }
 
   const interval = N / (options.levels ?? DEFAULT_N_DIVISOR)
   const iterations = options.iterations ?? DEFAULT_ITERATIONS

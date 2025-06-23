@@ -4,7 +4,6 @@ import {
   type CepheusState,
   type OptimizeTask,
   type RequiredStoreOptions,
-  type Square,
   type StoreOptions,
   TypeCepheusState,
 } from '../types'
@@ -17,7 +16,7 @@ export interface Store
   > {
   allIterations: number[]
   indexInitialState: Map<string, OptimizeTask>
-  indexSquare: Map<Square, Map<number, string>>
+  indexSquare: Map<number, Map<number, string>>
   indexState: Map<string, OptimizeTask>
   log: CepheusState[]
   options: RequiredStoreOptions
@@ -39,7 +38,7 @@ export const createStore = (
 
   const storeOptions = createStoreOptions(options)
 
-  const indexSquare = new Map<Square, Map<number, string>>()
+  const indexSquare = new Map<number, Map<number, string>>()
 
   const indexState = new Map<string, OptimizeTask>()
 

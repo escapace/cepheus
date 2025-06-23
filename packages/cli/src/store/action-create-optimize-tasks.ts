@@ -1,15 +1,16 @@
 import { tile } from '@cepheus/utilities'
 import { normalizeAngle } from 'cepheus'
-import { type OptimizeTaskOptions, TypeOptimizationState } from '../types'
+import { type OptimizeTaskOptions, type SquareOptions, TypeOptimizationState } from '../types'
 import { hash } from '../utilities/hash'
 import { normalizeWeights } from '../utilities/normalize-weights'
 import { objectHash } from '../utilities/object-hash'
 import { createSquareOptions } from './create-square-options'
 import type { Store } from './create-store'
+import assert from 'node:assert'
 
 interface Options {
   hueAngle?: number
-  squares?: Map<number, Required<Pick<OptimizeTaskOptions, 'chroma' | 'lightness'>>>
+  squares?: Map<number, SquareOptions>
   tolerance?: number
   weights?: OptimizeTaskOptions['weights']
 }
@@ -28,12 +29,29 @@ export function actionCreateOptimizeTasks(store: Store, iteration: number, optio
     const squareOptions =
       options.squares === undefined
         ? createSquareOptions(square, store.options.interval)
-        : // eslint-disable-next-line typescript/no-non-null-assertion
-          options.squares.get(square)!
+        : options.squares.get(square)
+
+    if (squareOptions === undefined) {
+      return
+    }
+
+    const colors =
+      squareOptions.colors === undefined
+        ? store.options.colors
+        : store.options.colors.map((color, index) =>
+            // eslint-disable-next-line typescript/no-non-null-assertion
+            squareOptions.colors!.includes(index) ? color : null,
+          )
+
+    assert(
+      colors.length !== 0 && !colors.every((value) => value === undefined || value === null),
+      'empty colors array',
+    )
 
     const optimizeTaskOptions: OptimizeTaskOptions = {
+      ...squareOptions,
       colorGamut: store.options.colorGamut,
-      colors: store.options.colors,
+      colors,
       colorSpace: store.options.colorSpace,
       deltaE: store.options.deltaE,
       hueAngle: normalizeAngle(options.hueAngle ?? store.options.hueAngle),
@@ -44,7 +62,6 @@ export function actionCreateOptimizeTasks(store: Store, iteration: number, optio
       tolerance: options.tolerance ?? 1,
       weights:
         options?.weights === undefined ? store.options.weights : normalizeWeights(options.weights),
-      ...squareOptions,
     }
 
     // const options = taskOptionsFrom(square, iteration, storeOptions)

@@ -15,7 +15,10 @@ export type RawPalette = [
 
 export interface Palette {
   colorGamut: 'p3' | 'srgb'
-  colors: Map<number, Array<[number, number, number]>>
+  // colors: Map<number, Array<[number, number, number] | undefined>>
+  colors: {
+    get: (key: number) => Array<[number, number, number] | undefined> | undefined;
+  }
   interval: number
   length: number
   squares: number[]

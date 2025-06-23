@@ -1,4 +1,3 @@
-/* eslint-disable typescript/no-non-null-assertion */
 import { type Deficiency, simulate as simulateDeficiency } from '@bjornlu/colorblind'
 import { clamp, expandRange, isWithin } from '@cepheus/utilities'
 import { normalizeAngle } from 'cepheus'
@@ -17,13 +16,12 @@ import {
 } from 'colorjs.io/fn'
 import { mean, sample, standardDeviation } from 'simple-statistics'
 import { N } from '../constants'
-import type { OptimizeOptions, RequiredOptimizeOptions } from '../types'
+import type { Color, OptimizeOptions, RequiredOptimizeOptions } from '../types'
 import { createPRNG } from '../utilities/create-prng'
 import { fixNaN } from '../utilities/fix-nan'
 import { percentile } from '../utilities/percentile'
 import { randomWithin } from '../utilities/random-within'
-
-export type Color = [number, number, number]
+import { isColor } from '../utilities/is-color'
 
 const normalizeLightness = (
   value: Required<Exclude<OptimizeOptions['lightness'], undefined>>,
@@ -334,9 +332,9 @@ export function randomColor(
   const colorGamut = options.colorGamut === 'p3' ? P3 : sRGB
 
   const checkCoords = (value: Coords): value is Color =>
-    !value.includes(null) &&
-    isWithin(value[0]!, options.lightness.range[0], options.lightness.range[1]) &&
-    isWithin(value[1]!, options.chroma.range[0], options.chroma.range[1])
+    isColor(value) &&
+    isWithin(value[0], options.lightness.range[0], options.lightness.range[1]) &&
+    isWithin(value[1], options.chroma.range[0], options.chroma.range[1])
 
   // while (iterations !== 0) {
   let accumulator: Color | undefined

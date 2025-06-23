@@ -4,6 +4,7 @@ import { ColorSpace, LCH, OKLCH, OKLrCH, P3, sRGB } from 'colorjs.io/fn'
 import { mean, sample, sum } from 'simple-statistics'
 import {
   TypeOptimizationState,
+  type Color,
   type OptimizationState,
   type OptimizeOptions,
   type RequiredOptimizeOptions,
@@ -15,24 +16,36 @@ import {
   normalizedCVD,
   normalizeOptions,
   randomColor,
-  type Color,
 } from './utilities'
+import { isColor } from '../utilities/is-color'
 
 // Cost function including weights
 const createCosts = (
   options: RequiredOptimizeOptions,
-  state: Color[],
+  state: Array<Color | null>,
 ): OptimizeOptions['weights'] => {
+  const statePresent = state.filter((value) => value !== null)
+  const { length: colorsTotal } = state
+  const { length: colorsPresent } = statePresent
+
+  const colorsCost = 1 - colorsPresent / colorsTotal
+
+  const differenceArray = state.flatMap((value, index) => {
+    const referenceColor = options.colors[index]
+
+    if (value === null || referenceColor === null) {
+      return []
+    }
+
+    return referenceColor.map((initial) => options.distance(value, initial))
+  })
+
   // penalize the increase in the mean distance from initial colors
-  const differenceCost = mean(
-    state.flatMap((value, index) =>
-      options.colors[index].map((initial) => options.distance(value, initial)),
-    ),
-  )
+  const differenceCost = differenceArray.length === 0 ? 1 : mean(differenceArray)
 
   // penalize the deviation from the target lightness
   const lightnessCost = relativeDifference(
-    mean(state.map((value) => value[0])),
+    mean(statePresent.map((value) => value[0])),
     options.lightness.target,
     options.lightness.range[0],
     options.lightness.range[1],
@@ -40,7 +53,7 @@ const createCosts = (
 
   if (__ENVIRONMENT__ !== 'production' && isNaN(lightnessCost)) {
     const data = [
-      mean(state.map((value) => value[0])),
+      mean(statePresent.map((value) => value[0])),
       options.lightness.target,
       options.lightness.range[0],
       options.lightness.range[1],
@@ -49,26 +62,32 @@ const createCosts = (
     throw new Error(`NAN ${JSON.stringify(data)}`)
   }
 
+  const hueArray = state.flatMap((value, index) => {
+    const referenceColor = options.colors[index]
+
+    if (value === null || referenceColor === null) {
+      return []
+    }
+
+    return referenceColor.map((initial) => normalizeAngle(value[2] - initial[2]) / 360)
+  })
+
   // penalize the deviation from the mean hue
-  const hueCost = mean(
-    state.flatMap((a, index) =>
-      options.colors[index].map((b) => normalizeAngle(a[2] - b[2]) / 360),
-    ),
-  )
+  const hueCost = hueArray.length === 0 ? 1 : mean(hueArray)
 
   // penalize the deviation from the target chroma
   const chromaCost = relativeDifference(
-    mean(state.map((value) => value[1])),
+    mean(statePresent.map((value) => value[1])),
     options.chroma.target,
     options.chroma.range[0],
     options.chroma.range[1],
   )
 
   // calculate distances under different vision conditions
-  const normalDistances = distances(state, options)
-  const protanopiaDistances = distances(state, options, 'protanopia')
-  const deuteranopiaDistances = distances(state, options, 'deuteranopia')
-  const tritanopiaDistances = distances(state, options, 'tritanopia')
+  const normalDistances = distances(statePresent, options)
+  const protanopiaDistances = distances(statePresent, options, 'protanopia')
+  const deuteranopiaDistances = distances(statePresent, options, 'deuteranopia')
+  const tritanopiaDistances = distances(statePresent, options, 'tritanopia')
 
   // penalize lower mean distances between colors (want colors to be more distinguishable)
   const normalCost = normalDistances.length === 0 ? 1 : 1 - mean(normalDistances)
@@ -132,7 +151,7 @@ const createCosts = (
 
   return {
     chroma: chromaCost,
-    colors: 0,
+    colors: colorsCost,
     deuteranopia: deuteranopiaCost,
     difference: differenceCost,
     dispersionDeuteranopia: dispersionDeuteranopiaCost,
@@ -147,16 +166,11 @@ const createCosts = (
   }
 }
 
-const cost = (options: RequiredOptimizeOptions, colors: Array<Color | null>): number => {
-  const { length: colorsAbsent } = colors.filter((value) => value === null)
-  const { length: colorsTotal } = colors
-
-  const costs = createCosts(
-    options,
-    colors.filter((value) => value !== null),
-  )
-
-  costs.colors = 1 - (colorsTotal - colorsAbsent) / colorsTotal
+const cost = (
+  options: RequiredOptimizeOptions,
+  colors: Array<Color | null>,
+): number => {
+  const costs = createCosts(options, colors)
 
   const cost = sum(
     (Object.keys(options.weights) as Array<keyof typeof costs>).map(
@@ -220,7 +234,14 @@ const iterate = (options: RequiredOptimizeOptions) => {
     /* Randomly choose which palette slot to mutate this step. */
     const index = options.prng.minmaxInt(0, currentColors.length)
     /* Select a reference colour from the available palette at the same index. */
-    const referenceColor = sample(options.colors[index], 1, () => options.prng.float())[0]
+    const referenceColor =
+      options.colors[index] === null
+        ? null
+        : sample(options.colors[index], 1, () => options.prng.float())[0]
+
+    if (referenceColor === null) {
+      continue
+    }
 
     /* Compute the current temperature before generating a neighbour. */
     let temperature = calculateEffectiveTemperature(costDeltaScale, annealingFactor)
@@ -280,7 +301,7 @@ const iterate = (options: RequiredOptimizeOptions) => {
   */
   if (
     bestColors.length === 0 ||
-    bestColors.every((value) => value === null || value === undefined)
+    bestColors.every((value) => !isColor(value))
   ) {
     throw new IterationError('No Changes')
   }

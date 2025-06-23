@@ -1,6 +1,7 @@
 import { assert } from './assert'
 import type { Palette, RawPalette, Triangle } from './types'
 import { chunk } from './utilities/chunk'
+import { mapSlice } from './utilities/map-slice'
 
 export const parsePalette = (palette: unknown): Palette => {
   assert(Array.isArray(palette))
@@ -20,14 +21,16 @@ export const parsePalette = (palette: unknown): Palette => {
 
   assert(triangles.length >= 1)
 
-  const step = length * 3
-
-  const colors = new Map(
-    squares.map((square, index) => [
-      square,
-      chunk(data.slice(index * step, (index + 1) * step)) as Array<[number, number, number]>,
-    ]),
+  const colorIndex = chunk(
+    mapSlice(
+      data,
+      (value) => (value === 2 ? 1 : 3),
+      (value) => (value.length === 1 ? undefined : (value as [number, number, number])),
+    ),
+    length,
   )
+
+  const colors = new Map(squares.map((square, index) => [square, colorIndex[index]]))
 
   return {
     colorGamut,
@@ -35,6 +38,6 @@ export const parsePalette = (palette: unknown): Palette => {
     interval,
     length,
     squares,
-    triangles
+    triangles,
   }
 }
