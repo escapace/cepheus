@@ -7,21 +7,21 @@ import {
   to as convert,
   deltaEJz,
   deltaEOK2,
-  inGamut,
   OKLCH,
   OKLrCH,
   P3,
   sRGB,
-  toGamut,
+  to,
+  toGamutCSS,
 } from 'colorjs.io/fn'
 import { mean, sample, standardDeviation } from 'simple-statistics'
 import { N } from '../constants'
 import type { Color, OptimizeOptions, RequiredOptimizeOptions } from '../types'
 import { createPRNG } from '../utilities/create-prng'
 import { fixNaN } from '../utilities/fix-nan'
+import { isColor } from '../utilities/is-color'
 import { percentile } from '../utilities/percentile'
 import { randomWithin } from '../utilities/random-within'
-import { isColor } from '../utilities/is-color'
 
 const normalizeLightness = (
   value: Required<Exclude<OptimizeOptions['lightness'], undefined>>,
@@ -231,6 +231,10 @@ export const distances = (
       }).coords,
     )
 
+    if (__ENVIRONMENT__ !== 'production' && !isColor(sRGBColor)) {
+      throw new TypeError(`${deficiency} outputs incorrect color`)
+    }
+
     const { b, g, r } = simulateDeficiency(
       {
         b: floatToByte(sRGBColor[2]),
@@ -335,7 +339,6 @@ export function randomColor(
     isWithin(value[0], options.lightness.range[0], options.lightness.range[1]) &&
     isWithin(value[1], options.chroma.range[0], options.chroma.range[1])
 
-  // while (iterations !== 0) {
   let accumulator: Color | undefined
 
   // eslint-disable-next-line prefer-const
@@ -343,60 +346,35 @@ export function randomColor(
     ? randomColorOneShot(options, color)
     : randomColorIterative(options, temperature, referenceColor, accumulator ?? [...color])
 
-  if (inGamut({ alpha: 1, coords: accumulator, space: options.colorSpace }, colorGamut)) {
-    return accumulator
-  }
+  // if (inGamut({ alpha: 1, coords: accumulator, space: options.colorSpace }, colorGamut)) {
+  //   return accumulator
+  // }
 
-  const deltaEMethod = ({ jzczhz: 'Jz', oklab: 'OK2' } as const)[options.deltaE]
-
-  const { coords: first } = toGamut(
+  const value = toGamutCSS(
     { alpha: 1, coords: [...accumulator], space: options.colorSpace },
     {
-      deltaEMethod,
-      method: 'css',
       space: colorGamut,
     },
   )
 
-  if (checkCoords(first)) {
-    return first
+  const { coords } = to(value, options.colorSpace, { inGamut:  false })
+
+  if (checkCoords(coords)) {
+    return coords
   }
 
-  const { coords: second } = toGamut(
-    { alpha: 1, coords: [...accumulator], space: options.colorSpace },
-    {
-      deltaEMethod,
-      method: 'clip',
-      space: colorGamut,
-    },
-  )
-
-  if (checkCoords(second)) {
-    return second
-  }
+  // const { coords: second } = toGamut(
+  //   { alpha: 1, coords: [...accumulator], space: options.colorSpace },
+  //   {
+  //     deltaEMethod,
+  //     method: 'clip',
+  //     space: colorGamut,
+  //   },
+  // )
+  //
+  // if (checkCoords(second)) {
+  //   return second
+  // }
 
   return null
 }
-
-// if (
-//   __ENVIRONMENT__ !== 'production' &&
-//   !isWithin(accumulator[0], options.lightness.range[0], options.lightness.range[1])
-// ) {
-//   throw new Error(
-//     `Lightness out of range! ${JSON.stringify([
-//       accumulator[0],
-//       options.lightness.range[0],
-//       options.lightness.range[1],
-//     ])}`,
-//   )
-// }
-//
-// if (
-//   __ENVIRONMENT__ !== 'production' &&
-//   !isWithin(accumulator[1], options.chroma.range[0], options.chroma.range[1])
-// ) {
-//   throw new Error('Chroma out of range!')
-// }
-
-// return null
-// }

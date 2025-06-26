@@ -5,7 +5,7 @@ export type { PRNG, PRNGName }
 
 export type Color = [number, number, number]
 
-type ColorGamut = 'p3' | 'srgb'
+export type ColorGamut = 'p3' | 'srgb'
 type ColorSpaceLiteral = 'oklch' | 'oklrch'
 
 export interface OptimizeTask<T extends OptimizationState = OptimizationState> {

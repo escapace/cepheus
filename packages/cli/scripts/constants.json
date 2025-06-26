@@ -2,7 +2,7 @@
   "builds": {
     "node": {
       "define": {
-        "__ENVIRONMENT__": "\"production\"",
+        "__ENVIRONMENT__": "\"testing\"",
         "__PLATFORM__": "\"node\""
       },
       "entryPoints": ["src/cli.ts", "src/index.ts", "src/worker.ts"],

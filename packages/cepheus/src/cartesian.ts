@@ -15,7 +15,7 @@ export const cartesian = (
   color: number,
   x: number,
   y: number,
-  extend = true,
+  // extend = true,
 ): [number, number, number] | undefined => {
   const { colors, interval } = interpolator[INTERPOLATOR].state.palette
 
@@ -35,9 +35,10 @@ export const cartesian = (
   if (base !== undefined) {
     weights.push(toWeight(x, y, sx, sy, interval))
     values.push(base)
-  } else if (!extend) {
-    return undefined
   }
+  // else if (!extend) {
+  //   return undefined
+  // }
 
   const n = [sx, sy + interval]
   // eslint-disable-next-line unicorn/prevent-abbreviations

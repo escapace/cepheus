@@ -115,7 +115,7 @@ export const createCepheus = (options: Options): Cepheus => {
               ? () => createIterator(options[0])
               : createIteratorMultiplexer(createIterator, options)
 
-          iterators.set('color', thunk)
+          iterators.color = thunk
 
           void update(false)
         },
@@ -131,7 +131,7 @@ export const createCepheus = (options: Options): Cepheus => {
       onScopeDispose(() => {
         unsubscribe()
         setImmediate(() => {
-          iterators.delete('color')
+          Reflect.deleteProperty(iterators, 'color')
         })
       })
     })

@@ -57,7 +57,7 @@
   "license": "MPL-2.0",
   "peerDependencies": {
     "@texel/color": ">=1.1.10",
-    "cassiopeia": ">=7.0.0",
+    "cassiopeia": ">=7.0.2",
     "cepheus": "workspace:*"
   },
   "private": false,

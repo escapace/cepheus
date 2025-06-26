@@ -10,7 +10,7 @@ export type RawPalette = [
   length: number,
   triangles: number[],
   squares: number[],
-  colors: number[],
+  colors: Array<number | null>,
 ]
 
 export interface Palette {
