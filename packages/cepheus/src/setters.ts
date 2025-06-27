@@ -1,4 +1,4 @@
-import { INTERPOLATOR } from './constants'
+import { CEPHEUS_INTERPOLATOR } from './constants'
 import type { Interpolator, Palette } from './types'
 
 export function chroma(interpolator: Interpolator): { max: number; min: number }
@@ -17,7 +17,7 @@ export function chroma(
   a?: number,
   b?: number,
 ): Promise<{ max: number; min: number }> | { max: number; min: number } {
-  const value = interpolator[INTERPOLATOR]
+  const value = interpolator[CEPHEUS_INTERPOLATOR]
 
   if (a !== undefined || b !== undefined) {
     return value.updateChroma(a, b).then(() => value.state.chroma)
@@ -42,7 +42,7 @@ export function lightness(
   a?: number,
   b?: number,
 ): Promise<{ max: number; min: number }> | { max: number; min: number } {
-  const value = interpolator[INTERPOLATOR]
+  const value = interpolator[CEPHEUS_INTERPOLATOR]
 
   if (a !== undefined || b !== undefined) {
     return value.updateLightness(a, b).then(() => value.state.lightness)
@@ -55,7 +55,7 @@ export function palette(interpolator: Interpolator, palette?: undefined): Palett
 export function palette(interpolator: Interpolator, palette?: undefined): Palette
 export function palette(interpolator: Interpolator, palette: Palette): Promise<Palette>
 export function palette(interpolator: Interpolator, palette?: Palette): Palette | Promise<Palette> {
-  const value = interpolator[INTERPOLATOR]
+  const value = interpolator[CEPHEUS_INTERPOLATOR]
 
   if (palette !== undefined) {
     return value.updatePalette(palette).then(() => value.state.palette)

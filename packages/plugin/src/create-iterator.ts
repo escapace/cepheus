@@ -2,7 +2,7 @@ import { DisplayP3, OKLCH, serialize, sRGB, type Vector } from '@texel/color'
 import type { Iterator, StyleSheetPartial } from 'cassiopeia'
 import { color } from './color'
 import type { CreateIteratorOptions } from './types'
-import { INTERPOLATOR } from 'cepheus'
+import { CEPHEUS_INTERPOLATOR } from 'cepheus'
 
 const createStyleSheet = (
   variables: string[],
@@ -55,7 +55,7 @@ export function* createIterator(options: CreateIteratorOptions): Iterator {
   const properties = {
     ...options,
     colorGamutMapping:
-      options.colorGamut !== options.interpolator[INTERPOLATOR].state.palette.colorGamut,
+      options.colorGamut !== options.interpolator[CEPHEUS_INTERPOLATOR].state.palette.colorGamut,
   }
 
   let variable: string | true

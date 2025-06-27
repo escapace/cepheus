@@ -1,6 +1,6 @@
 import { assert, describe, it, vi } from 'vitest'
 
-import { alias, createInterpolator, INTERPOLATOR, parsePalette } from 'cepheus'
+import { alias, createInterpolator, CEPHEUS_INTERPOLATOR, parsePalette } from 'cepheus'
 import { color } from '../src/color'
 import type { ColorOptions } from './types'
 
@@ -12,10 +12,10 @@ const mock = (input: string, options: Omit<ColorOptions, 'colors' | 'interpolato
   const value = color(input, {
     ...options,
     colors: {
-      red: (interpolator, color, lightness, chroma, isDark) => {
-        assert(typeof interpolator[INTERPOLATOR] === 'object')
+      red: (interpolator, color, lightness, chroma, isDark, extended) => {
+        assert(typeof interpolator[CEPHEUS_INTERPOLATOR] === 'object')
 
-        spy(...[color, lightness, chroma, isDark])
+        spy(...[color, lightness, chroma, isDark, extended])
 
         return [0, 0, 0] as const
       },
@@ -67,12 +67,28 @@ describe('color()', () => {
     assert.deepEqual(value, [0, 0, 0, 1])
     assert.equal(spy.mock.calls.length, 1)
 
-    const [color, lightness, chroma, isDark] = spy.mock.calls[0] as unknown[]
+    const [color, lightness, chroma, isDark, extended] = spy.mock.calls[0] as unknown[]
 
     assert.equal(color, 'red')
     assert.equal(lightness, undefined)
     assert.equal(chroma, undefined)
     assert(isDark === true)
+    assert(extended === false)
+  })
+
+  it('.', () => {
+    const [value, spy] = mock(`---color-x-red`, { colorGamut: 'srgb', colorScheme: 'dark' })
+
+    assert.deepEqual(value, [0, 0, 0, 1])
+    assert.equal(spy.mock.calls.length, 1)
+
+    const [color, lightness, chroma, isDark, extended] = spy.mock.calls[0] as unknown[]
+
+    assert.equal(color, 'red')
+    assert.equal(lightness, undefined)
+    assert.equal(chroma, undefined)
+    assert(isDark === true)
+    assert(extended === true)
   })
 
   it('.', () => {

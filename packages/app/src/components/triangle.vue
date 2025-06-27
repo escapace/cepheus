@@ -1,7 +1,7 @@
 <!-- eslint-disable typescript/no-non-null-assertion -->
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { barycentric, INTERPOLATOR, type Point, type Triangle } from 'cepheus'
+import { barycentric, CEPHEUS_INTERPOLATOR, type Point, type Triangle } from 'cepheus'
 import { useInterpolator } from '@cepheus/vue'
 import { range } from 'lodash-es'
 import {
@@ -132,7 +132,7 @@ onMounted(() => {
     const toX = (x: number) => Math.floor((x / 150) * img.width) + 100
     const toY = (y: number) => Math.floor((y / 150) * img.height) + 100
 
-    const triangle = instance[INTERPOLATOR].state.palette.triangles[0]
+    const triangle = instance[CEPHEUS_INTERPOLATOR].state.palette.triangles[0]
 
     fillTriangle(img, triangle.map(([x, y]) => [toX(x), toY(y)]) as Triangle)
     context.putImageData(img, 0, 0)

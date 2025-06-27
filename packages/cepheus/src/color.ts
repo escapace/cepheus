@@ -1,5 +1,5 @@
 import { barycentric } from './barycentric'
-import { INTERPOLATOR, MAX } from './constants'
+import { CEPHEUS_FULL_SCALE, CEPHEUS_INTERPOLATOR } from './constants'
 import type { Interpolator } from './types'
 
 export const color = (
@@ -8,8 +8,9 @@ export const color = (
   lightness: number,
   chroma: number,
   invert = false,
+  extended = false,
 ) => {
-  const alias = interpolator[INTERPOLATOR].state.palette.alias
+  const { alias } = interpolator[CEPHEUS_INTERPOLATOR].state.palette
 
   const index = alias === undefined ? color : alias(color)
 
@@ -17,5 +18,13 @@ export const color = (
     return
   }
 
-  return barycentric(interpolator, index, MAX - lightness, chroma, lightness, invert)
+  return barycentric(
+    interpolator,
+    index,
+    CEPHEUS_FULL_SCALE - lightness,
+    chroma,
+    lightness,
+    invert,
+    extended,
+  )
 }

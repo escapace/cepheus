@@ -1,13 +1,13 @@
 <!-- eslint-disable typescript/no-non-null-assertion -->
 <script setup lang="ts">
-import { INTERPOLATOR, type Triangle } from 'cepheus'
+import { CEPHEUS_INTERPOLATOR, type Triangle } from 'cepheus'
 import { onMounted, onUnmounted } from 'vue'
 import { useInterpolator } from '@cepheus/vue'
 import { useCepheusStore } from '../composables/use-cepheus-store'
 import { usePane } from '../composables/use-pane'
 
 const instance = useInterpolator()
-const palette = instance[INTERPOLATOR].state.palette
+const palette = instance[CEPHEUS_INTERPOLATOR].state.palette
 
 usePane()
 
@@ -58,7 +58,10 @@ onMounted(() => {
 
       const paletteTriangle = palette.triangles[0].map(([x, y]) => [toX(x), toY(y)]) as Triangle
 
-      const triangle = instance[INTERPOLATOR].triangle.map(([x, y]) => [toX(x), toY(y)]) as Triangle
+      const triangle = instance[CEPHEUS_INTERPOLATOR].references[0].triangle.map(([x, y]) => [
+        toX(x),
+        toY(y),
+      ]) as Triangle
 
       context.putImageData(img, 0, 0)
       strokeTriangle(paletteTriangle)

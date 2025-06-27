@@ -9,11 +9,11 @@ import {
   sRGB,
   sRGBGamut,
 } from '@texel/color'
-import { cartesian, INTERPOLATOR } from 'cepheus'
+import { cartesian, CEPHEUS_INTERPOLATOR } from 'cepheus'
 import { onMounted } from 'vue'
 
 const instance = useInterpolator()
-const palette = instance[INTERPOLATOR].state.palette
+const palette = instance[CEPHEUS_INTERPOLATOR].state.palette
 
 onMounted(() => {
   const canvas = document.querySelector('canvas')!
@@ -41,7 +41,7 @@ onMounted(() => {
   })
 
   const interpolator = (x: number, y: number) => {
-    const coords = cartesian(instance, 0, x, y, true)
+    const coords = cartesian(instance, 0, x, y)
 
     if (coords === undefined) {
       return [255, 255, 255]

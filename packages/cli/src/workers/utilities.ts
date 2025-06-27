@@ -15,7 +15,7 @@ import {
   toGamutCSS,
 } from 'colorjs.io/fn'
 import { mean, sample, standardDeviation } from 'simple-statistics'
-import { N } from '../constants'
+import { SIDE_LENGTH } from '../constants'
 import type { Color, OptimizeOptions, RequiredOptimizeOptions } from '../types'
 import { createPRNG } from '../utilities/create-prng'
 import { fixNaN } from '../utilities/fix-nan'
@@ -27,16 +27,22 @@ const normalizeLightness = (
   value: Required<Exclude<OptimizeOptions['lightness'], undefined>>,
   tolerance: number,
 ): Required<Exclude<OptimizeOptions['lightness'], undefined>> => ({
-  range: expandRange(value.range.map((value) => value / N) as [number, number], tolerance - 1),
-  target: value.target / N,
+  range: expandRange(
+    value.range.map((value) => value / SIDE_LENGTH) as [number, number],
+    tolerance - 1,
+  ),
+  target: value.target / SIDE_LENGTH,
 })
 
 const normalizeChroma = (
   value: Required<Exclude<OptimizeOptions['chroma'], undefined>>,
   tolerance: number,
 ): Required<Exclude<OptimizeOptions['chroma'], undefined>> => ({
-  range: expandRange(value.range.map((v) => (v / N) * 0.4) as [number, number], tolerance - 1),
-  target: (value.target / N) * 0.4,
+  range: expandRange(
+    value.range.map((v) => (v / SIDE_LENGTH) * 0.4) as [number, number],
+    tolerance - 1,
+  ),
+  target: (value.target / SIDE_LENGTH) * 0.4,
 })
 
 const createDistanceFunction = (options: OptimizeOptions) => {
@@ -98,8 +104,8 @@ export const normalizeOptions = (options: OptimizeOptions): RequiredOptimizeOpti
     ...createDistanceFunction(options),
     chroma: normalizeChroma(
       {
-        range: [0, N],
-        target: mean(options.chroma?.range ?? [0, N]),
+        range: [0, SIDE_LENGTH],
+        target: mean(options.chroma?.range ?? [0, SIDE_LENGTH]),
         ...options.chroma,
       },
       tolerance,
@@ -124,8 +130,8 @@ export const normalizeOptions = (options: OptimizeOptions): RequiredOptimizeOpti
     },
     lightness: normalizeLightness(
       {
-        range: [0, N],
-        target: mean(options.lightness?.range ?? [0, N]),
+        range: [0, SIDE_LENGTH],
+        target: mean(options.lightness?.range ?? [0, SIDE_LENGTH]),
         ...options.lightness,
       },
       tolerance,
@@ -357,7 +363,7 @@ export function randomColor(
     },
   )
 
-  const { coords } = to(value, options.colorSpace, { inGamut:  false })
+  const { coords } = to(value, options.colorSpace, { inGamut: false })
 
   if (checkCoords(coords)) {
     return coords

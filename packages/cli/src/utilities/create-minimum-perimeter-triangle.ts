@@ -3,7 +3,7 @@ import { minTriangle } from '@escapace/minimum-perimeter-triangle'
 import type { Point, Triangle } from 'cepheus'
 import { sortBy } from 'lodash-es'
 import assert from 'node:assert'
-import { N } from '../constants'
+import { SIDE_LENGTH } from '../constants'
 import { distance } from './distance'
 
 export const createMinimumPerimeterTriangle = (squares: number[], interval: number) => {
@@ -34,13 +34,13 @@ export const createMinimumPerimeterTriangle = (squares: number[], interval: numb
   ]
 
   const A = sortBy(trianglePoints, (point) => distance(...point, 0, 0))[0].map((value) =>
-    clamp(value, 0, N),
+    clamp(value, 0, SIDE_LENGTH),
   ) as Point
-  const B = sortBy(trianglePoints, (point) => distance(...point, N / 2, N))[0].map((value) =>
-    clamp(value, 0, N),
-  ) as Point
-  const C = sortBy(trianglePoints, (point) => distance(...point, N, 0))[0].map((value) =>
-    clamp(value, 0, N),
+  const B = sortBy(trianglePoints, (point) =>
+    distance(...point, SIDE_LENGTH / 2, SIDE_LENGTH),
+  )[0].map((value) => clamp(value, 0, SIDE_LENGTH)) as Point
+  const C = sortBy(trianglePoints, (point) => distance(...point, SIDE_LENGTH, 0))[0].map((value) =>
+    clamp(value, 0, SIDE_LENGTH),
   ) as Point
 
   assert(A !== B, 'createMinimumPerimeterTriangle() unable to produce correct triangle')

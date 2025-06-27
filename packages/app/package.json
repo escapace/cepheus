@@ -5,7 +5,7 @@
   "author": "escapace <opensource@escapace.com>",
   "bugs": "https://github.com/escapace/cepheus/issues",
   "dependencies": {
-    "@cassiopeia/vue": "^7.0.2",
+    "@cassiopeia/vue": "^7.0.3",
     "@cepheus/plugin": "workspace:*",
     "@cepheus/utilities": "workspace:*",
     "@cepheus/vue": "workspace:*",
@@ -16,7 +16,7 @@
     "@thi.ng/random": "^4.1.20",
     "@tweakpane/core": "^2.0.5",
     "@vueuse/core": "^13.4.0",
-    "cassiopeia": "^7.0.2",
+    "cassiopeia": "^7.0.3",
     "cepheus": "workspace:*",
     "devalue": "^5.1.1",
     "hono": "^4.8.3",

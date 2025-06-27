@@ -23,6 +23,7 @@ export type ColorFunction = (
   lightness: number | undefined,
   chroma: number | undefined,
   invert: boolean,
+  extended: boolean,
 ) => [number, number, number] | undefined
 
 export interface CreateIteratorOptions extends Combination {

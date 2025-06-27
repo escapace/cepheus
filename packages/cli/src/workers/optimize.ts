@@ -166,10 +166,7 @@ const createCosts = (
   }
 }
 
-const cost = (
-  options: RequiredOptimizeOptions,
-  colors: Array<Color | null>,
-): number => {
+const cost = (options: RequiredOptimizeOptions, colors: Array<Color | null>): number => {
   const costs = createCosts(options, colors)
 
   const cost = sum(
@@ -299,10 +296,7 @@ const iterate = (options: RequiredOptimizeOptions) => {
   /*
     If no valid palette was produced, indicate failure by raising an error.
   */
-  if (
-    bestColors.length === 0 ||
-    bestColors.every((value) => !isColor(value))
-  ) {
+  if (bestColors.length === 0 || bestColors.every((value) => !isColor(value))) {
     throw new IterationError('No Changes')
   }
 

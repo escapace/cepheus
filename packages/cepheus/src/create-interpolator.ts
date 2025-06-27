@@ -1,35 +1,50 @@
 import type { Options } from '.'
-import { INTERPOLATOR } from './constants'
-import type { Interpolator, Palette, State, Subscription, Triangle } from './types'
+import { CEPHEUS_INTERPOLATOR } from './constants'
+import type { Interpolator, Palette, Reference, State, Subscription } from './types'
 import { chroma0, chroma1, getX0, lightness0, lightness1 } from './utilities/calculations'
 
-const notify = async (subscriptions: Set<Subscription>) =>
-  await Promise.all(Array.from(subscriptions).map((value) => value()))
+const notify = async (subscriptions: Subscription[]) =>
+  await Promise.all(subscriptions.map((value) => value()))
 
-const changePalette = (state: State, triangleReference: Triangle, palette: Palette = state.palette) => {
-  const triangle = palette.triangles[0]
+const changePalette = (state: State, references: Reference[], palette: Palette = state.palette) => {
+  const { triangles } = palette
 
-  const x0 = getX0(triangle)
+  for (let index = 0; index < triangles.length; index++) {
+    const triangle = triangles[index]
 
-  const { p0, p1 } = chroma0(x0, triangle, state)
+    const x0 = getX0(triangle)
 
-  const triangle0 = lightness0(p0, p1, state)
-  const triangle1 = chroma1(x0, triangle[1], state)
-  const triangle2 = lightness1(p0, p1, state)
+    const { p0, p1 } = chroma0(x0, triangle, state)
+
+    const triangle0 = lightness0(p0, p1, state)
+    const triangle1 = chroma1(x0, triangle[1], state)
+    const triangle2 = lightness1(p0, p1, state)
+
+    // if (typeof references[index] === 'object') {
+    //   const reference = references[index]
+    //   const { triangle } = reference
+    //   triangle[0] = triangle0
+    //   triangle[1] = triangle1
+    //   triangle[2] = triangle2
+    //
+    //   reference.p0 = p0
+    //   reference.p1 = p1
+    //   reference.x0 = x0
+    // } else {
+    references[index] = { p0, p1, triangle: [triangle0, triangle1, triangle2], x0 }
+    // }
+  }
 
   state.palette = palette
-  triangleReference[0] = triangle0
-  triangleReference[1] = triangle1
-  triangleReference[2] = triangle2
 
-  return { p0, p1, state, x0 }
+  return state
 }
 
 export const createInterpolator = (options: Options): Interpolator => {
-  const subscriptions = new Set<Subscription>()
-  const triangleReference: Triangle = [] as unknown as Triangle
+  const subscriptions: Subscription[] = []
+  const references: Reference[] = []
 
-  let { p0, p1, state, x0 } = changePalette(
+  const state = changePalette(
     {
       chroma:
         options.chroma === undefined
@@ -41,71 +56,88 @@ export const createInterpolator = (options: Options): Interpolator => {
           : { max: options.lightness.max, min: options.lightness.min },
       palette: options.palette,
     },
-    triangleReference,
+    references,
   )
 
   const updatePalette = async (palette?: Palette) => {
     if (palette !== undefined && state.palette !== palette) {
-      const properties = changePalette(state, triangleReference, palette)
-
-      x0 = properties.x0
-      p0 = properties.p0
-      p1 = properties.p1
-
+      changePalette(state, references, palette)
       await notify(subscriptions)
     }
   }
 
   const updateChroma = async (a?: number, b?: number) => {
-    let changed = false
-    const triangle = state.palette.triangles[0]
+    const isMin = a !== undefined && a !== state.chroma.min
+    const isMax = b !== undefined && b !== state.chroma.max
 
-    if (a !== undefined && a !== state.chroma.min) {
+    if (isMin) {
       state.chroma.min = a
-      const temporary = chroma0(x0, triangle, state)
-      p0 = temporary.p0
-      p1 = temporary.p1
-      triangleReference[0] = lightness0(p0, p1, state)
-      triangleReference[2] = lightness1(p0, p1, state)
-      changed = true
     }
 
-    if (b !== undefined && b !== state.chroma.max) {
+    if (isMax) {
       state.chroma.max = b
-      triangleReference[1] = chroma1(x0, triangle[1], state)
-      changed = true
     }
 
-    if (changed) {
+    if (isMin || isMax) {
+      const { triangles } = state.palette
+
+      for (let index = 0; index < triangles.length; index++) {
+        const triangle = triangles[index]
+        const reference = references[index]
+
+        if (isMin) {
+          const temporary = chroma0(reference.x0, triangle, state)
+          reference.p0 = temporary.p0
+          reference.p1 = temporary.p1
+          reference.triangle[0] = lightness0(reference.p0, reference.p1, state)
+          reference.triangle[2] = lightness1(reference.p0, reference.p1, state)
+        }
+
+        if (isMax) {
+          reference.triangle[1] = chroma1(reference.x0, triangle[1], state)
+        }
+      }
+
       await notify(subscriptions)
     }
   }
 
   const updateLightness = async (a?: number, b?: number) => {
-    let changed = false
+    const isMin = a !== undefined && a !== state.lightness.min
+    const isMax = b !== undefined && b !== state.lightness.max
 
-    if (b !== undefined && b !== state.lightness.max) {
-      state.lightness.max = b
-      triangleReference[2] = lightness1(p0, p1, state)
-      changed = true
-    }
-
-    if (a !== undefined && a !== state.lightness.min) {
+    if (isMin) {
       state.lightness.min = a
-      triangleReference[0] = lightness0(p0, p1, state)
-      changed = true
     }
 
-    if (changed) {
+    if (isMax) {
+      state.lightness.max = b
+    }
+
+    if (isMin || isMax) {
+      const { triangles } = state.palette
+
+      for (let index = 0; index < triangles.length; index++) {
+        const reference = references[index]
+
+        if (isMax) {
+          reference.triangle[2] = lightness1(reference.p0, reference.p1, state)
+        }
+
+        if (isMin) {
+          reference.triangle[0] = lightness0(reference.p0, reference.p1, state)
+        }
+      }
+
       await notify(subscriptions)
     }
   }
 
   return {
-    [INTERPOLATOR]: {
+    [CEPHEUS_INTERPOLATOR]: {
+      references,
       state,
       subscriptions,
-      triangle: triangleReference,
       updateChroma,
       updateLightness,
       updatePalette,

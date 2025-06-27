@@ -10,13 +10,13 @@ import {
   sRGB,
   sRGBGamut,
 } from '@texel/color'
-import { INTERPOLATOR, LENGTH as N } from 'cepheus'
+import { CEPHEUS_INTERPOLATOR, CEPHEUS_SIDE_LENGTH } from 'cepheus'
 import { range } from 'lodash-es'
 
 const interpolator = useInterpolator()
-const palette = interpolator[INTERPOLATOR].state.palette
+const palette = interpolator[CEPHEUS_INTERPOLATOR].state.palette
 
-const levels = N / palette.interval
+const levels = CEPHEUS_SIDE_LENGTH / palette.interval
 const numberColors = palette.length
 const colors = range(0, numberColors)
 
@@ -49,10 +49,10 @@ const toStyle = (squareIndex: number, colorIndex: number): Record<string, unknow
         class="square"
       >
         <!-- <div class="label"> -->
-          <!-- {{ square }} -->
-          <!-- <svg viewBox="0 0 100 100"> -->
-          <!--   <text textLength="100" x="0" y="50"  class="label">{{ square }}</text> -->
-          <!-- </svg> -->
+        <!-- {{ square }} -->
+        <!-- <svg viewBox="0 0 100 100"> -->
+        <!--   <text textLength="100" x="0" y="50"  class="label">{{ square }}</text> -->
+        <!-- </svg> -->
         <!-- </div> -->
       </div>
     </div>

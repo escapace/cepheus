@@ -5,11 +5,11 @@ import {
   DEFAULT_DELTA_E,
   DEFAULT_HUE_ANGLE,
   DEFAULT_ITERATIONS,
-  DEFAULT_N_DIVISOR,
+  DEFAULT_SIDE_LENGTH_DIVISOR,
   DEFAULT_PRECISION,
   DEFAULT_WEIGHTS,
-  N,
-  N_DIVISORS,
+  SIDE_LENGTH,
+  SIDE_LENGTH_DIVISORS,
 } from '../constants'
 import type { Color, RequiredStoreOptions, StoreOptions } from '../types'
 import assert from 'node:assert'
@@ -38,11 +38,11 @@ export function createStoreOptions(options: StoreOptions): RequiredStoreOptions 
     )
   }
 
-  const interval = N / (options.levels ?? DEFAULT_N_DIVISOR)
+  const interval = SIDE_LENGTH / (options.levels ?? DEFAULT_SIDE_LENGTH_DIVISOR)
   const iterations = options.iterations ?? DEFAULT_ITERATIONS
 
-  if (!N_DIVISORS.includes(interval)) {
-    throw new Error(`'levels' must be one of ${N_DIVISORS.join(', ')}`)
+  if (!SIDE_LENGTH_DIVISORS.includes(interval)) {
+    throw new Error(`'levels' must be one of ${SIDE_LENGTH_DIVISORS.join(', ')}`)
   }
 
   if (!isInteger(iterations) || iterations < 1) {

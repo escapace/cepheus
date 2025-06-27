@@ -5,13 +5,14 @@ import {
   type ColorFunction,
 } from '@cepheus/plugin'
 import {
-  PLUGIN,
+  CASSIOPEIA_PLUGIN,
   type Plugin as CassiopeiaPlugin,
   type Iterators,
   type UpdatePlugin,
 } from 'cassiopeia'
 import {
   createInterpolator,
+  CEPHEUS_INTERPOLATOR,
   subscribe,
   chroma as updateChroma,
   lightness as updateLightness,
@@ -130,6 +131,7 @@ export const createCepheus = (options: Options): Cepheus => {
 
       onScopeDispose(() => {
         unsubscribe()
+        interpolator[CEPHEUS_INTERPOLATOR].subscriptions.splice(0)
         setImmediate(() => {
           Reflect.deleteProperty(iterators, 'color')
         })
@@ -138,6 +140,7 @@ export const createCepheus = (options: Options): Cepheus => {
   }
 
   const cepheus: Cepheus = {
+    [CASSIOPEIA_PLUGIN]: plugin,
     colors,
     dispose,
     install: (app: App) => {
@@ -146,7 +149,6 @@ export const createCepheus = (options: Options): Cepheus => {
       app.onUnmount(dispose)
     },
     interpolator,
-    [PLUGIN]: plugin,
   }
 
   return cepheus

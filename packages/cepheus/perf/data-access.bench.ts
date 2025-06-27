@@ -1,6 +1,7 @@
+/* eslint-disable typescript/strict-boolean-expressions */
+/* eslint-disable typescript/no-unsafe-assignment */
 /**
- * Create a Vitest benchmark comparing three data access implementations for the type:
- * Map<number, ([number, number, number] | undefined)[]>
+ * Create a Vitest benchmark comparing three data access implementations.
  *
  * Requirements:
  * 1. Implement three data structures with identical get() method signatures
@@ -40,12 +41,12 @@
 
 import { bench, describe } from 'vitest'
 
-type Triple = [number, number, number]
-type DataValue = (Triple | undefined)[]
 type DataEntry = [number, DataValue]
+type DataValue = Array<Triple | undefined>
+type Triple = [number, number, number]
 
 class ArrayDataStructure {
-  private readonly valueArrays: (DataValue | undefined)[]
+  private readonly valueArrays: Array<DataValue | undefined>
   constructor(entries: DataEntry[], _arrayLength: number) {
     const highestKey = Math.max(...entries.map(([key]) => key))
     this.valueArrays = new Array(highestKey + 1)
@@ -57,20 +58,20 @@ class ArrayDataStructure {
 }
 
 class PackedArrayDataStructure {
-  private readonly valueArrays: (DataValue | undefined)[];
+  private readonly valueArrays: Array<DataValue | undefined>
   constructor(entries: DataEntry[], arrayLength: number) {
-    const highestKey = Math.max(...entries.map(([key]) => key));
-    const store = new Array(highestKey + 1).fill(undefined);
-    for (const [key, srcRow] of entries) {
-      const packedRow: DataValue = new Array(arrayLength).fill(undefined);
-      for (let i = 0; i < arrayLength; i += 1) packedRow[i] = srcRow[i];
-      Object.freeze(packedRow);
-      store[key] = packedRow;
+    const highestKey = Math.max(...entries.map(([key]) => key))
+    const store = new Array(highestKey + 1).fill(undefined)
+    for (const [key, sourceRow] of entries) {
+      const packedRow: DataValue = new Array(arrayLength).fill(undefined)
+      for (let index = 0; index < arrayLength; index += 1) packedRow[index] = sourceRow[index]
+      Object.freeze(packedRow)
+      store[key] = packedRow
     }
-    this.valueArrays = store;
+    this.valueArrays = store
   }
   get(key: number): DataValue | undefined {
-    return this.valueArrays[key];
+    return this.valueArrays[key]
   }
 }
 
@@ -102,13 +103,13 @@ class PackedArrayDataStructure {
 // }
 
 class ArrayBufferDataStructure {
+  private readonly definedFlags: Uint8Array
+  private readonly highestKey: number
+  private readonly itemsPerKey: number
+  private readonly keyPresence: Uint8Array
   private readonly xColumn: Float32Array
   private readonly yColumn: Float32Array
   private readonly zColumn: Float32Array
-  private readonly definedFlags: Uint8Array
-  private readonly keyPresence: Uint8Array
-  private readonly itemsPerKey: number
-  private readonly highestKey: number
 
   constructor(entries: DataEntry[], arrayLength: number) {
     this.itemsPerKey = arrayLength
@@ -123,14 +124,14 @@ class ArrayBufferDataStructure {
     for (const [key, row] of entries) {
       this.keyPresence[key] = 1
       const base = key * arrayLength
-      for (let i = 0; i < arrayLength; i += 1) {
-        const v = row[i]
+      for (let index = 0; index < arrayLength; index += 1) {
+        const v = row[index]
         if (v !== undefined) {
-          const idx = base + i
-          this.definedFlags[idx] = 1
-          this.xColumn[idx] = v[0]
-          this.yColumn[idx] = v[1]
-          this.zColumn[idx] = v[2]
+          const index_ = base + index
+          this.definedFlags[index_] = 1
+          this.xColumn[index_] = v[0]
+          this.yColumn[index_] = v[1]
+          this.zColumn[index_] = v[2]
         }
       }
     }
@@ -140,13 +141,12 @@ class ArrayBufferDataStructure {
     if (key < 0 || key > this.highestKey || !this.keyPresence[key]) return undefined
     const base = key * this.itemsPerKey
     const out: DataValue = new Array(this.itemsPerKey)
-    for (let i = 0; i < this.itemsPerKey; i += 1) {
-      const idx = base + i
-      if (this.definedFlags[idx] === 0) {
-        out[i] = undefined
-      } else {
-        out[i] = [this.xColumn[idx], this.yColumn[idx], this.zColumn[idx]]
-      }
+    for (let index = 0; index < this.itemsPerKey; index += 1) {
+      const index_ = base + index
+      out[index] =
+        this.definedFlags[index_] === 0
+          ? undefined
+          : [this.xColumn[index_], this.yColumn[index_], this.zColumn[index_]]
     }
     return out
   }
@@ -157,9 +157,9 @@ function generateTestData(totalKeys: number, arrayLength: number): DataEntry[] {
   let nextKey = 0
   for (let produced = 0; produced < totalKeys; produced += 1) {
     const row: DataValue = new Array(arrayLength).fill(undefined)
-    for (let i = 0; i < arrayLength; i += 1) {
+    for (let index = 0; index < arrayLength; index += 1) {
       if (Math.random() >= 0.2) {
-        row[i] = [Math.random() * 999 + 1, Math.random() * 999 + 1, Math.random() * 999 + 1]
+        row[index] = [Math.random() * 999 + 1, Math.random() * 999 + 1, Math.random() * 999 + 1]
       }
     }
     entries.push([nextKey, row])
@@ -179,10 +179,10 @@ function createBenchmarkSuite(totalKeys: number, arrayLength: number) {
 
     const presentKeys = dataEntries.map(([k]) => k)
     const maxKey = Math.max(...presentKeys)
-    const lookupKeys: number[] = new Array(1_000)
-    for (let i = 0; i < 1_000; i += 1) {
-      lookupKeys[i] =
-        i & 1
+    const lookupKeys: number[] = new Array(1000)
+    for (let index = 0; index < 1000; index += 1) {
+      lookupKeys[index] =
+        index & 1
           ? maxKey + 1 + ((Math.random() * maxKey) | 0)
           : presentKeys[(Math.random() * presentKeys.length) | 0]
     }
@@ -202,6 +202,6 @@ function createBenchmarkSuite(totalKeys: number, arrayLength: number) {
   })
 }
 
-;[100, 1_000, 10_000, 50_000].forEach((keys) =>
-  [5, 50].forEach((len) => createBenchmarkSuite(keys, len)),
+;[100, 1000, 10_000, 50_000].forEach((keys) =>
+  [5, 50].forEach((length) => createBenchmarkSuite(keys, length)),
 )

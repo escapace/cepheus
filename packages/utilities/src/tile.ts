@@ -1,15 +1,15 @@
-import { LENGTH } from 'cepheus'
+import { CEPHEUS_SIDE_LENGTH } from 'cepheus'
 import { cartesianProduct } from './cartesian-product'
 import { toSquare } from './to-square'
 
 export const tile = (interval: number): number[] => {
   // Validate that interval is a divisor
-  if (LENGTH % interval !== 0) {
-    throw new Error(`Interval ${interval} is not a divisor of ${LENGTH}`)
+  if (CEPHEUS_SIDE_LENGTH % interval !== 0) {
+    throw new Error(`Interval ${interval} is not a divisor of ${CEPHEUS_SIDE_LENGTH}`)
   }
 
   // Calculate how many subdivisions we need along each axis
-  const divisions = LENGTH / interval
+  const divisions = CEPHEUS_SIDE_LENGTH / interval
 
   // Generate arrays of x and y coordinates for bottom-left corners
   const xCoords: number[] = []

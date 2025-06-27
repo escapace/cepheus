@@ -98,9 +98,9 @@ describe('./src/lerp-angle.spec.ts', () => {
 
   describe('precision', () => {
     it('maintains precision for fractional results', () => {
-      assert.deepStrictEqual(lerpAngle(0, 90, 1/3), 30)
-      assert.deepStrictEqual(lerpAngle(0, 360, 1/6), 0) // 360 normalizes to 0, so no movement
-      assert.deepStrictEqual(lerpAngle(350, 10, 1/4), 355)
+      assert.deepStrictEqual(lerpAngle(0, 90, 1 / 3), 30)
+      assert.deepStrictEqual(lerpAngle(0, 360, 1 / 6), 0) // 360 normalizes to 0, so no movement
+      assert.deepStrictEqual(lerpAngle(350, 10, 1 / 4), 355)
     })
   })
 })

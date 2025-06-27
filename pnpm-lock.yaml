@@ -45,8 +45,8 @@ importers:
   packages/app:
     dependencies:
       '@cassiopeia/vue':
-        specifier: ^7.0.2
-        version: 7.0.2(cassiopeia@7.0.2)(vue@3.5.17(typescript@5.8.3))
+        specifier: ^7.0.3
+        version: 7.0.3(cassiopeia@7.0.3)(vue@3.5.17(typescript@5.8.3))
       '@cepheus/plugin':
         specifier: workspace:*
         version: link:../plugin
@@ -78,8 +78,8 @@ importers:
         specifier: ^13.4.0
         version: 13.4.0(vue@3.5.17(typescript@5.8.3))
       cassiopeia:
-        specifier: ^7.0.2
-        version: 7.0.2
+        specifier: ^7.0.3
+        version: 7.0.3
       cepheus:
         specifier: workspace:*
         version: link:../cepheus
@@ -308,8 +308,8 @@ importers:
         specifier: '>=1.1.10'
         version: 1.1.10
       cassiopeia:
-        specifier: '>=7.0.2'
-        version: 7.0.2
+        specifier: '>=7.0.3'
+        version: 7.0.3
       cepheus:
         specifier: workspace:*
         version: link:../cepheus
@@ -412,8 +412,8 @@ importers:
         specifier: workspace:*
         version: link:../plugin
       cassiopeia:
-        specifier: '>=7.0.2'
-        version: 7.0.2
+        specifier: '>=7.0.3'
+        version: 7.0.3
       cepheus:
         specifier: workspace:*
         version: link:../cepheus
@@ -564,11 +564,11 @@ packages:
       vite: '>=6.3.5'
       vue: '>=3.5.16'
 
-  '@cassiopeia/vue@7.0.2':
-    resolution: {integrity: sha512-vUVvAeeGbaOd/MkEqKQO1xiG5OpLcmvVi7R005U67YbVRAbH/IXtoLNYI1byDNXxJ4GOv2N8s9sjyEUhkV7TqA==}
+  '@cassiopeia/vue@7.0.3':
+    resolution: {integrity: sha512-G9Caf5cfTCu6oA+YGzJl8SdFhwlU4OtxUQqL2tQ86CtAnptDy4WICrx3DwfLWciam26CrMUTkqNe+GzrEwomGw==}
     engines: {node: '>=22.15.0', pnpm: '>=10.10.0'}
     peerDependencies:
-      cassiopeia: 7.0.2
+      cassiopeia: 7.0.3
       vue: '>=3.5.16'
 
   '@cloudflare/kv-asset-handler@0.4.0':
@@ -2081,8 +2081,8 @@ packages:
   caniuse-lite@1.0.30001724:
     resolution: {integrity: sha512-WqJo7p0TbHDOythNTqYujmaJTvtYRZrjpP8TCvH6Vb9CYJerJNKamKzIWOM4BkQatWj9H2lYulpdAQNBe7QhNA==}
 
-  cassiopeia@7.0.2:
-    resolution: {integrity: sha512-xdBifODAaU24Wk3wfNCOo5e9RG8YIp5wwDaTpDKUwIRWPKA3PlDAF95J7nGWGlhSCPNC9nkXjoIKytoQXmQL9w==}
+  cassiopeia@7.0.3:
+    resolution: {integrity: sha512-NhoAF8qPRNre4sfsyfXD49d3TLR1f+i4xkeGKGVMmKDc/Zzn01xJQzcun/RhuFvoxDFSy70gHMJ3CKgv9VQuhQ==}
     engines: {node: '>=22.15.0', pnpm: '>=10.10.0'}
 
   ccount@2.0.1:
@@ -4608,9 +4608,9 @@ snapshots:
       vite: 6.3.5(@types/node@24.0.1)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0)
       vue: 3.5.17(typescript@5.8.3)
 
-  '@cassiopeia/vue@7.0.2(cassiopeia@7.0.2)(vue@3.5.17(typescript@5.8.3))':
+  '@cassiopeia/vue@7.0.3(cassiopeia@7.0.3)(vue@3.5.17(typescript@5.8.3))':
     dependencies:
-      cassiopeia: 7.0.2
+      cassiopeia: 7.0.3
       vue: 3.5.17(typescript@5.8.3)
 
   '@cloudflare/kv-asset-handler@0.4.0':
@@ -6028,7 +6028,7 @@ snapshots:
 
   caniuse-lite@1.0.30001724: {}
 
-  cassiopeia@7.0.2: {}
+  cassiopeia@7.0.3: {}
 
   ccount@2.0.1: {}
 

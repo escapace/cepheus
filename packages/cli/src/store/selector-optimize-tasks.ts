@@ -1,5 +1,5 @@
 import { compact, groupBy, map, memoize, uniq } from 'lodash-es'
-import { N } from '../constants'
+import { SIDE_LENGTH } from '../constants'
 import {
   type OptimizationStateFulfilled,
   type OptimizationStatePending,
@@ -66,7 +66,8 @@ export const selectorOptimizeTasksFulfilled = (
   )
 
 const selectorOptimizeTasksCountTotal = memoize(
-  (store: Store): number => store.options.iterations * Math.pow(N / store.options.interval, 2),
+  (store: Store): number =>
+    store.options.iterations * Math.pow(SIDE_LENGTH / store.options.interval, 2),
 )
 
 export const selectorOptimizeTasksCount = (store: Store) =>

@@ -1,10 +1,15 @@
-import { INTERPOLATOR } from './constants'
+import { CEPHEUS_INTERPOLATOR } from './constants'
 import type { Interpolator, Subscription, Unsubscribe } from './types'
+import { filter } from './utilities/filter'
 
 export const subscribe = (interpolator: Interpolator, subscription: Subscription): Unsubscribe => {
-  const { subscriptions } = interpolator[INTERPOLATOR]
+  const { subscriptions } = interpolator[CEPHEUS_INTERPOLATOR]
 
-  subscriptions.add(subscription)
+  if (!subscriptions.includes(subscription)) {
+    subscriptions.push(subscription)
+  }
 
-  return () => subscriptions.delete(subscription)
+  return () => {
+    filter(subscriptions, (value) => value !== subscription)
+  }
 }

@@ -1,6 +1,6 @@
 /* eslint-disable typescript/no-non-null-assertion */
 import { DisplayP3Gamut, gamutMapOKLCH, OKLCH, sRGBGamut } from '@texel/color'
-import { color as _color, INTERPOLATOR } from 'cepheus'
+import { color as _color, CEPHEUS_INTERPOLATOR } from 'cepheus'
 import { parseVariable } from './parse-variable'
 import type { ColorOptions } from './types'
 
@@ -14,7 +14,7 @@ export const color = (
     return undefined
   }
 
-  const { alpha, chroma, color, lightness } = properties
+  const { alpha, chroma, color, extended, lightness } = properties
 
   const value =
     typeof color === 'string'
@@ -36,6 +36,7 @@ export const color = (
         lightness!,
         chroma!,
         options.colorScheme === 'dark',
+        extended,
       )
 
   if (coords === undefined) {
@@ -44,7 +45,7 @@ export const color = (
 
   if (
     options.colorGamutMapping ??
-    options.colorGamut !== options.interpolator[INTERPOLATOR].state.palette.colorGamut
+    options.colorGamut !== options.interpolator[CEPHEUS_INTERPOLATOR].state.palette.colorGamut
   ) {
     gamutMapOKLCH(coords, options.colorGamut === 'p3' ? DisplayP3Gamut : sRGBGamut, OKLCH, coords)
   }

@@ -1,6 +1,6 @@
 import { toPosition } from '@cepheus/utilities'
 import { range } from 'lodash-es'
-import { N } from '../constants'
+import { SIDE_LENGTH } from '../constants'
 import type { SquareOptions } from '../types'
 import { parametricLogisticLift } from '../utilities/parametric-logistic-lift'
 import { toPrecision } from '../utilities/to-precision'
@@ -19,10 +19,10 @@ export function createSquareOptions(
     const [inputMin, inputMax] = range
     // Calculate distances from input range boundaries to wide range boundaries
     const minDistanceToWideMin = Math.abs(inputMin)
-    const maxDistanceToWideMax = Math.abs(inputMax - N)
+    const maxDistanceToWideMax = Math.abs(inputMax - SIDE_LENGTH)
 
     // Choose the boundary that's closer to its respective wide range boundary
-    let delta = (minDistanceToWideMin <= maxDistanceToWideMax ? inputMin : inputMax) / N
+    let delta = (minDistanceToWideMin <= maxDistanceToWideMax ? inputMin : inputMax) / SIDE_LENGTH
 
     const reverse = delta >= 0.5
     delta = reverse ? 1 - delta : delta

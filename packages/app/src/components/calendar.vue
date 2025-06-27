@@ -107,7 +107,7 @@ const createEvents = (): Data['events'] => {
     )
 
     const borderColor = cassiopeia.add(
-      `---color-${random.minmaxInt(0, 3)}-${random.minmaxInt(225, 249)}-${random.minmaxInt(225, 249)}-95`,
+      `---color-x-${random.minmaxInt(0, 3)}-${random.minmaxInt(30, 130)}-${random.minmaxInt(200, 245)}-95`,
     )
 
     return {
@@ -162,7 +162,7 @@ const update = () => {
 // })
 
 void update()
-const { pause, resume } = useTimeoutPoll(update, 3 * 1000)
+const { pause, resume } = useTimeoutPoll(update, 1 * 1000)
 
 // void cassiopeia.update(false)
 

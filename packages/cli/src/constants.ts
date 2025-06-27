@@ -1,11 +1,14 @@
 import { divisors } from '@cepheus/utilities'
+import { CEPHEUS_SIDE_LENGTH } from 'cepheus'
 import { median } from 'simple-statistics'
-import { normalizeWeights } from './utilities/normalize-weights'
 import type { OptimizeOptions } from './types'
+import { normalizeWeights } from './utilities/normalize-weights'
 
-export const N = 120
-export const N_DIVISORS = divisors(N).filter((value) => value !== 1)
-export const DEFAULT_N_DIVISOR = median(N_DIVISORS.slice(0, Math.max(N_DIVISORS.length / 2)))
+export const SIDE_LENGTH = CEPHEUS_SIDE_LENGTH
+export const SIDE_LENGTH_DIVISORS = divisors(SIDE_LENGTH).filter((value) => value !== 1)
+export const DEFAULT_SIDE_LENGTH_DIVISOR = median(
+  SIDE_LENGTH_DIVISORS.slice(0, Math.max(SIDE_LENGTH_DIVISORS.length / 2)),
+)
 
 export const DEFAULT_ITERATIONS = 4
 

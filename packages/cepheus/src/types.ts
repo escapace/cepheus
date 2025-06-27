@@ -1,4 +1,4 @@
-import type { INTERPOLATOR } from './constants'
+import type { CEPHEUS_INTERPOLATOR } from './constants'
 
 export type Line = [Point, Point]
 export type Point = [x: number, y: number]
@@ -17,7 +17,7 @@ export interface Palette {
   colorGamut: 'p3' | 'srgb'
   // colors: Map<number, Array<[number, number, number] | undefined>>
   colors: {
-    get: (key: number) => Array<[number, number, number] | undefined> | undefined;
+    get: (key: number) => Array<[number, number, number] | undefined> | undefined
   }
   interval: number
   length: number
@@ -36,13 +36,20 @@ export interface State {
   palette: Palette
 }
 
+export interface Reference {
+  p0: Point
+  p1: Point
+  triangle: Triangle
+  x0: Point
+}
+
 export interface Options extends Partial<Omit<State, 'palette'>>, Pick<State, 'palette'> {}
 
 export interface Interpolator {
-  [INTERPOLATOR]: {
+  [CEPHEUS_INTERPOLATOR]: {
+    references: Reference[]
     state: State
-    subscriptions: Set<Subscription>
-    triangle: Triangle
+    subscriptions: Subscription[]
     updateChroma: (a?: number, b?: number) => Promise<void>
     updateLightness: (a?: number, b?: number) => Promise<void>
     updatePalette: (palette: Palette) => Promise<void>

@@ -1,4 +1,4 @@
-import { INTERPOLATOR, LENGTH as N } from './constants'
+import { CEPHEUS_INTERPOLATOR, CEPHEUS_SIDE_LENGTH } from './constants'
 import type { Interpolator } from './types'
 import { distance } from './utilities/distance'
 import { erfc } from './utilities/erfc'
@@ -15,9 +15,8 @@ export const cartesian = (
   color: number,
   x: number,
   y: number,
-  // extend = true,
 ): [number, number, number] | undefined => {
-  const { colors, interval } = interpolator[INTERPOLATOR].state.palette
+  const { colors, interval } = interpolator[CEPHEUS_INTERPOLATOR].state.palette
 
   const nXf = Math.floor(x / interval)
   const nYf = Math.floor(y / interval)
@@ -55,14 +54,14 @@ export const cartesian = (
     n, s, e, w, ne, sw, se, nw,
     // long walk
     //
-    // n, s, ne, sw, e, nw, se, w // !
-    // s, ne, sw, n, se, nw, e, w // !
-    // n, se, nw, s, ne, sw, e, w // !
-    // s, n, se, nw, e, sw, ne, w // !
-    // n, sw, ne, s, nw, se, w, e // !
-    // s, nw, se, n, sw, ne, w, e // !
-    // n, s, nw, se, w, ne, sw, e // !
-    // s, n, sw, ne, w, se, nw, e, // !
+    // n, s, ne, sw, e, nw, se, w
+    // s, ne, sw, n, se, nw, e, w
+    // n, se, nw, s, ne, sw, e, w
+    // s, n, se, nw, e, sw, ne, w
+    // n, sw, ne, s, nw, se, w, e
+    // s, nw, se, n, sw, ne, w, e
+    // n, s, nw, se, w, ne, sw, e
+    // s, n, sw, ne, w, se, nw, e
     // e, nw, se, w, ne, sw, n, s
     // w, ne, sw, e, nw, se, n, s
     // w, e, nw, se, n, sw, ne, s
@@ -74,7 +73,7 @@ export const cartesian = (
   ]
 
   order.forEach(([sx, sy]) => {
-    if (sx >= 0 && sy >= 0 && sx < N * 2 && sy < N * 2) {
+    if (sx >= 0 && sy >= 0 && sx < CEPHEUS_SIDE_LENGTH * 2 && sy < CEPHEUS_SIDE_LENGTH * 2) {
       const square = szudzik(sx / interval, sy / interval)
       const coords = colors.get(square)?.[color]
 

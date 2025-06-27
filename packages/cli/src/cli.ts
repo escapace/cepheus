@@ -14,9 +14,9 @@ import {
   DEFAULT_DELTA_E,
   DEFAULT_HUE_ANGLE,
   DEFAULT_ITERATIONS,
-  DEFAULT_N_DIVISOR,
+  DEFAULT_SIDE_LENGTH_DIVISOR,
   DEFAULT_PRECISION,
-  N_DIVISORS,
+  SIDE_LENGTH_DIVISORS,
 } from './constants'
 import { selectorPalette } from './store/selector-palette'
 import {
@@ -39,7 +39,7 @@ const compress = promisify(gzip)
 const HELP = `${chalk.bold('Usage:')}
   cepheus --seed <string> (--color <color>)...
         [--color-gamut p3|srgb] [--color-space oklch|oklrch] [--prng xoshiro128++|xorwow|xorshift128|sfc32]
-        [--delta-e jzczhz|oklab] [--iterations <number>] [--levels ${N_DIVISORS.join('|')}]
+        [--delta-e jzczhz|oklab] [--iterations <number>] [--levels ${SIDE_LENGTH_DIVISORS.join('|')}]
         [--restore <file>] [--save <file>]
   cepheus -h | --help
   cepheus --version
@@ -52,8 +52,8 @@ ${chalk.bold('Options:')}
   --color-space   Preferred iteration color space. [default: oklrch]
   --hue-angle     Hue angle for each sampling step. [default: ${DEFAULT_HUE_ANGLE}]
   --prng          Pseudorandom number generator. [default: xoshiro128++]
-  --levels        Number of uniform sampling steps (${N_DIVISORS.join(',')})
-                  along each square axis. [default: ${DEFAULT_N_DIVISOR}]
+  --levels        Number of uniform sampling steps (${SIDE_LENGTH_DIVISORS.join(',')})
+                  along each square axis. [default: ${DEFAULT_SIDE_LENGTH_DIVISOR}]
   --iterations    Number of iterations. [default: ${DEFAULT_ITERATIONS}]
   --session       Use a session to file.
   --precision     Number of significant digits to round to. [default: ${DEFAULT_PRECISION}]
@@ -174,9 +174,9 @@ const run = async () => {
     return gracefulExit(1)
   }
 
-  if (levels !== undefined && !N_DIVISORS.includes(levels)) {
+  if (levels !== undefined && !SIDE_LENGTH_DIVISORS.includes(levels)) {
     console.log(HELP)
-    console.error(`Option '--levels' must be one of ${N_DIVISORS.join(', ')}.`)
+    console.error(`Option '--levels' must be one of ${SIDE_LENGTH_DIVISORS.join(', ')}.`)
     return gracefulExit(1)
   }
 

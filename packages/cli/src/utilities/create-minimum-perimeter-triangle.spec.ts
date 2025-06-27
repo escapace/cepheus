@@ -1,11 +1,11 @@
 import { toSquare } from '@cepheus/utilities'
 import { describe, expect, it } from 'vitest'
-import { N } from '../constants'
+import { SIDE_LENGTH } from '../constants'
 import { createMinimumPerimeterTriangle } from './create-minimum-perimeter-triangle'
 
 describe('create-minimum-perimeter-triangle', () => {
   it('.', () => {
-    const interval = N / 4
+    const interval = SIDE_LENGTH / 4
 
     const positions: Array<[number, number]> = [
       [0, 0],

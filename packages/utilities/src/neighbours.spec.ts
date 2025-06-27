@@ -1,4 +1,4 @@
-import { LENGTH as N } from 'cepheus'
+import { CEPHEUS_SIDE_LENGTH as N } from 'cepheus'
 import { assert, describe, it } from 'vitest'
 import { neighbours } from './neighbours'
 import { toPosition } from './to-position'

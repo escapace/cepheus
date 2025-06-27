@@ -1,5 +1,5 @@
 import { cartesian } from './cartesian'
-import { INTERPOLATOR } from './constants'
+import { CEPHEUS_INTERPOLATOR } from './constants'
 import type { Interpolator } from './types'
 import { normalize } from './utilities/normalize'
 
@@ -10,8 +10,9 @@ export const barycentric = (
   beta: number,
   gamma: number,
   invert = false,
+  extended = false,
 ) => {
-  const { triangle } = interpolator[INTERPOLATOR]
+  const { triangle } = interpolator[CEPHEUS_INTERPOLATOR].references[extended ? color + 1 : 0]
   const [t0, t1, t2] = triangle
 
   const aa = invert ? gamma : alpha
