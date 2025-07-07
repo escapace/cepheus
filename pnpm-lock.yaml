@@ -112,8 +112,8 @@ importers:
         version: 3.25.67
     devDependencies:
       '@cassiopeia/vite':
-        specifier: 7.0.1
-        version: 7.0.1(@vitejs/plugin-vue@5.2.4(vite@6.3.5(@types/node@24.0.3)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0))(vue@3.5.17(typescript@5.8.3)))(vite@6.3.5(@types/node@24.0.3)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0))(vue@3.5.17(typescript@5.8.3))
+        specifier: 7.0.3
+        version: 7.0.3(@vitejs/plugin-vue@5.2.4(vite@6.3.5(@types/node@24.0.3)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0))(vue@3.5.17(typescript@5.8.3)))(vite@6.3.5(@types/node@24.0.3)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0))(vue@3.5.17(typescript@5.8.3))
       '@ls-lint/ls-lint':
         specifier: 2.3.1
         version: 2.3.1
@@ -556,8 +556,8 @@ packages:
   '@bjornlu/colorblind@1.0.3':
     resolution: {integrity: sha512-RG9W0BuFib5xN19R4U1dFK7s26+UPiJqHdwqawpvH7sywXJ6zc37onPpRpnFP0aNuKLhhmuitqPAXxLxOA+HgQ==}
 
-  '@cassiopeia/vite@7.0.1':
-    resolution: {integrity: sha512-shGwb43/K6vkzpACx/scjkjDBlnrZ2AotssBD3+Oj30D3OyGTQky2fg+4UGHn1PKbwUcODHzQeTsl0scyNCYTQ==}
+  '@cassiopeia/vite@7.0.3':
+    resolution: {integrity: sha512-IHRKMRgxLR4kIx85nC5rVnHXricXbhp3+fjmc46JzdSuf2mTwZp51mklA9Nuzc5cPjGLv1W1EfkEUJ+IlvqRbA==}
     engines: {node: '>=22.15.0', pnpm: '>=10.10.0'}
     peerDependencies:
       '@vitejs/plugin-vue': '>=5.2.4'
@@ -4603,7 +4603,7 @@ snapshots:
 
   '@bjornlu/colorblind@1.0.3': {}
 
-  '@cassiopeia/vite@7.0.1(@vitejs/plugin-vue@5.2.4(vite@6.3.5(@types/node@24.0.3)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0))(vue@3.5.17(typescript@5.8.3)))(vite@6.3.5(@types/node@24.0.3)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0))(vue@3.5.17(typescript@5.8.3))':
+  '@cassiopeia/vite@7.0.3(@vitejs/plugin-vue@5.2.4(vite@6.3.5(@types/node@24.0.3)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0))(vue@3.5.17(typescript@5.8.3)))(vite@6.3.5(@types/node@24.0.3)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0))(vue@3.5.17(typescript@5.8.3))':
     dependencies:
       '@ast-grep/napi': 0.38.5
       '@vitejs/plugin-vue': 5.2.4(vite@6.3.5(@types/node@24.0.3)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0))(vue@3.5.17(typescript@5.8.3))
