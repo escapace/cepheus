@@ -29,7 +29,7 @@
     "zod": "^3.25.67"
   },
   "devDependencies": {
-    "@cassiopeia/vite": "7.0.1",
+    "@cassiopeia/vite": "7.0.3",
     "@ls-lint/ls-lint": "2.3.1",
     "@pointe/types": "5.14.1",
     "@types/lodash-es": "4.17.12",
