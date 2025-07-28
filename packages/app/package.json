@@ -33,7 +33,7 @@
     "@ls-lint/ls-lint": "2.3.1",
     "@pointe/types": "5.15.0",
     "@types/lodash-es": "4.17.12",
-    "@vitejs/plugin-vue": "5.2.4",
+    "@vitejs/plugin-vue": "6.0.0",
     "eslint": "9.29.0",
     "eslint-config-escapace": "5.8.0",
     "esroll": "0.4.5",
