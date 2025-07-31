@@ -1,5 +1,5 @@
 import { assert, describe, it } from 'vitest'
-import { range } from 'lodash-es'
+import { range } from 'es-toolkit'
 import { cartesianProduct } from './cartesian-product'
 
 describe('./src/cartesian-product.spec.ts', () => {

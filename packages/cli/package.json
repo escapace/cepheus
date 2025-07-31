@@ -19,6 +19,7 @@
     "arg": "^5.0.2",
     "bignumber.js": "^9.3.1",
     "cepheus": "workspace:*",
+    "coastal": "^0.2.1",
     "colorjs.io": "^0.6.0-alpha.1",
     "emittery": "^1.2.0",
     "exit-hook": "^4.0.0",

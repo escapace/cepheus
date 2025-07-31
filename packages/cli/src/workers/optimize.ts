@@ -1,5 +1,5 @@
 import { isWithin } from '@cepheus/utilities'
-import { normalizeAngle } from 'cepheus'
+import { normalizeAngle } from 'coastal'
 import { ColorSpace, LCH, OKLCH, OKLrCH, P3, sRGB } from 'colorjs.io/fn'
 import { mean, sample, sum } from 'simple-statistics'
 import {

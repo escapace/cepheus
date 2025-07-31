@@ -1,4 +1,4 @@
-import { szudzik as szudzik2 } from 'cepheus'
+import { szudzik as szudzik2 } from 'coastal'
 
 export { szudzik2 }
 

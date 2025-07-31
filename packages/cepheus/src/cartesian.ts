@@ -1,11 +1,8 @@
+import { lerp, lerpAngle, normalize, szudzik } from 'coastal'
 import { CEPHEUS_INTERPOLATOR, CEPHEUS_SIDE_LENGTH } from './constants'
 import type { Interpolator } from './types'
 import { distance } from './utilities/distance'
 import { erfc } from './utilities/erfc'
-import { lerp } from './utilities/lerp'
-import { lerpAngle } from './utilities/lerp-angle'
-import { normalize } from './utilities/normalize'
-import { szudzik } from './utilities/szudzik'
 
 const toWeight = (x: number, y: number, sx: number, sy: number, interval: number) =>
   erfc(distance(x, y, sx + interval / 2, sy + interval / 2) / interval)

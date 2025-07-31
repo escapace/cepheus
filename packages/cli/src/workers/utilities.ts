@@ -1,6 +1,6 @@
 import { type Deficiency, simulate as simulateDeficiency } from '@bjornlu/colorblind'
 import { clamp, expandRange, isWithin } from '@cepheus/utilities'
-import { normalizeAngle } from 'cepheus'
+import { normalizeAngle } from 'coastal'
 import {
   type Coords,
   type PlainColorObject,

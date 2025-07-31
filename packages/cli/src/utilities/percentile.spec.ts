@@ -1,5 +1,5 @@
 /* eslint-disable typescript/consistent-type-assertions */
-import { normalizeAngle } from 'cepheus'
+import { normalizeAngle } from 'coastal'
 import { assert, describe, it } from 'vitest'
 import type { PRNG } from './create-prng'
 import { percentile } from './percentile'

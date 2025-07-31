@@ -2,7 +2,7 @@
 
 import { createCepheus as _createCepheus, type Cepheus } from '@cepheus/vue'
 import { computedAsync, usePreferredColorScheme, usePreferredContrast } from '@vueuse/core'
-import { lerp } from 'cepheus'
+import { lerp } from 'coastal'
 import { throttle } from 'lodash-es'
 import { defineStore, type Pinia, storeToRefs } from 'pinia'
 import {

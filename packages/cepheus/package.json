@@ -55,6 +55,10 @@
   ],
   "homepage": "https://github.com/escapace/cepheus/tree/trunk/packages/cepheus#readme",
   "license": "MPL-2.0",
+  "peerDependencies": {
+    "coastal": "^0.2.1",
+    "es-toolkit": "^1.39.8"
+  },
   "private": false,
   "publishConfig": {
     "access": "public",

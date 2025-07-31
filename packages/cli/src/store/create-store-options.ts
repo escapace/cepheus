@@ -1,4 +1,4 @@
-import { normalizeAngle } from 'cepheus'
+import { normalizeAngle } from 'coastal'
 import { to as convert, OKLCH, OKLrCH, parse } from 'colorjs.io/fn'
 import { isInteger, isString, omit } from 'lodash-es'
 import {

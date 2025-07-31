@@ -1,8 +1,7 @@
+import { DirectAddressTable, mapChunkBy } from 'coastal'
+import { chunk } from 'es-toolkit'
 import { assert } from './assert'
 import type { Palette, RawPalette, Triangle } from './types'
-import { ArrayMap } from './utilities/array-map'
-import { chunk } from './utilities/chunk'
-import { mapSlice } from './utilities/map-slice'
 
 export const parsePalette = (palette: unknown): Palette => {
   assert(Array.isArray(palette))
@@ -23,7 +22,7 @@ export const parsePalette = (palette: unknown): Palette => {
   assert(triangles.length >= 1)
 
   const coordinates = chunk(
-    mapSlice(
+    mapChunkBy(
       data,
       (value) => (value === null ? 1 : 3),
       (value) => (value.length === 1 ? undefined : (value as [number, number, number])),
@@ -31,7 +30,7 @@ export const parsePalette = (palette: unknown): Palette => {
     length,
   )
 
-  const colors = new ArrayMap(squares, coordinates)
+  const colors = new DirectAddressTable(squares, coordinates)
 
   return {
     colorGamut,

@@ -1,4 +1,4 @@
-import { pullAll } from 'lodash-es'
+import { pull } from 'es-toolkit'
 import { neighbours } from './neighbours'
 
 export const isolate = (squares: number[], interval: number, intercardinal: boolean) => {
@@ -29,7 +29,7 @@ export const isolate = (squares: number[], interval: number, intercardinal: bool
   while (remaining.length !== 0) {
     const values = walk(remaining[0])
 
-    pullAll(remaining, values)
+    pull(remaining, values)
 
     groups.push(values)
   }

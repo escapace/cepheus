@@ -1,7 +1,7 @@
 /* eslint-disable typescript/no-non-null-assertion */
+import { lerpArray } from 'coastal'
 import type { Line, Point, State, Triangle } from '../types'
 import { intersection } from './intersection'
-import { lerpArray } from './lerp-array'
 
 export const lightness1 = (p0: Point, p1: Point, state: Pick<State, 'lightness'>) =>
   lerpArray(p0, p1, state.lightness.max) as Point

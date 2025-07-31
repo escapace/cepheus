@@ -1,5 +1,5 @@
 import { tile } from '@cepheus/utilities'
-import { normalizeAngle } from 'cepheus'
+import { normalizeAngle } from 'coastal'
 import { type OptimizeTaskOptions, type SquareOptions, TypeOptimizationState } from '../types'
 import { hash } from '../utilities/hash'
 import { normalizeWeights } from '../utilities/normalize-weights'

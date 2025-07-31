@@ -7,13 +7,8 @@
     "email": "opensource@escapace.com"
   },
   "bugs": "https://github.com/escapace/cepheus/issues",
-  "dependencies": {
-    "cepheus": "workspace:*",
-    "lodash-es": "^4.17.21"
-  },
   "devDependencies": {
     "@ls-lint/ls-lint": "2.3.1",
-    "@types/lodash-es": "4.17.12",
     "@types/node": "24.1.0",
     "@vitest/coverage-v8": "3.2.4",
     "eslint": "9.32.0",
@@ -60,6 +55,11 @@
   ],
   "homepage": "https://github.com/escapace/cepheus/tree/trunk/packages/utilities#readme",
   "license": "MPL-2.0",
+  "peerDependencies": {
+    "cepheus": "workspace:*",
+    "coastal": "^0.2.1",
+    "es-toolkit": "^1.39.8"
+  },
   "private": false,
   "publishConfig": {
     "access": "public",

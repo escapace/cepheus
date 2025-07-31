@@ -1,7 +1,7 @@
+import { normalize } from 'coastal'
 import { cartesian } from './cartesian'
 import { CEPHEUS_INTERPOLATOR } from './constants'
 import type { Interpolator } from './types'
-import { normalize } from './utilities/normalize'
 
 export const barycentric = (
   interpolator: Interpolator,
