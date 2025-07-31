@@ -217,7 +217,7 @@ export function normalizedCVD(x: number[]): number {
   return cvDiffs / denom
 }
 
-export const floatToByte = (value: number) => clamp(Math.round(255 * value), 0, 255)
+const floatToByte = (value: number) => clamp(Math.round(255 * value), 0, 255)
 
 export const distances = (
   colors: Color[],
@@ -274,7 +274,7 @@ export const distances = (
   return distances
 }
 
-export const randomColorOneShot = (options: RequiredOptimizeOptions, color: Color): Color => [
+const randomColorOneShot = (options: RequiredOptimizeOptions, color: Color): Color => [
   randomWithin(options.lightness.range[0], options.lightness.range[1], options.prng),
   randomWithin(options.chroma.range[0], options.chroma.range[1], options.prng),
   normalizeAngle(
@@ -282,7 +282,7 @@ export const randomColorOneShot = (options: RequiredOptimizeOptions, color: Colo
   ),
 ]
 
-export const randomColorIterative = (
+const randomColorIterative = (
   options: RequiredOptimizeOptions,
   temperature: number,
   referenceColor: Color,
