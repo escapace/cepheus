@@ -71,6 +71,9 @@ importers:
       '@thi.ng/random':
         specifier: ^4.1.24
         version: 4.1.24
+      '@tweakpane/core':
+        specifier: ^2.0.5
+        version: 2.0.5
       '@vueuse/core':
         specifier: ^13.6.0
         version: 13.6.0(vue@3.5.18(typescript@5.8.3))
@@ -1738,6 +1741,9 @@ packages:
   '@thi.ng/random@4.1.24':
     resolution: {integrity: sha512-wXIU1cRDlAGzjOJDOAByta96xfswIPwF+5jNsYS5cQC1mFFYrGx39nppqW88JYvuWERcc8Dk7FpF1dKKF7wiug==}
     engines: {node: '>=18'}
+
+  '@tweakpane/core@2.0.5':
+    resolution: {integrity: sha512-punBgD5rKCF5vcNo6BsSOXiDR/NSs9VM7SG65QSLJIxfRaGgj54ree9zQW6bO3pNFf3AogiGgaNODUVQRk9YqQ==}
 
   '@tybys/wasm-util@0.10.0':
     resolution: {integrity: sha512-VyyPYFlOMNylG45GoAe0xDoLwWuowvf92F9kySqzYh8vmYm7D2u4iUJKa1tOUpS70Ku13ASrOkS4ScXFsTaCNQ==}
@@ -5662,6 +5668,8 @@ snapshots:
     dependencies:
       '@thi.ng/api': 8.11.33
       '@thi.ng/errors': 2.5.39
+
+  '@tweakpane/core@2.0.5': {}
 
   '@tybys/wasm-util@0.10.0':
     dependencies:
