@@ -36,7 +36,7 @@
     "@types/lodash-es": "4.17.12",
     "@vitejs/plugin-vue": "6.0.1",
     "eslint": "9.32.0",
-    "eslint-config-escapace": "5.8.0",
+    "eslint-config-escapace": "5.9.0",
     "pangram": "2.3.1",
     "pointe": "5.15.1",
     "prettier": "3.6.2",
