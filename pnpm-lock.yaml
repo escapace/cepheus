@@ -94,7 +94,7 @@ importers:
         version: 4.11.7
       lodash-es:
         specifier: ^4.17.21
-        version: 4.17.21
+        version: 4.17.23
       pinia:
         specifier: ^3.0.3
         version: 3.0.4(typescript@5.8.3)(vue@3.5.18(typescript@5.8.3))
@@ -255,7 +255,7 @@ importers:
         version: 4.0.0
       lodash-es:
         specifier: ^4.17.21
-        version: 4.17.21
+        version: 4.17.23
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
@@ -3437,8 +3437,8 @@ packages:
     resolution: {integrity: sha512-XT9ewWAC43tiAV7xDAPflMkG0qOPn2QjHqlgX8FOqmWa/rxnyYDulF9T0F7tRy1u+TVTmK/M//6VIOye+2zDXg==}
     engines: {node: '>=20'}
 
-  lodash-es@4.17.21:
-    resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
+  lodash-es@4.17.23:
+    resolution: {integrity: sha512-kVI48u3PZr38HdYz98UmfPnXl2DXrpdctLrFLCd3kOx1xUkOmpFPx7gCWWM5MPkL/fD8zb+Ph0QzjGFs4+hHWg==}
 
   lodash.camelcase@4.3.0:
     resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
@@ -7727,7 +7727,7 @@ snapshots:
     dependencies:
       p-locate: 6.0.0
 
-  lodash-es@4.17.21: {}
+  lodash-es@4.17.23: {}
 
   lodash.camelcase@4.3.0: {}
 
@@ -8103,7 +8103,7 @@ snapshots:
       express: 5.1.0(supports-color@10.2.2)
       fastify-fetch: 5.1.0
       fs-extra: 11.3.3
-      lodash-es: 4.17.21
+      lodash-es: 4.17.23
       mlly: 1.8.0
       picocolors: 1.1.1
       pkg-entry-points: 1.1.1
