@@ -61,7 +61,7 @@ importers:
         version: 1.7.23(vue@3.5.18(typescript@5.8.3))
       '@hono/node-server':
         specifier: ^1.17.1
-        version: 1.19.6(hono@4.11.7)
+        version: 1.19.6(hono@4.11.10)
       '@js-temporal/polyfill':
         specifier: ^0.5.1
         version: 0.5.1
@@ -91,7 +91,7 @@ importers:
         version: 5.6.2
       hono:
         specifier: ^4.8.10
-        version: 4.11.7
+        version: 4.11.10
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.23
@@ -3064,8 +3064,8 @@ packages:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
 
-  hono@4.11.7:
-    resolution: {integrity: sha512-l7qMiNee7t82bH3SeyUCt9UF15EVmaBvsppY2zQtrbIhl/yzBTny+YUxsVjSjQ6gaqaeVtZmGocom8TzBlA4Yw==}
+  hono@4.11.10:
+    resolution: {integrity: sha512-kyWP5PAiMooEvGrA9jcD3IXF7ATu8+o7B3KCbPXid5se52NPqnOpM/r9qeW2heMnOekF4kqR1fXJqCYeCLKrZg==}
     engines: {node: '>=16.9.0'}
 
   hookable@5.5.3:
@@ -5235,9 +5235,9 @@ snapshots:
       '@tanstack/vue-virtual': 3.13.12(vue@3.5.18(typescript@5.8.3))
       vue: 3.5.18(typescript@5.8.3)
 
-  '@hono/node-server@1.19.6(hono@4.11.7)':
+  '@hono/node-server@1.19.6(hono@4.11.10)':
     dependencies:
-      hono: 4.11.7
+      hono: 4.11.10
 
   '@humanfs/core@0.19.1': {}
 
@@ -7394,7 +7394,7 @@ snapshots:
 
   he@1.2.0: {}
 
-  hono@4.11.7: {}
+  hono@4.11.10: {}
 
   hookable@5.5.3: {}
 
