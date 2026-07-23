@@ -60,8 +60,8 @@ importers:
         specifier: ^1.7.23
         version: 1.7.23(vue@3.5.18(typescript@5.9.3))
       '@hono/node-server':
-        specifier: ^1.17.1
-        version: 1.19.13(hono@4.12.25)
+        specifier: ^2.0.0
+        version: 2.0.11(hono@4.12.25)
       '@js-temporal/polyfill':
         specifier: ^0.5.1
         version: 0.5.1
@@ -1279,9 +1279,9 @@ packages:
     peerDependencies:
       vue: ^3.2.0
 
-  '@hono/node-server@1.19.13':
-    resolution: {integrity: sha512-TsQLe4i2gvoTtrHje625ngThGBySOgSK3Xo2XRYOdqGN1teR8+I7vchQC46uLJi8OF62YTYA3AhSpumtkhsaKQ==}
-    engines: {node: '>=18.14.1'}
+  '@hono/node-server@2.0.11':
+    resolution: {integrity: sha512-bjD221KPLoJTWUwso1J6fGKiTXEUFedG/s0visavY4zakFPkeGURMRNly+FhBHs7T8Dz4qHaZIMX9ZoJHSJtKA==}
+    engines: {node: '>=20'}
     peerDependencies:
       hono: ^4
 
@@ -3314,7 +3314,7 @@ packages:
   git-raw-commits@4.0.0:
     resolution: {integrity: sha512-ICsMM1Wk8xSGMowkOmPrzo2Fgmfo4bMHLNX6ytHjajRJUqvHOw/TFapQ+QG75c3X/tTDDhOSRPGC52dDbNM8FQ==}
     engines: {node: '>=16'}
-    deprecated: This package is no longer maintained. For the JavaScript API, please use @conventional-changelog/git-client instead.
+    deprecated: Deprecated and no longer maintained. Use @conventional-changelog/git-client instead.
     hasBin: true
 
   glob-parent@5.1.2:
@@ -5739,7 +5739,7 @@ snapshots:
       '@tanstack/vue-virtual': 3.13.12(vue@3.5.18(typescript@5.9.3))
       vue: 3.5.18(typescript@5.9.3)
 
-  '@hono/node-server@1.19.13(hono@4.12.25)':
+  '@hono/node-server@2.0.11(hono@4.12.25)':
     dependencies:
       hono: 4.12.25
 
