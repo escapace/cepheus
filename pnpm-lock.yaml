@@ -61,7 +61,7 @@ importers:
         version: 1.7.23(vue@3.5.18(typescript@5.9.3))
       '@hono/node-server':
         specifier: ^2.0.0
-        version: 2.0.11(hono@4.12.34)
+        version: 2.0.11(hono@4.13.5)
       '@js-temporal/polyfill':
         specifier: ^0.5.1
         version: 0.5.1
@@ -91,7 +91,7 @@ importers:
         version: 5.8.1
       hono:
         specifier: ^4.8.10
-        version: 4.12.34
+        version: 4.13.5
       lodash-es:
         specifier: ^4.17.21
         version: 4.18.1
@@ -3061,6 +3061,7 @@ packages:
   eslint@9.32.0:
     resolution: {integrity: sha512-LSehfdpgMeWcTZkWZVIJl+tkZ2nuSkyyB9C27MZqFWXuph7DvaowgcTvKqxvpLW1JZIk8PN7hFY3Rj9LQ7m7lg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -3418,8 +3419,8 @@ packages:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
 
-  hono@4.12.34:
-    resolution: {integrity: sha512-GqXJqY/xJkJmuloTrnV1ZEXG3fqte+VjkUqoRNZXcrUidiUOP4fMSIHHY4tsqZBK++kVyWmt/AAfSUuy57/eSA==}
+  hono@4.13.5:
+    resolution: {integrity: sha512-O6+/eCYRkzzzy0rPWwKLiGBR1nFuUPZynnwjxN1MBA62NNqbT0wQEzQyK2gSO5yDIDB336sXQleAhOHrzlYyKw==}
     engines: {node: '>=16.9.0'}
 
   hookable@5.5.3:
@@ -5739,9 +5740,9 @@ snapshots:
       '@tanstack/vue-virtual': 3.13.12(vue@3.5.18(typescript@5.9.3))
       vue: 3.5.18(typescript@5.9.3)
 
-  '@hono/node-server@2.0.11(hono@4.12.34)':
+  '@hono/node-server@2.0.11(hono@4.13.5)':
     dependencies:
-      hono: 4.12.34
+      hono: 4.13.5
 
   '@humanfs/core@0.19.1': {}
 
@@ -8135,7 +8136,7 @@ snapshots:
 
   he@1.2.0: {}
 
-  hono@4.12.34: {}
+  hono@4.13.5: {}
 
   hookable@5.5.3: {}
 
