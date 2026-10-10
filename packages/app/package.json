@@ -43,7 +43,7 @@
     "prettier-config-escapace": "1.2.2",
     "syncpack": "13.0.4",
     "tsx": "4.20.3",
-    "typescript": "5.9.3",
+    "typescript": "6.0.3",
     "vite": "7.3.5",
     "vue-tsc": "3.0.4",
     "wrangler": "4.26.1"
